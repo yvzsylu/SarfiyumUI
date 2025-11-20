@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "SarfiyumUI": {
+    "Larkon": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,40 +17,62 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/sarfiyum-ui",
+            "outputPath": "dist/larkon",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "src/assets",
+                "output": "/assets"
               }
             ],
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jsvectormap/dist/js/jsvectormap.min.js"
+            ],
+            "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": [
+                  "color-functions",
+                  "global-builtin",
+                  "import",
+                  "mixed-decls"
+                ]
+              }
+            },
+            "allowedCommonJsDependencies": ["moment","dayjs","apexcharts","jsvectormap","jsvectormap/dist/maps/world.js","jsvectormap/dist/maps/russia.js","jsvectormap/dist/maps/canada.js","jsvectormap/dist/maps/iraq.js","jsvectormap/dist/maps/spain.js","sweetalert2","gumshoejs","choices.js","dropzone","deepmerge","quill-delta"]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "8MB",
+                  "maximumError": "8MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              }
             },
             "development": {
               "optimization": false,
@@ -64,10 +86,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "SarfiyumUI:build:production"
+              "buildTarget": "Larkon:build:production"
             },
             "development": {
-              "buildTarget": "SarfiyumUI:build:development"
+              "buildTarget": "Larkon:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -80,7 +102,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -98,5 +121,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "bbac1580-d5fe-4984-935a-9a02b873c361"
   }
 }
