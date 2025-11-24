@@ -26,17 +26,30 @@ export class AuthenticationEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(login),
-      exhaustMap(({ username, password ,rememberMe}) =>
+      exhaustMap(({ username, password, rememberMe }) =>
         this.authService.login(username, password, rememberMe).pipe(
           map((user: User) => {
             this.toastr.success('Giriş Başarılı', 'Yönlendiriliyorsunuz...');
             return loginSuccess({ user });
           }),
-          catchError((error) => {
+          catchError((err) => {
+            // Varsayılan hata mesajı
             let errorMessage = 'Giriş işlemi başarısız.';
-            if (error.error && error.error.message) {
-              errorMessage = error.error.message;
+
+            // 1. Durum: Backend'den gelen ServiceResult hatası (400, 401 vs.)
+            // Backend errors dizisi dönüyor: { errors: ["Kullanıcı bulunamadı"], ... }
+            if (err.error && err.error.errors && Array.isArray(err.error.errors)) {
+              errorMessage = err.error.errors[0]; // Listeden ilk hatayı al
             }
+            // 2. Durum: AuthService içinden bizim fırlattığımız "throw new Error" hataları
+            else if (err.message) {
+               errorMessage = err.message;
+            }
+            // 3. Durum: Standart string hata dönüşü
+            else if (err.error && typeof err.error === 'string') {
+              errorMessage = err.error;
+            }
+
             this.toastr.error(errorMessage, 'Hata');
             return of(loginFailure({ error: errorMessage }));
           })
@@ -47,23 +60,24 @@ export class AuthenticationEffects {
 
   // 2. REDIRECT EFFECT (Yönlendirme İşlemi)
   // loginSuccess tetiklendiğinde burası çalışır.
+  // ...
   loginRedirect$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(loginSuccess),
         tap(({ user }) => {
-          // app.routes.ts dosyana göre rotalar:
           if (user.isAdmin) {
-            // path: 'admin' tanımlı olduğu için
-            this.router.navigate(['/admin']); 
+            // DEĞİŞİKLİK BURADA: Tam yolu veriyoruz
+            this.router.navigate(['/admin/admin-dashboard']); 
           } else {
-            // path: 'user' tanımlı olduğu için
-            this.router.navigate(['/user']);
+            // User için de benzer bir yapı varsa:
+            this.router.navigate(['/user/user-dashboard']); // Örnek
           }
         })
       ),
-    { dispatch: false } // Yeni bir action tetiklemez, sadece yönlendirme yapar.
+    { dispatch: false }
   );
+  // ...
 
   logout$ = createEffect(() =>
     this.actions$.pipe(

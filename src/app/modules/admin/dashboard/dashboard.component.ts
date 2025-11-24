@@ -22,5 +22,5 @@ import { RecentOrderComponent } from './components/recent-order/recent-order.com
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AdminDashboardComponent {
-  title = 'WELCOME!';
+  title = 'Hoş Geldiniz!';
 }

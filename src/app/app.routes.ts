@@ -1,17 +1,19 @@
 import { Routes } from '@angular/router';
-import { LayoutComponent } from './layouts/layout/layout.component';
-import { AuthLayoutComponent } from '@layouts/auth-layout/auth-layout.component';
+// import { LayoutComponent } from './layouts/layout/layout.component';
+import { AuthLayoutComponent } from '@layouts/shared/auth-layout/auth-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { AdminLayoutComponent } from '../app/layouts/admin-layouts/admin-layout/admin-layout.component';
+import { UserLayoutComponent } from '../app/layouts/user-layouts/user-layout/user-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'index', pathMatch: 'full' },
-  {
-    path: '',
-    component: LayoutComponent,
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./views/views.route').then((mod) => mod.VIEW_ROUTES),
-  },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  // {
+  //   path: '',
+  //   component: LayoutComponent,
+  //   canActivate: [AuthGuard],
+  //   loadChildren: () =>
+  //     import('./views/views.route').then((mod) => mod.VIEW_ROUTES),
+  // },
   {
     path: 'auth',
     component: AuthLayoutComponent,
@@ -20,7 +22,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    component: LayoutComponent,
+    component: AdminLayoutComponent,
     canActivate: [AuthGuard],
     data: { role: 'admin' },
     loadChildren: () =>
@@ -28,10 +30,19 @@ export const routes: Routes = [
   },
   {
     path: 'user',
-    component: LayoutComponent,
+    component: UserLayoutComponent,
     canActivate: [AuthGuard],
     data: { role: 'user' },
     loadChildren: () =>
       import('./modules/user/dashboard/user.route').then((mod) => mod.USER_ROUTES),
   },
+  {
+    path: '404',
+    loadChildren: () => 
+      import('./modules/shared/error-404/error-404.route').then(m => m.ERROR_404_ROUTES)
+  },
+  // ----------------------------------
+
+  // Wildcard her zaman EN SONDA olmalı (Doğru yapmışsın)
+  { path: '**', redirectTo: '404' }
 ];
