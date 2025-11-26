@@ -26,7 +26,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: 'admin' },
     loadChildren: () =>
-      import('./modules/admin/dashboard/admin.route').then((mod) => mod.ADMIN_ROUTES),
+      import('./modules/admin/admin.route').then((mod) => mod.ADMIN_ROUTES),
   },
   {
     path: 'user',
@@ -34,7 +34,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: 'user' },
     loadChildren: () =>
-      import('./modules/user/dashboard/user.route').then((mod) => mod.USER_ROUTES),
+      import('./modules/user/user.route').then((mod) => mod.USER_ROUTES),
   },
   {
     path: '404',

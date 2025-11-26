@@ -1,27 +1,19 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  EventEmitter,
-  inject,
-  Input,
-  Output,
-} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, inject, Input, Output, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import {
-  NgbActiveOffcanvas,
-  NgbDropdownModule,
-  NgbOffcanvas,
-  NgbOffcanvasModule,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveOffcanvas, NgbDropdownModule, NgbOffcanvas, NgbOffcanvasModule } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { changetheme } from '@store/layout/layout-action';
 import { getLayoutColor } from '@store/layout/layout-selector';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { AdminActivitiStremComponent } from './component/admin-activiti-strem/admin-activiti-strem.component';
 import { notificationsData } from './data';
 import { logout } from '@store/authentication/authentication.actions';
-
+import { getUser } from '@store/authentication/authentication.selector';
+// User modelini import etmeyi unutma (Tip güvenliği için iyi olur)
+// import { User } from '@store/authentication/auth.model'; 
+import { tap } from 'rxjs/operators'; // <-- Import etmeyi unutma
 @Component({
   selector: 'app-admin-topbar',
   standalone: true,
@@ -36,7 +28,7 @@ import { logout } from '@store/authentication/authentication.actions';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [NgbActiveOffcanvas],
 })
-export class AdminTopbarComponent {
+export class AdminTopbarComponent implements OnInit {
   @Input() title: string | undefined;
   @Output() settingsButtonClicked = new EventEmitter();
   @Output() mobileMenuButtonClicked = new EventEmitter();
@@ -46,6 +38,21 @@ export class AdminTopbarComponent {
   offcanvasService = inject(NgbOffcanvas);
 
   notificationList = notificationsData;
+  
+  // ! işareti ile init sorununu aşıyoruz
+  user$!: Observable<any>; 
+
+  ngOnInit(): void {
+    // Selector'ı loglayarak dinle
+    this.user$ = this.store.select(getUser).pipe(
+      tap(user => {
+        console.log('📢 [5] Topbar Component Verisi:', user);
+        if (user) {
+            console.log('👤 [6] İsim Alanı Kontrolü:', user.fullName);
+        }
+      })
+    );
+  }
 
   settingMenu() {
     this.settingsButtonClicked.emit();

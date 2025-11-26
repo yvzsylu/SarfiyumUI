@@ -5,6 +5,7 @@ export class User {
   password?: string
   firstName?: string
   lastName?: string
+  fullName?: string; 
   roles?: string[]; // JWT'den gelen roller
   token?: string
   isAdmin?: boolean

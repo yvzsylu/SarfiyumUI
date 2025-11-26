@@ -68,10 +68,10 @@ export class AuthenticationEffects {
         tap(({ user }) => {
           if (user.isAdmin) {
             // DEĞİŞİKLİK BURADA: Tam yolu veriyoruz
-            this.router.navigate(['/admin/admin-dashboard']); 
+            this.router.navigate(['/admin/dashboard']); 
           } else {
             // User için de benzer bir yapı varsa:
-            this.router.navigate(['/user/user-dashboard']); // Örnek
+            this.router.navigate(['/user/dashboard']); // Örnek
           }
         })
       ),

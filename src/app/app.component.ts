@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, type OnInit } from '@angular/core'; // Kullanılmayan importları temizledim (Signal, viewChild vb.)
+import { Component, inject, ViewChild, type OnInit } from '@angular/core';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -9,10 +9,12 @@ import {
   type Event,
 } from '@angular/router';
 import { TitleService } from '@core/services/title.service';
-import {
-  NgProgressbar,
-  NgProgressRef,
-} from 'ngx-progressbar';
+import { NgProgressbar, NgProgressRef } from 'ngx-progressbar';
+
+// --- YENİ EKLENEN IMPORTLAR ---
+import { Store } from '@ngrx/store';
+import { AuthenticationService } from '@/app/core/services/auth.service';
+import { loginSuccess } from '@/app/store/authentication/authentication.actions';
 
 @Component({
   selector: 'app-root',
@@ -22,12 +24,15 @@ import {
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  // progressRef!: NgProgressRef; // <--- BU SATIRI SİLDİM, AŞAĞIDAKİ progressBar ZATEN AYNI İŞİ YAPIYOR, GEREKSİZDİ.
   
   @ViewChild(NgProgressRef) progressBar!: NgProgressRef;
 
   private titleService = inject(TitleService);
   private router = inject(Router);
+  
+  // --- YENİ ENJEKSİYONLAR ---
+  private store = inject(Store);
+  private authService = inject(AuthenticationService);
 
   constructor() {
     this.router.events.subscribe((event: Event) => {
@@ -36,13 +41,21 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // 1. Mevcut Title işlemi
     this.titleService.init();
+
+    // 2. --- YENİ EKLENEN: OTURUM KURTARMA ---
+    // Sayfa yenilendiğinde (F5) cookie'den kullanıcıyı geri yükle
+    const user = this.authService.getUserFromCookie();
+    
+    if (user) {
+      // Token geçerli ise Store'u güncelle
+      this.store.dispatch(loginSuccess({ user }));
+    }
   }
 
   checkRouteChange(routerEvent: Event) {
     if (routerEvent instanceof NavigationStart) {
-      // DÜZELTME: ?. eklendi. 
-      // Eğer sayfa ilk yüklenirken progressBar henüz hazır değilse uygulama hata vermez, sadece bar çalışmaz.
       this.progressBar?.start();
     }
     if (
@@ -51,7 +64,6 @@ export class AppComponent implements OnInit {
       routerEvent instanceof NavigationError
     ) {
       setTimeout(() => {
-        // DÜZELTME: ?. eklendi.
         this.progressBar?.complete();
       }, 200);
     }

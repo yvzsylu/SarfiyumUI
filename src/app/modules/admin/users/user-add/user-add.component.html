@@ -1,0 +1,113 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Yeni Müşteri (Kuyumcu) Oluştur</h4>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="addForm" (ngSubmit)="onSubmit()">
+
+                    <h5 class="mb-3 text-primary mt-2"><i class="bx bx-user-circle"></i> Yetkili Kişi Bilgileri</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ad Soyad</label>
+                            <input type="text" class="form-control" formControlName="fullName" 
+                                   [ngClass]="{'is-invalid': submitted && f['fullName'].errors}">
+                            <div *ngIf="submitted && f['fullName'].errors" class="invalid-feedback">Ad Soyad zorunludur.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" formControlName="username" 
+                                   [ngClass]="{'is-invalid': submitted && f['username'].errors}">
+                            <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">Kullanıcı adı en az 3 karakter olmalı.</div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">E-Posta</label>
+                            <input type="email" class="form-control" formControlName="email" 
+                                   [ngClass]="{'is-invalid': submitted && f['email'].errors}">
+                            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">Geçerli bir e-posta giriniz.</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre</label>
+                            <input type="password" class="form-control" formControlName="password" 
+                                   [ngClass]="{'is-invalid': submitted && f['password'].errors}">
+                            
+                            <div class="mt-2 p-2 bg-light rounded border">
+                                <small class="fw-bold">Şifre Gereksinimleri:</small>
+                                <ul class="list-unstyled mb-0 text-muted" style="font-size: 0.8rem;">
+                                    <li [class.text-success]="checkPasswordRule('length')" [class.text-danger]="!checkPasswordRule('length')">
+                                        <i class="bx" [class.bx-check]="checkPasswordRule('length')" [class.bx-x]="!checkPasswordRule('length')"></i> En az 6 karakter
+                                    </li>
+                                    <li [class.text-success]="checkPasswordRule('lower')" [class.text-danger]="!checkPasswordRule('lower')">
+                                        <i class="bx" [class.bx-check]="checkPasswordRule('lower')" [class.bx-x]="!checkPasswordRule('lower')"></i> En az 1 küçük harf (a-z)
+                                    </li>
+                                    <li [class.text-success]="checkPasswordRule('upper')" [class.text-danger]="!checkPasswordRule('upper')">
+                                        <i class="bx" [class.bx-check]="checkPasswordRule('upper')" [class.bx-x]="!checkPasswordRule('upper')"></i> En az 1 büyük harf (A-Z)
+                                    </li>
+                                    <li [class.text-success]="checkPasswordRule('number')" [class.text-danger]="!checkPasswordRule('number')">
+                                        <i class="bx" [class.bx-check]="checkPasswordRule('number')" [class.bx-x]="!checkPasswordRule('number')"></i> En az 1 rakam (0-9)
+                                    </li>
+                                    <li [class.text-success]="checkPasswordRule('special')" [class.text-danger]="!checkPasswordRule('special')">
+                                        <i class="bx" [class.bx-check]="checkPasswordRule('special')" [class.bx-x]="!checkPasswordRule('special')"></i> En az 1 özel karakter (!.+*)
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre Tekrar</label>
+                            <input type="password" class="form-control" formControlName="confirmPassword" 
+                                   [ngClass]="{'is-invalid': submitted && (f['confirmPassword'].errors || addForm.errors?.['mismatch'])}">
+                            
+                            <div *ngIf="submitted && f['confirmPassword'].errors?.['required']" class="invalid-feedback">
+                                Şifre tekrarı zorunludur.
+                            </div>
+                            <div *ngIf="submitted && addForm.errors?.['mismatch']" class="invalid-feedback">
+                                Şifreler eşleşmiyor.
+                            </div>
+                        </div>
+                    </div>
+                        <h5 class="mb-3 text-primary mt-4"><i class="bx bx-target-lock"></i> Atama ve Yetki</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rol Seçimi</label>
+                                <select class="form-select" formControlName="roleId"
+                                        [ngClass]="{'is-invalid': submitted && f['roleId'].errors}">
+                                    <option value="">Rol Seçiniz...</option>
+                                    <option *ngFor="let role of roleList" [value]="role.id">
+                                        {{ role.name }}
+                                    </option>
+                                </select>
+                                <div *ngIf="submitted && f['roleId'].errors" class="invalid-feedback">Rol seçimi zorunludur.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bağlanacak Firma (Tenant)</label>
+                                <select class="form-select" formControlName="tenantId">
+                                    <option [ngValue]="null">Bağımsız Kullanıcı (Admin)</option>
+                                    <option *ngFor="let tenant of tenantList" [value]="tenant.id">
+                                        {{ tenant.name }}
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Admin yetkisi atanıyorsa boş bırakılmalıdır.
+                                </small>
+                            </div>
+                        </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <a routerLink="/admin/users/list" class="btn btn-secondary me-2">İptal</a>
+                            <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                                <i class="bx bx-save"></i> Kaydet
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

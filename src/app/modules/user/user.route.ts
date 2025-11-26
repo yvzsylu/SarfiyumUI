@@ -1,15 +1,15 @@
 import { Routes } from '@angular/router';
-import { UserDashboardComponent } from '../dashboard/dashboard.component';
+import { UserDashboardComponent } from './dashboard/dashboard.component';
 
 export const USER_ROUTES: Routes = [
   { 
     path: '', 
-    redirectTo: 'user-dashboard', 
+    redirectTo: 'dashboard', 
     pathMatch: 'full' 
   },
   // 2. KURAL: Asıl dashboard rotası
   {
-    path: 'user-dashboard',
+    path: 'dashboard',
     data: { title: 'User Dashboard' },
     component: UserDashboardComponent
   }

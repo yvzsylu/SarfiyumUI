@@ -4,7 +4,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { basePath } from '@common/constants';
 import { MENU, type MenuItem } from '@common/user-menu-meta';
-import { LogoBoxComponent } from '@component/logo-box.component';
+import { UserLogoBoxComponent } from '@component/user-logo-box.component';
 import {
   NgbCollapseModule,
   type NgbCollapse,
@@ -20,7 +20,7 @@ import { SimplebarAngularModule } from 'simplebar-angular';
   imports: [
     CommonModule,
     RouterModule,
-    LogoBoxComponent,
+    UserLogoBoxComponent,
     NgbCollapseModule,
     SimplebarAngularModule,
   ],

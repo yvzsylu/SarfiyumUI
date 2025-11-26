@@ -14,7 +14,10 @@ export const loginFailure = createAction(
   '[Authentication] Login Failure',
   props<{ error: string }>()
 )
-
+export const loginApiSuccess = createAction(
+  '[Auth] Login API Success',
+  props<{ user: User }>() // Payload, loginSuccess ile aynıdır
+);
 // logout action
 export const logout = createAction('[Authentication] Logout')
 

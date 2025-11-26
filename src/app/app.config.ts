@@ -6,10 +6,10 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
-import {
-  provideHttpClient,
-  withFetch,
-  withInterceptorsFromDi,
+import { 
+  provideHttpClient, 
+  withFetch, 
+  withInterceptors // <--- BU EKSİK OLDUĞU İÇİN HATA VERİYOR
 } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -24,7 +24,7 @@ import { CalendarEffects } from '@store/calendar/calendar.effects';
 import { AuthenticationEffects } from '@store/authentication/authentication.effects'; // Effect burada
 import { localStorageSyncReducer } from '@store/layout/layout-reducers';
 import { routes } from './app.routes';
-
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
 // DİKKAT: Gerçek API kullanacaksan FakeBackendProvider'ı buradan kaldırdım.
 // import { FakeBackendProvider } from './helper/fake-backend'; 
 
@@ -43,7 +43,10 @@ export const appConfig: ApplicationConfig = {
     provideEffects(CalendarEffects, AuthenticationEffects),
     
     importProvidersFrom(BrowserAnimationsModule, BrowserModule),
-    provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([jwtInterceptor]) // Artık hata vermeyecektir
+    ),
     
     // Toastr Ayarlarını buraya taşıdık (Main.ts'ten aldık)
     provideToastr({

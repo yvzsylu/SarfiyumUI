@@ -15,6 +15,7 @@ interface JwtPayload {
   jti: string;
   userId: string;
   email: string;
+  fullName: string; 
   roles: string | string[]; 
   exp: number;
   iss: string;
@@ -31,6 +32,60 @@ export class AuthenticationService {
 
   constructor(private http: HttpClient) {}
 
+getUserFromCookie(): User | null {
+    // 1. Cookie var mı?
+    const token = this.cookieService.get(this.authSessionKey);
+    console.log('🔍 [1] Cookie Okundu:', token ? 'Evet, Token Var' : 'HAYIR, Token Yok! (Cookie Adı Yanlış Olabilir)');
+
+    if (!token) return null;
+
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      console.log('🔓 [2] Token Ham Decode:', decoded);
+
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp && decoded.exp < currentTime) {
+        console.warn('⌛ [3] Token Süresi Dolmuş!');
+        this.cookieService.delete(this.authSessionKey);
+        return null;
+      }
+      
+      const userResult = this.decodeToken(token);
+      console.log('✅ [4] User Modeli Oluşturuldu:', userResult);
+      return userResult;
+
+    } catch (error) {
+      console.error('❌ [Error] Token Decode Hatası:', error);
+      return null;
+    }
+  }
+
+  // GÜNCELLENMİŞ DECODE METODU
+  public decodeToken(token: string): User {
+    const decoded = jwtDecode<JwtPayload>(token);
+
+    // Rol yönetimi: String gelirse Array'e çevir
+    let userRoles: string[] = [];
+    if (decoded.roles) {
+        if (Array.isArray(decoded.roles)) {
+            userRoles = decoded.roles.map(r => r.toLowerCase());
+        } else {
+            // Tek string gelirse (Senin durumun: "Admin")
+            userRoles = [decoded.roles.toLowerCase()];
+        }
+    }
+
+    return {
+      id: decoded.userId,
+      username: decoded.sub,
+      email: decoded.email,
+      fullName: decoded.fullName, 
+      roles: userRoles,
+      isAdmin: userRoles.includes('admin'),
+      token: token,
+    };
+  }
+
   // Login dönüş tipini Observable<User> olarak düşünebiliriz
   login(username: string, password: string, rememberMe: boolean) {
     // 1. Değişiklik: Dönüş tipi ServiceResult<string> oldu
@@ -44,6 +99,17 @@ export class AuthenticationService {
             this.user = user;
             
             this.saveSession(token, rememberMe);
+
+            // 2. Kullanıcı Adını Hatırla (UX İçin - LocalStorage)
+            if (rememberMe) {
+              localStorage.setItem('remembered_username', username);
+              localStorage.setItem('is_remembered', 'true');
+            } else {
+              // Eğer tiki kaldırdıysa hafızadan da sil
+              localStorage.removeItem('remembered_username');
+              localStorage.removeItem('is_remembered');
+            }
+
             return user;
           }
           
@@ -74,21 +140,5 @@ export class AuthenticationService {
     this.cookieService.delete(this.authSessionKey);
   }
 
-  public decodeToken(token: string): User {
-    const decoded = jwtDecode<JwtPayload>(token);
-
-    return {
-      id: decoded.userId,
-      username: decoded.sub,
-      email: decoded.email,
-      // Roles kontrolü aynen kalıyor
-      roles: Array.isArray(decoded.roles) 
-                    ? decoded.roles.map((r: string) => r.toLowerCase())
-                    : [decoded.roles.toLowerCase()],
-      isAdmin: Array.isArray(decoded.roles) 
-          ? decoded.roles.some((r: string) => r.toLowerCase() === 'admin')
-          : (decoded.roles as string).toLowerCase() === 'admin',
-      token: token,
-    };
-  }
+  
 }
