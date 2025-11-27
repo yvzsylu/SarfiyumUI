@@ -1,0 +1,96 @@
+<div class="row" *ngIf="profileData; else loading">
+  
+  <div class="col-xl-9 col-lg-8">
+    <div class="card overflow-hidden">
+      <div class="card-body">
+        <div class="bg-primary profile-bg rounded-top position-relative mx-n3 mt-n3">
+    <div class="avatar-xl border border-light border-3 rounded-circle position-absolute top-100 start-0 translate-middle ms-5 bg-white d-flex align-items-center justify-content-center overflow-hidden">
+        
+        <img *ngIf="profileData.tenantLogoUrl" 
+             [src]="apiRoot + profileData.tenantLogoUrl" 
+             alt="Firma Logosu" 
+             class="img-fluid w-100 h-100 object-fit-cover">
+
+        <span *ngIf="!profileData.tenantLogoUrl" class="fs-1 fw-bold text-primary">{{ initials }}</span>
+        
+    </div>
+</div>
+        
+        <div class="mt-5 d-flex flex-wrap align-items-center justify-content-between">
+          <div class="ms-5 ps-3">
+            <h4 class="mb-1 mt-3">
+                {{ profileData.fullName }} 
+                <i class='bx bxs-badge-check text-success align-middle' *ngIf="profileData.isUserActive" title="Onaylı Hesap"></i>
+            </h4>
+            <p class="mb-0 text-muted">{{ '@' + profileData.username }}</p>
+          </div>
+          
+          <div class="d-flex align-items-center gap-2 my-2 my-lg-0">
+     
+     <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;" accept="image/*">
+
+     <button class="btn btn-outline-primary" (click)="fileInput.click()" [disabled]="isUploading">
+        <span *ngIf="isUploading" class="spinner-border spinner-border-sm me-1"></span>
+        <i class="bx bx-upload" *ngIf="!isUploading"></i> Logo Yükle
+     </button>
+
+  </div>
+        </div>
+
+        <div class="row mt-4 gy-2" *ngIf="profileData.tenantId">
+          
+          <div class="col-lg-3 col-6">
+            <div class="d-flex align-items-center gap-2 border-end">
+              <div>
+                <iconify-icon icon="solar:calendar-date-bold-duotone" class="fs-28 text-primary"></iconify-icon>
+              </div>
+              <div>
+                <h5 class="mb-1">{{ profileData.tenantCreatedAt | date:'MM/yyyy' }}</h5>
+                <p class="mb-0 text-muted">Hesap Açılma Tarihi</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-6">
+            <div class="d-flex align-items-center gap-2 border-end">
+              <div>
+                <iconify-icon icon="solar:verified-check-bold-duotone" class="fs-28 text-success"></iconify-icon>
+              </div>
+              <div>
+                <h5 class="mb-1" [class.text-success]="profileData.isTenantActive" [class.text-danger]="!profileData.isTenantActive">
+                    {{ profileData.isTenantActive ? 'Aktif' : 'Pasif' }}
+                </h5>
+                <p class="mb-0 text-muted">Firma Durumu</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-6">
+             <div class="d-flex align-items-center gap-2">
+               <div>
+                 <iconify-icon icon="solar:phone-calling-bold-duotone" class="fs-28 text-info"></iconify-icon>
+               </div>
+               <div>
+                 <h5 class="mb-1 fs-14">{{ profileData.tenantPhoneNumber }}</h5>
+                 <p class="mb-0 text-muted">İş Telefonu</p>
+               </div>
+             </div>
+           </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-lg-4">
+    <profile-personal-info [user]="profileData"></profile-personal-info>
+  </div>
+
+</div>
+
+<ng-template #loading>
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+</ng-template>

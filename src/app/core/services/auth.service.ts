@@ -16,6 +16,9 @@ interface JwtPayload {
   userId: string;
   email: string;
   fullName: string; 
+  tenantId: string;
+  tenantName: string;
+  tenantLogoUrl: string;
   roles: string | string[]; 
   exp: number;
   iss: string;
@@ -35,27 +38,26 @@ export class AuthenticationService {
 getUserFromCookie(): User | null {
     // 1. Cookie var mı?
     const token = this.cookieService.get(this.authSessionKey);
-    console.log('🔍 [1] Cookie Okundu:', token ? 'Evet, Token Var' : 'HAYIR, Token Yok! (Cookie Adı Yanlış Olabilir)');
 
     if (!token) return null;
 
     try {
       const decoded = jwtDecode<JwtPayload>(token);
-      console.log('🔓 [2] Token Ham Decode:', decoded);
+      // console.log('🔓 [2] Token Ham Decode:', decoded);
 
       const currentTime = Date.now() / 1000;
       if (decoded.exp && decoded.exp < currentTime) {
-        console.warn('⌛ [3] Token Süresi Dolmuş!');
+        // console.warn('⌛ [3] Token Süresi Dolmuş!');
         this.cookieService.delete(this.authSessionKey);
         return null;
       }
       
       const userResult = this.decodeToken(token);
-      console.log('✅ [4] User Modeli Oluşturuldu:', userResult);
+        // console.log('✅ [4] User Modeli Oluşturuldu:', userResult);
       return userResult;
 
     } catch (error) {
-      console.error('❌ [Error] Token Decode Hatası:', error);
+      // console.error('❌ [Error] Token Decode Hatası:', error);
       return null;
     }
   }
@@ -80,6 +82,9 @@ getUserFromCookie(): User | null {
       username: decoded.sub,
       email: decoded.email,
       fullName: decoded.fullName, 
+      tenantId: decoded.tenantId,
+      tenantName: decoded.tenantName,
+      tenantLogoUrl: decoded.tenantLogoUrl,
       roles: userRoles,
       isAdmin: userRoles.includes('admin'),
       token: token,
@@ -89,7 +94,7 @@ getUserFromCookie(): User | null {
   // Login dönüş tipini Observable<User> olarak düşünebiliriz
   login(username: string, password: string, rememberMe: boolean) {
     // 1. Değişiklik: Dönüş tipi ServiceResult<string> oldu
-    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/Auth/login`, { username, password })
+    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/login`, { username, password })
       .pipe(
         map((res) => {
           // 2. Değişiklik: isSuccess kontrolü ve data'dan token alma
@@ -118,6 +123,22 @@ getUserFromCookie(): User | null {
         })
       );
   }
+
+  // --- YENİ EKLENEN: ŞİFRE SIFIRLAMA ---
+  resetPassword(email: string) {
+    // Backend: POST api/Auth/reset-password
+    // Body: { email: "..." }
+    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/reset-password`, { email })
+      .pipe(
+        map((res) => {
+          if (res.isSuccess) {
+            return res.data; // Başarılı mesajı döner
+          }
+          throw new Error(res.errors?.[0] || 'Password reset failed');
+        })
+      );
+  }
+  // -------------------------------------
 
   logout(): void {
     this.removeSession();

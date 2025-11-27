@@ -25,7 +25,7 @@
         </div>
 
         
-        <div ngbDropdown class="dropdown topbar-item">
+        <!-- <div ngbDropdown class="dropdown topbar-item">
           <button ngbDropdownToggle type="button" class="topbar-button position-relative arrow-none" id="page-header-notifications-dropdown">
             <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-24 align-middle"></iconify-icon>
             <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">{{notificationList.length}}<span class="visually-hidden">unread messages</span></span>
@@ -71,7 +71,7 @@
               <a href="javascript:void(0);" class="btn btn-primary btn-sm">View All Notification <i class="bx bx-right-arrow-alt ms-1"></i></a>
             </div>
           </div>
-        </div>
+        </div> -->
 
         
         <div class="topbar-item d-none d-md-flex">
@@ -81,43 +81,61 @@
         </div>
 
         
-        <div class="topbar-item d-none d-md-flex">
+        <!-- <div class="topbar-item d-none d-md-flex">
           <button type="button" class="topbar-button" id="theme-settings-btn" (click)="open()" aria-controls="theme-settings-offcanvas">
             <iconify-icon icon="solar:clock-circle-bold-duotone" class="fs-24 align-middle"></iconify-icon>
           </button>
-        </div>
+        </div> -->
 
         
         <div ngbDropdown class="dropdown topbar-item">
           <a ngbDropdownToggle type="button" class="topbar-button arrow-none" id="page-header-user-dropdown">
             <span class="d-flex align-items-center">
-              <img class="rounded-circle" width="32" src="assets/images/users/avatar-1.jpg" alt="avatar-3">
+              <ng-container *ngIf="user$ | async as user">
+          
+          <!-- 1. Durum: Logo VARSA (API URL + Logo Path) -->
+          <img *ngIf="user.tenantLogoUrl" 
+               class="rounded-circle object-fit-cover" 
+               width="32" 
+               height="32"
+               [src]="apiRoot + user.tenantLogoUrl" 
+               alt="Firma Logosu">
+
+          <!-- 2. Durum: Logo YOKSA (Varsayılan Avatar veya Baş Harf) -->
+          <div *ngIf="!user.tenantLogoUrl" 
+               class="avatar-xs rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center">
+               <span class="text-primary fw-bold fs-12">{{ user.fullName.charAt(0).toUpperCase() }}</span>
+          </div>
+
+      </ng-container>
             </span>
           </a>
           <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
             
-            <h6 class="dropdown-header">Welcome Gaston!</h6>
-            <a class="dropdown-item" routerLink="/pages/profile">
-              <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Profile</span>
+            <h6 class="dropdown-header">Hoşgeldin {{ (user$ | async)?.fullName || 'Kullanıcı' }}!</h6>
+            <h6 class="dropdown-header ">- {{ (user$ | async)?.tenantName }}!</h6>
+
+            <a class="dropdown-item" routerLink="/user/profile">
+              <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Profilim</span>
             </a>
-            <a class="dropdown-item" routerLink="/apps/chat">
+            <!-- <a class="dropdown-item" routerLink="/apps/chat">
               <i class="bx bx-message-dots text-muted fs-18 align-middle me-1"></i><span class="align-middle">Messages</span>
             </a>
 
             <a class="dropdown-item" routerLink="/pages/pricing">
               <i class="bx bx-wallet text-muted fs-18 align-middle me-1"></i><span class="align-middle">Pricing</span>
+            </a> -->
+            <a class="dropdown-item" routerLink="/user/faqs">
+              <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Yardım</span>
             </a>
-            <a class="dropdown-item" routerLink="/pages/faqs">
-              <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Help</span>
-            </a>
-            <a class="dropdown-item" routerLink="/auth/lock-screen">
+            <!-- <a class="dropdown-item" routerLink="/auth/lock-screen">
               <i class="bx bx-lock text-muted fs-18 align-middle me-1"></i><span class="align-middle">Lock screen</span>
-            </a>
+            </a> -->
 
             <div class="dropdown-divider my-1"></div>
 
             <a class="dropdown-item text-danger" role="button" (click)="logout()">
-              <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Logout</span>
+              <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Çıkış Yap</span>
             </a>
           </div>
         </div>

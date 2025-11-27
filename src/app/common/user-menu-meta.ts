@@ -14,105 +14,58 @@ export type MenuItem = {
 export const MENU: MenuItem[] = [
   {
     key: 'general',
-    label: 'GENERAL',
+    label: 'Genel',
     isTitle: true,
   },
   {
     key: 'dashboards',
     icon: 'solar:widget-5-bold-duotone',
     label: 'Dashboard',
-    link:'/index'
+    link:'/user/dashboard',
   },
   {
     key: 'settings',
     icon: 'solar:settings-bold-duotone',
-    label: 'Settings',
-    link: '/pages/settings',
+    label: 'Çarpan Ayarları',
+    link: '/user/multiplier-settings',
   },
   {
     key: 'users',
-    label: 'Users',
+    label: 'Kullanıcı Ayarları',
     isTitle: true,
   },
   {
     key: 'profile',
     icon: 'solar:chat-square-like-bold-duotone',
-    label: 'Profile',
-    link: '/pages/profile',
+    label: 'Profilim',
+    link: '/user/profile',
   },
-  {
-    key: 'role',
-    icon: 'solar:user-speak-rounded-bold-duotone',
-    label: 'Roles',
-    collapsed: true,
-    subMenu: [
-      {
-        key: 'role-list',
-        label: 'List',
-        link: '/role/list',
-        parentKey: 'role',
-      },
-      {
-        key: 'role-edit',
-        label: 'Edit',
-        link: '/role/edit',
-        parentKey: 'role',
-      },
-      {
-        key: 'role-create',
-        label: 'Create',
-        link: '/role/add',
-        parentKey: 'role',
-      },
-    ],
-  },
-  {
-    key: 'customer',
-    icon: 'solar:users-group-two-rounded-bold-duotone',
-    label: 'Customers',
-    collapsed: true,
-    subMenu: [
-      {
-        key: 'customer-list',
-        label: 'List',
-        link: '/customer/list',
-        parentKey: 'customer',
-      },
-      {
-        key: 'customer-details',
-        label: 'Details',
-        link: '/customer/detail',
-        parentKey: 'customer',
-      }
-    ],
-  },
-
   {
     key: 'other-apps',
-    label: 'Other Apps',
+    label: 'Diğer Uygulamalar',
     isTitle: true,
   },
   {
     key: 'todo',
     icon: 'solar:checklist-bold-duotone',
     label: 'Todo',
-    link: '/apps/todo',
+    link: '/user/apps/todo',
   },
   {
     key: 'support',
-    label: 'Support',
+    label: 'Destek',
     isTitle: true,
   },
   {
     key: 'help-center',
     icon: 'solar:help-bold-duotone',
-    label: 'Help Center',
-    link: '/pages/help-center',
+    label: 'Yardım Merkezi',
+    link: '/user/help-center',
   },
   {
     key: 'faqs',
     icon: 'solar:question-circle-bold-duotone',
-    label: 'FAQs',
-    link: '/pages/faqs',
+    label: 'SSS',
+    link: '/user/faqs',
   }
 ]

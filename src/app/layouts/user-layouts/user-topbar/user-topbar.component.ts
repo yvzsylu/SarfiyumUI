@@ -6,6 +6,7 @@ import {
   inject,
   Input,
   Output,
+  OnInit
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import {
@@ -18,9 +19,13 @@ import { Store } from '@ngrx/store';
 import { changetheme } from '@store/layout/layout-action';
 import { getLayoutColor } from '@store/layout/layout-selector';
 import { SimplebarAngularModule } from 'simplebar-angular';
-import { UserActivitiStremComponent } from './component/user-activiti-strem/user-activiti-strem.component';
-import { notificationsData } from './data';
+import { UserActivitiStremComponent } from './component/user-activiti-strem/user-activiti-strem.component'; // Yolunu kontrol et
+import { notificationsData } from './data'; // Yolunu kontrol et
 import { logout } from '@store/authentication/authentication.actions';
+import { getUser } from '@store/authentication/authentication.selector';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { environment } from '../../../../environments/enviroment'; // Environment dosya yolunu kontrol et
 
 @Component({
   selector: 'app-user-topbar',
@@ -36,16 +41,44 @@ import { logout } from '@store/authentication/authentication.actions';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [NgbActiveOffcanvas],
 })
-export class UserTopbarComponent {
+export class UserTopbarComponent implements OnInit {
   @Input() title: string | undefined;
   @Output() settingsButtonClicked = new EventEmitter();
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
-  router = inject(Router);
-  store = inject(Store);
-  offcanvasService = inject(NgbOffcanvas);
+  private router = inject(Router);
+  private store = inject(Store);
+  private offcanvasService = inject(NgbOffcanvas);
 
   notificationList = notificationsData;
+
+  // Kullanıcı verisi observable'ı
+  user$!: Observable<any>;
+
+  // API Kök Dizini (Resimler için)
+  // environment.apiUrl genelde "https://localhost:7140/api" şeklindedir.
+  // Resimler root'ta (/uploads/...) olduğu için /api kısmını siliyoruz.
+  public apiRoot = environment.apiUrl.replace('/api', '');
+
+  ngOnInit(): void {
+    console.log(this.apiRoot);
+    // Store'dan kullanıcıyı dinle
+ this.user$ = this.store.select(getUser).pipe(
+   tap(user => {
+     // Debug için loglayabilirsin:
+     // console.log('User Topbar Data:', user);
+   })
+ );
+    // this.user$ = this.store.select(getUser).pipe(
+    // tap(user => {
+    //   if(user?.tenantLogoUrl) {
+    //      console.log('API Root:', this.apiRoot);
+    //      console.log('Gelen Logo URL:', user.tenantLogoUrl);
+    //      console.log('Oluşan Final URL:', this.apiRoot + user.tenantLogoUrl);
+    //   }
+    // })
+  // );
+  }
 
   settingMenu() {
     this.settingsButtonClicked.emit();
