@@ -6,10 +6,17 @@ export const login = createAction(
   '[Authentication] Login',
   props<{ username: string; password: string , rememberMe: boolean }>()
 )
+// export const loginSuccess = createAction(
+//   '[Authentication] Login Success',
+//   props<{ user: User }>()
+// )
 export const loginSuccess = createAction(
   '[Authentication] Login Success',
-  props<{ user: User }>()
-)
+  props<{ user: User; redirect: boolean }>() 
+);
+
+// added redirect parameter for f5 handling
+
 export const loginFailure = createAction(
   '[Authentication] Login Failure',
   props<{ error: string }>()

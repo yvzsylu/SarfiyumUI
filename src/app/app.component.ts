@@ -50,7 +50,9 @@ export class AppComponent implements OnInit {
     
     if (user) {
       // Token geçerli ise Store'u güncelle
-      this.store.dispatch(loginSuccess({ user }));
+      // this.store.dispatch(loginSuccess({ user }));
+      this.store.dispatch(loginSuccess({ user, redirect: false }));
+      
     }
   }
 

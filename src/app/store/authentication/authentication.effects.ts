@@ -30,27 +30,29 @@ export class AuthenticationEffects {
         this.authService.login(username, password, rememberMe).pipe(
           map((user: User) => {
             this.toastr.success('Giriş Başarılı', 'Yönlendiriliyorsunuz...');
-            return loginSuccess({ user });
+            // Redirect: true çünkü kullanıcı butona bastı
+            return loginSuccess({ user, redirect: true });
           }),
           catchError((err) => {
-            // Varsayılan hata mesajı
+            // --- errorMessage DEĞİŞKENİNİ BURADA TANIMLIYORUZ ---
             let errorMessage = 'Giriş işlemi başarısız.';
 
-            // 1. Durum: Backend'den gelen ServiceResult hatası (400, 401 vs.)
-            // Backend errors dizisi dönüyor: { errors: ["Kullanıcı bulunamadı"], ... }
+            // 1. Backend ServiceResult hatası (errors array)
             if (err.error && err.error.errors && Array.isArray(err.error.errors)) {
-              errorMessage = err.error.errors[0]; // Listeden ilk hatayı al
+              errorMessage = err.error.errors[0];
             }
-            // 2. Durum: AuthService içinden bizim fırlattığımız "throw new Error" hataları
+            // 2. JS Error nesnesi
             else if (err.message) {
                errorMessage = err.message;
             }
-            // 3. Durum: Standart string hata dönüşü
+            // 3. String hata
             else if (err.error && typeof err.error === 'string') {
               errorMessage = err.error;
             }
 
             this.toastr.error(errorMessage, 'Hata');
+            
+            // Artık errorMessage tanımlı olduğu için hata vermeyecek
             return of(loginFailure({ error: errorMessage }));
           })
         )
@@ -58,27 +60,29 @@ export class AuthenticationEffects {
     )
   );
 
-  // 2. REDIRECT EFFECT (Yönlendirme İşlemi)
-  // loginSuccess tetiklendiğinde burası çalışır.
-  // ...
+  // 2. REDIRECT EFFECT (Yönlendirme Mantığı)
   loginRedirect$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(loginSuccess),
-        tap(({ user }) => {
+        // DEĞİŞİKLİK 2: redirect parametresini karşılıyoruz
+        tap(({ user, redirect }) => { 
+          
+          // Eğer redirect FALSE ise (F5 durumu) fonksiyonu burada kes, yönlendirme yapma.
+          if (!redirect) {
+             return; 
+          }
+
+          // Eğer redirect TRUE ise yönlendirmeyi yap
           if (user.isAdmin) {
-            // DEĞİŞİKLİK BURADA: Tam yolu veriyoruz
             this.router.navigate(['/admin/dashboard']); 
           } else {
-            // User için de benzer bir yapı varsa:
-            this.router.navigate(['/user/dashboard']); // Örnek
+            this.router.navigate(['/user/dashboard']); 
           }
         })
       ),
     { dispatch: false }
   );
-  // ...
-
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(logout),
