@@ -1,32 +1,127 @@
 <div class="row">
-  <div class="col-xxl-5">
-    <dashboard-state />
-  </div> 
+  <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+       
+      <ng-container *ngIf="user$ | async as user">
 
-  <div class="col-xxl-7">
-    <dashboard-performance />
-  </div> 
-</div> 
+          <!-- 1. Durum: Logo VARSA (API URL + Logo Path) -->
+          <img *ngIf="user.tenantLogoUrl" 
+               class="rounded-circle object-fit-cover" 
+               width="32" 
+               height="32"
+               [src]="apiRoot + user.tenantLogoUrl" 
+               alt="Firma Logosu">
 
-<div class="row">
-  <div class="col-lg-4">
-    <dashboard-conversions />
-  </div> 
+          <!-- 2. Durum: Logo YOKSA (Varsayılan Avatar veya Baş Harf) -->
+          <div *ngIf="!user.tenantLogoUrl" 
+               class="avatar-xs rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center">
+               <span class="text-primary fw-bold fs-12">{{ user.fullName.charAt(0).toUpperCase() }}</span>
+          </div>
+          <h3 class="mb-0 text-uppercase fw-bold text-primary">{{ user.tenantName }} Piyasalar</h3>
 
-  <div class="col-lg-4">
-    <dashboard-sessions-country />
-  </div> 
-
-  <div class="col-lg-4">
-    <dashboard-top-pages />
-  </div> 
-
-</div> 
-
-<div class="row">
-  <div class="col">
-    <dashboard-recent-order />
-    
+      </ng-container>
+    </div>
+    <div class="fs-4 fw-medium font-monospace">
+      {{ currentTime | date:'HH:mm:ss' }}
+    </div>
   </div>
-  
-</div> 
+
+  <div class="col-xl-8 col-lg-7">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0">Altın Fiyatları</h4>
+        <span class="badge bg-success-subtle text-success blinker">● Canlı Veri</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+          <table class="table table-hover table-striped align-middle mb-0 custom-table">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th class="ps-4">Cins</th>
+                <th class="text-end">Alış</th>
+                <th class="text-end pe-4">Satış</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of goldList">
+                <td class="ps-4">
+                  <div class="fw-bold">{{ item.description || item.symbol }}</div>
+                  <small class="text-muted">{{ item.symbol }}</small>
+                </td>
+                <td class="text-end fw-bold text-primary">
+                  {{ item.bid | number:'1.2-2' }} <span class="currency-symbol">₺</span>
+                </td>
+                <td class="text-end fw-bold text-danger pe-4">
+                  {{ item.ask | number:'1.2-2' }} <span class="currency-symbol">₺</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4 col-lg-5">
+    
+    <div class="card mb-3">
+      <div class="card-header border-bottom-0">
+        <h4 class="card-title mb-0">Sarrafiye / Ziynet</h4>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th class="ps-3">Ürün</th>
+                <th class="text-end">Alış</th>
+                <th class="text-end pe-3">Satış</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of sarrafiyeList">
+                <td class="ps-3 fw-semibold small">{{ item.description || item.symbol }}</td>
+                <td class="text-end small">{{ item.bid | number:'1.0-0' }}</td>
+                <td class="text-end small pe-3">{{ item.ask | number:'1.0-0' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-primary-subtle border-primary border-opacity-25">
+      <div class="card-header bg-transparent border-0 pb-0">
+        <h4 class="card-title text-primary mb-0">
+          <iconify-icon icon="solar:calculator-bold" class="align-middle me-1"></iconify-icon>
+          Hızlı Hesapla
+        </h4>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label small">Miktar</label>
+          <input type="number" class="form-control form-control-lg fw-bold" 
+                 [(ngModel)]="convertAmount" (input)="calculateConverter()">
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label small">Ürün Seçiniz</label>
+          <select class="form-select form-select-lg fw-bold" 
+                  [(ngModel)]="selectedSymbol" (change)="calculateConverter()">
+            <option *ngFor="let item of allData" [value]="item.symbol">
+              {{ item.description || item.symbol }}
+            </option>
+          </select>
+        </div>
+
+        <div class="bg-white p-3 rounded shadow-sm text-center mt-4 dark-mode-adjust">
+          <div class="text-muted small mb-1">Tahmini Satış Tutarı</div>
+          <h2 class="mb-0 text-primary fw-bold">
+            {{ convertResult | number:'1.2-2' }} ₺
+          </h2>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

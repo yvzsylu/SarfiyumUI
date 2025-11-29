@@ -1,0 +1,68 @@
+// Canlı veri yanıp sönme efekti
+.blinker {
+  animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
+
+// Tablo scrollbar özelleştirme
+.table-responsive::-webkit-scrollbar {
+  width: 5px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+// BOOTSTRAP DARK MODE UYUMU
+// Senin AdminTopbar'ın html'e "data-bs-theme='dark'" eklediğinde burası çalışır.
+[data-bs-theme="dark"] {
+  
+  .card {
+    // Bootstrap zaten dark modda kartları koyu yapar ama
+    // özel border veya shadow ayarları gerekirse buraya:
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .table-light {
+    // Tablo başlıklarını koyulaştır
+    background-color: #2c3036;
+    color: #e9ecef;
+    
+    th {
+      background-color: #2c3036;
+      color: #adb5bd;
+      border-bottom-color: #495057;
+    }
+  }
+
+  .custom-table {
+    color: #e9ecef;
+    tbody tr:hover {
+        background-color: rgba(255,255,255, 0.05);
+    }
+  }
+
+  .text-primary {
+    // Koyu temada primary rengi biraz açmak okunurluğu artırır
+    color: #6ea8fe !important; 
+  }
+
+  // Çevirici Kartı Dark Mode
+  .bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    border-color: rgba(13, 110, 253, 0.3) !important;
+  }
+
+  // Çevirici Sonuç Kutusu
+  .dark-mode-adjust {
+    background-color: #212529 !important; // Beyaz kutuyu siyah yap
+    border: 1px solid #495057;
+    
+    .text-muted {
+      color: #adb5bd !important;
+    }
+  }
+}
