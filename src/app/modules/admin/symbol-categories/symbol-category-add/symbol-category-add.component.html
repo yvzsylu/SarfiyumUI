@@ -1,0 +1,35 @@
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Yeni Kategori Ekle</h4>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="addForm" (ngSubmit)="onSubmit()">
+          
+          <h5 class="mb-3 text-primary mt-2"><i class="bx bx-category"></i> Kategori Bilgileri</h5>
+          
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label class="form-label">Kategori Adı</label>
+              <input type="text" class="form-control" formControlName="name" placeholder="Örn: MADEN"
+                     [ngClass]="{'is-invalid': submitted && f['name'].errors}">
+              <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">Kategori adı zorunludur.</div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 text-end">
+              <a routerLink="/admin/symbol-categories/list" class="btn btn-secondary me-2">İptal</a>
+              <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="bx bx-save"></i> Kaydet
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

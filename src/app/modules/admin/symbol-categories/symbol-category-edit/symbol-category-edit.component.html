@@ -1,0 +1,41 @@
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Kategori Düzenle</h4>
+      </div>
+      <div class="card-body">
+
+        <div *ngIf="isLoading && !editForm.touched" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Kategori bilgileri yükleniyor...</p>
+        </div>
+
+        <form *ngIf="!isLoading || editForm.touched" [formGroup]="editForm" (ngSubmit)="onSubmit()">
+          
+          <h5 class="mb-3 text-primary mt-2"><i class="bx bx-edit"></i> Kategori Detayları</h5>
+
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label class="form-label">Kategori Adı</label>
+              <input type="text" class="form-control" formControlName="name" 
+                     [ngClass]="{'is-invalid': submitted && f['name'].errors}">
+              <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">Kategori adı zorunludur.</div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 text-end">
+              <a routerLink="/admin/symbol-categories/list" class="btn btn-secondary me-2">İptal</a>
+              <button type="submit" class="btn btn-success" [disabled]="isLoading && editForm.touched">
+                <span *ngIf="isLoading && editForm.touched" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="bx bx-save"></i> Değişiklikleri Kaydet
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

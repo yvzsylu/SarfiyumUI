@@ -59,5 +59,15 @@ export const ADMIN_ROUTES: Routes = [
     path: 'users',
     loadChildren: () => 
       import('../admin/users/user.route').then(m => m.USER_ROUTES)
+  },
+    {
+    path: 'symbols',
+    loadChildren: () => 
+      import('../admin/symbols/symbol.route').then(m => m.SYMBOL_ROUTES)
+  },
+    {
+    path: 'symbol-categories',
+    loadChildren: () => 
+      import('../admin/symbol-categories/symbol-category.route').then(m => m.SYMBOL_CATEGORY_ROUTES)
   }
 ];

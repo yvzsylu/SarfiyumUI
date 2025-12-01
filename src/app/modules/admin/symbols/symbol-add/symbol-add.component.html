@@ -1,0 +1,43 @@
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Yeni Sembol Ekle</h4>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="addForm" (ngSubmit)="onSubmit()">
+          
+          <div class="mb-3">
+            <label class="form-label">Sembol Adı (API Key)</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="Örn: ALTIN"
+                   [ngClass]="{'is-invalid': submitted && f['name'].errors}">
+            <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">Sembol adı zorunludur.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Kategori</label>
+            <select class="form-select" formControlName="categoryId"
+                    [ngClass]="{'is-invalid': submitted && f['categoryId'].errors}">
+              <option value="">Seçiniz...</option>
+              <option *ngFor="let cat of categoryList" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+            <div *ngIf="submitted && f['categoryId'].errors" class="invalid-feedback">Kategori seçimi zorunludur.</div>
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" formControlName="isActive" id="activeSwitch">
+            <label class="form-check-label" for="activeSwitch">Aktif</label>
+          </div>
+
+          <div class="text-end">
+            <a routerLink="/admin/symbols/list" class="btn btn-secondary me-2">İptal</a>
+            <button type="submit" class="btn btn-success" [disabled]="isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span> Kaydet
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
