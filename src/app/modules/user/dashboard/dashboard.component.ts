@@ -1,67 +1,72 @@
-import { Component, OnInit, OnDestroy, inject,CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, Inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule, DecimalPipe, DatePipe, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Observable, Subscription, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { GoldHubService } from './services/gold-hub.service'; // Yolunu kendine göre ayarla
-import { getUser } from '@store/authentication/authentication.selector'; // Senin store yapın
-import { PriceData } from '@/app/core/models/price-data.model'; // Modelin yeri (yolunu kontrol et)
+
+import { GoldHubService } from './services/gold-hub.service';
+import { getUser } from '@store/authentication/authentication.selector';
+import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/enviroment';
 
 @Component({
-  selector: 'app-admin-dashboard',
+  selector: 'app-user-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, DecimalPipe, DatePipe],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'], // SCSS dosyasını bağladık
+  styleUrls: ['./dashboard.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
-
-
 })
 export class UserDashboardComponent implements OnInit, OnDestroy {
-  // Servisler
   private goldHub = inject(GoldHubService);
   private store = inject(Store);
-  user$!: Observable<any>;
+  private router = inject(Router);
 
-  // API Kök Dizini (Resimler için)
-  // environment.apiUrl genelde "https://localhost:7140/api" şeklindedir.
-  // Resimler root'ta (/uploads/...) olduğu için /api kısmını siliyoruz.
+  constructor(@Inject(DOCUMENT) private document: Document) {
+    this.isTvMode = this.router.url.includes('/tv/');
+  }
+
+  // State
+  user$!: Observable<any>;
   public apiRoot = environment.apiUrl.replace('/api', '');
-  // Veriler
+
+  // Data
+  allData: PriceData[] = [];
   goldList: PriceData[] = [];
   sarrafiyeList: PriceData[] = [];
-  allData: PriceData[] = [];
-  
-  // UI Değişkenleri
-  currentTime = new Date();
-  tenantLogo: string = 'assets/images/users/user-dummy-img.jpg'; // Default
-  tenantName: string = '';
+  dovizList: PriceData[] = [];
+  private previousPrices: { [key: string]: number } = {};
 
-  // Çevirici
+  // UI
+  currentTime = new Date();
+  isTvMode = false;
+  isDarkMode = false;
+
+  // Converter
   convertAmount: number = 1;
   selectedSymbol: string = '';
   convertResult: number = 0;
 
   private subs: Subscription[] = [];
+  private timeInterval: any;
 
   ngOnInit(): void {
-    // 1. SignalR Başlat
-     this.user$ = this.store.select(getUser).pipe(
-       tap(user => {
-         // Debug için loglayabilirsin:
-         // console.log('User Topbar Data:', user);
-       })
-     );
+    // Theme Check
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      this.isDarkMode = true;
+      this.document.documentElement.setAttribute('data-bs-theme', 'dark');
+    }
+
+    this.user$ = this.store.select(getUser);
     this.goldHub.startConnection();
 
-    // 2. Fiyatları Dinle
     const priceSub = this.goldHub.prices$.subscribe(data => {
-      if (data.length > 0) {
+      if (data && data.length > 0) {
         this.allData = data;
-        this.categorizeData(data);
-        
-        // Çevirici için varsayılan seçim
+        this.processData(data);
+
         if (!this.selectedSymbol && this.goldList.length > 0) {
           this.selectedSymbol = this.goldList[0].symbol;
           this.calculateConverter();
@@ -70,33 +75,55 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     });
     this.subs.push(priceSub);
 
-    // 3. User Bilgisini Store'dan Çek (Logo ve İsim için)
-    const userSub = this.store.select(getUser).subscribe(user => {
-      if (user) {
-        // Senin User modelindeki alan adlarına göre düzenle
-        // JWT içinde logoUrl varsa oradan da alabilirsin
-        this.tenantName = user.fullName || 'Firma Adı'; 
-        // this.tenantLogo = user.tenantLogoUrl || this.tenantLogo; 
-      }
-    });
-    this.subs.push(userSub);
-
-    // 4. Saat
-    setInterval(() => {
-      this.currentTime = new Date();
-    }, 1000);
+    this.startClock();
   }
 
-  categorizeData(data: PriceData[]) {
-    // Harem Altın Mantığı: Sol Taraf (Has Altın, Ons vb.)
-    this.goldList = data.filter(d => 
-      d.category === 'MADEN' || d.category === 'GRAM ALTIN' || d.symbol.includes('ALTIN')
-    );
+  processData(data: PriceData[]) {
+    data.forEach(item => {
+      this.calculateDirection(item); // Yönünü belirle
 
-    // Sağ Taraf (Çeyrek, Yarım, Ata vb.)
-    this.sarrafiyeList = data.filter(d => 
-      d.category === 'SARRAFIYE' || d.category === 'ZİYNET' || d.category === 'DARPHANE'
-    );
+      // Hangi kategoriye ait?
+      if (item.category === 'MADEN' || item.category === 'GRAM ALTIN' || item.symbol.includes('ALTIN')) {
+        this.updateList(this.goldList, item);
+      }
+      else if (item.category === 'SARRAFIYE' || item.category === 'ZİYNET' || item.category === 'DARPHANE') {
+        this.updateList(this.sarrafiyeList, item);
+      }
+      else if (item.category === 'DÖVİZ' || item.category === 'PARİTE' || item.symbol.includes('USD') || item.symbol.includes('EUR')) {
+        this.updateList(this.dovizList, item);
+      }
+    });
+  }
+
+  updateList(list: PriceData[], newItem: PriceData) {
+    const existingItem = list.find(x => x.symbol === newItem.symbol);
+
+    if (existingItem) {
+      // Varsa SADECE değerlerini güncelle (Referansı bozma)
+      existingItem.bid = newItem.bid;
+      existingItem.ask = newItem.ask;
+      existingItem.timestamp = newItem.timestamp;
+      existingItem.direction = newItem.direction; // Flash efekti için
+    } else {
+      // Yoksa listeye ekle
+      list.push(newItem);
+    }
+  }
+
+  trackBySymbol(index: number, item: PriceData): string {
+    return item.symbol; // Sembol (ID) değişmediyse satırı yeniden çizme
+  }
+
+  calculateDirection(item: PriceData) {
+    const prevAsk = this.previousPrices[item.symbol];
+    if (prevAsk) {
+      if (item.ask! > prevAsk) item.direction = 'up';
+      else if (item.ask! < prevAsk) item.direction = 'down';
+      else item.direction = 'stable';
+    } else {
+      item.direction = 'stable';
+    }
+    if (item.ask) this.previousPrices[item.symbol] = item.ask;
   }
 
   calculateConverter() {
@@ -108,7 +135,46 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  startClock() {
+    this.timeInterval = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    this.document.documentElement.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('theme', theme);
+  }
+
+  toggleTvMode() {
+    const currentUrl = this.router.url;
+    if (this.isTvMode) {
+      const newUrl = currentUrl.replace('/tv', '');
+      this.exitFullScreen();
+      this.router.navigateByUrl(newUrl);
+      this.isTvMode = false;
+    } else {
+      const newUrl = '/tv' + currentUrl;
+      this.enterFullScreen();
+      this.router.navigateByUrl(newUrl);
+      this.isTvMode = true;
+    }
+  }
+
+  enterFullScreen() {
+    const elem = this.document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+  }
+
+  exitFullScreen() {
+    if (this.document.exitFullscreen && this.document.fullscreenElement) this.document.exitFullscreen();
+  }
+
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+    if (this.timeInterval) clearInterval(this.timeInterval);
+    this.goldHub.stopConnection();
   }
 }

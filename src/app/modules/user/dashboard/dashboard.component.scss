@@ -1,68 +1,193 @@
-// Canlı veri yanıp sönme efekti
-.blinker {
-  animation: blinker 1.5s linear infinite;
+// --- DEĞİŞKENLER ---
+$gold-color: #d4af37;
+$flash-green: rgba(25, 135, 84, 0.25);
+$flash-red: rgba(220, 53, 69, 0.25);
+
+// --- ANİMASYONLAR ---
+.blinker { animation: blinker 1.5s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+@keyframes flashGreenAnim { 0% { background-color: $flash-green; } 100% { background-color: transparent; } }
+@keyframes flashRedAnim { 0% { background-color: $flash-red; } 100% { background-color: transparent; } }
+.flash-up { animation: flashGreenAnim 1s ease-out; }
+.flash-down { animation: flashRedAnim 1s ease-out; }
+
+// --- SCROLLBAR ---
+.table-responsive::-webkit-scrollbar { width: 5px; }
+.table-responsive::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+// =============================================================
+// 🔥 LAYOUT VE GRID DÜZENLEMESİ (DÜZELTİLDİ) 🔥
+// =============================================================
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden; // Taşmayı kesinlikle engelle
+  box-sizing: border-box;
 }
 
-@keyframes blinker {
-  50% { opacity: 0; }
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 15px; // Kenar boşluğu
 }
 
-// Tablo scrollbar özelleştirme
-.table-responsive::-webkit-scrollbar {
-  width: 5px;
-}
-.table-responsive::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 4px;
+.dashboard-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; // Flexbox taşma fix'i
 }
 
-// BOOTSTRAP DARK MODE UYUMU
-// Senin AdminTopbar'ın html'e "data-bs-theme='dark'" eklediğinde burası çalışır.
-[data-bs-theme="dark"] {
+// TV MODU
+.dashboard-wrapper.tv-mode-layout {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 9999;
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow: hidden; // TV modunda da scroll olmasın
+}
+
+// Header
+.header-row {
+  flex: 0 0 auto;
+  margin-bottom: 15px !important;
+}
+
+// Grid Alanı
+.full-height-grid {
+  flex: 1; // Kalan tüm alanı kapla
+  min-height: 0;
+  padding-bottom: 0;
   
-  .card {
-    // Bootstrap zaten dark modda kartları koyu yapar ama
-    // özel border veya shadow ayarları gerekirse buraya:
-    border-color: rgba(255, 255, 255, 0.1);
+  // Bootstrap Gutter (g-4) yaklaşık 1.5rem (24px) boşluk bırakır.
+  // Bu yüzden yüksekliği %50'den biraz az veriyoruz ki boşlukla beraber %100 olsun.
+  .grid-item {
+    height: calc(50% - 12px); // (Gap'in yarısını çıkarıyoruz)
+    padding-bottom: 0;
+  }
+}
+
+// --- KART YAPISI ---
+.card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+
+  .card-header {
+    flex: 0 0 auto;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    
+    // Soft Renkler
+    &.soft-gold-header { background-color: #fffbf0; border-color: #faeab8; .icon-box { color: #f59e0b; } }
+    &.soft-silver-header { background-color: #f8f9fa; border-color: #e9ecef; .icon-box { color: #6c757d; } }
+    &.soft-green-header { background-color: #eafaf1; border-color: #c8e6c9; .icon-box { color: #198754; } }
+    &.soft-blue-header { background-color: #e3f2fd; border-color: #bbdefb; .icon-box { color: #0d6efd; } }
+
+    .icon-box {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
   }
 
-  .table-light {
-    // Tablo başlıklarını koyulaştır
-    background-color: #2c3036;
-    color: #e9ecef;
-    
+  .card-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    position: relative;
+  }
+}
+
+// --- TABLOLAR ---
+.table-responsive {
+  height: 100% !important;
+  max-height: none !important;
+  overflow-y: auto;
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     th {
-      background-color: #2c3036;
-      color: #adb5bd;
-      border-bottom-color: #495057;
+      background-color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #999;
+      padding: 12px;
+      border-bottom: 2px solid #f0f0f0;
     }
   }
 
-  .custom-table {
-    color: #e9ecef;
-    tbody tr:hover {
-        background-color: rgba(255,255,255, 0.05);
+  td {
+    padding: 10px 12px; // Paddingi biraz kıstık ki daha çok veri sığsın
+    vertical-align: middle;
+    border-bottom: 1px solid #f9f9f9;
+  }
+}
+
+// --- DİĞER BİLEŞENLER ---
+.theme-switch-wrapper {
+  display: flex; align-items: center;
+  .theme-switch { display: inline-block; height: 30px; width: 60px; position: relative; input { display: none; } }
+  .slider {
+    background-color: #e2e6ea; bottom: 0; left: 0; right: 0; top: 0;
+    position: absolute; cursor: pointer; transition: .4s;
+    border-radius: 34px; border: 1px solid #d1d5db;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 6px;
+    .bx { font-size: 16px; z-index: 1; }
+    .sun-icon { color: #f39c12; }
+    .moon-icon { color: #f1c40f; opacity: 0.5; }
+    &:before {
+      background-color: #fff; bottom: 3px; content: ""; height: 22px; width: 22px;
+      left: 3px; position: absolute; transition: .4s; border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;
     }
   }
+  input:checked + .slider {
+    background-color: #343a40; border-color: #495057;
+    .sun-icon { opacity: 0.5; }
+    .moon-icon { opacity: 1; color: #fff; }
+    &:before { transform: translateX(30px); }
+  }
+}
 
-  .text-primary {
-    // Koyu temada primary rengi biraz açmak okunurluğu artırır
-    color: #6ea8fe !important; 
+// --- DARK MODE ---
+[data-bs-theme="dark"] {
+  .dashboard-wrapper.tv-mode-layout { background-color: #1a1d21 !important; }
+  .header-panel { background-color: #212529 !important; border-color: #343a40 !important; }
+  .text-dark { color: #e9ecef !important; }
+  .card { background-color: #212529; border: 1px solid #343a40; }
+  
+  .card-header {
+    &.soft-gold-header { background-color: #3e3218; border-color: #58451a; .icon-box { background-color: #58451a !important; color: #ffc107 !important; } }
+    &.soft-silver-header { background-color: #2c3036; border-color: #343a40; .icon-box { background-color: #343a40 !important; color: #ced4da !important; } }
+    &.soft-green-header { background-color: #132e20; border-color: #194d30; .icon-box { background-color: #194d30 !important; color: #28a745 !important; } }
+    &.soft-blue-header { background-color: #152538; border-color: #1c3a5e; .icon-box { background-color: #1c3a5e !important; color: #0d6efd !important; } }
   }
 
-  // Çevirici Kartı Dark Mode
-  .bg-primary-subtle {
-    background-color: rgba(13, 110, 253, 0.15) !important;
-    border-color: rgba(13, 110, 253, 0.3) !important;
+  .market-table {
+    thead th { background-color: #212529; color: #6c757d; border-bottom-color: #343a40; }
+    td { border-bottom-color: #2c3036; }
+    tr:hover { background-color: #2c3036 !important; }
   }
 
-  // Çevirici Sonuç Kutusu
-  .dark-mode-adjust {
-    background-color: #212529 !important; // Beyaz kutuyu siyah yap
-    border: 1px solid #495057;
-    
-    .text-muted {
-      color: #adb5bd !important;
-    }
+  .result-box { background-color: #2c3036 !important; border-color: #343a40 !important; }
+  .form-control, .form-select {
+    background-color: #2c3036; border-color: #343a40; color: #fff;
+    &:focus { border-color: #0d6efd; background-color: #2c3036; }
   }
+  .table-responsive::-webkit-scrollbar-thumb { background: #555; }
+}
+
+// --- RESPONSIVE ---
+@media (max-width: 992px) {
+  :host { height: auto; overflow: auto; }
+  .full-height-grid .grid-item { height: auto; min-height: 400px; }
 }

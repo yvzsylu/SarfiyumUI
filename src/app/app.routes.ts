@@ -4,6 +4,7 @@ import { AuthLayoutComponent } from '@layouts/shared/auth-layout/auth-layout.com
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminLayoutComponent } from '../app/layouts/admin-layouts/admin-layout/admin-layout.component';
 import { UserLayoutComponent } from '../app/layouts/user-layouts/user-layout/user-layout.component';
+import { EmptyLayoutComponent } from '@layouts/empty-layout/empty-layout.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -36,6 +37,23 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./modules/user/user.route').then((mod) => mod.USER_ROUTES),
   },
+  // =================================================================
+  // 🔥 SADECE USER İÇİN TV / GENİŞ EKRAN MODU
+  // =================================================================
+  {
+    path: 'tv',
+    component: EmptyLayoutComponent, 
+    canActivate: [AuthGuard], 
+    children: [
+      {
+        // SADECE USER ROTASI VAR. Admin buraya erişemez (404 verir).
+        path: 'user',
+        data: { role: 'user' },
+        loadChildren: () => import('./modules/user/user.route').then((mod) => mod.USER_ROUTES),
+      }
+    ]
+  },
+  // =================================================================
   {
     path: '404',
     loadChildren: () => 

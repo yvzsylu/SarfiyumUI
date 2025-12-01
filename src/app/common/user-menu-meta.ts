@@ -25,7 +25,7 @@ export const MENU: MenuItem[] = [
   },
   {
     key: 'settings',
-    icon: 'solar:settings-bold-duotone',
+    icon: 'solar:maximize-broken',
     label: 'Çarpan Ayarları',
     link: '/user/multiplier-settings',
   },
