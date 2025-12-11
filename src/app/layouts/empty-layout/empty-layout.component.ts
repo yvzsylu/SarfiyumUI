@@ -6,12 +6,11 @@ import { Store } from '@ngrx/store';
 import { NgbActiveOffcanvas, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { getSidebarsize } from '@store/layout/layout-selector';
 import { changesidebarsize } from '@store/layout/layout-action';
-import { FooterComponent } from '../shared/footer/footer.component';
 
 
 @Component({
   selector: 'app-empty-layout',
-  imports: [RouterModule, FooterComponent],
+  imports: [RouterModule],
   templateUrl: './empty-layout.component.html',
   styleUrl: './empty-layout.component.scss',
   providers: [NgbActiveOffcanvas],

@@ -1,14 +1,19 @@
-import { Component, OnInit, OnDestroy, inject, Inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Inject, CUSTOM_ELEMENTS_SCHEMA, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DecimalPipe, DatePipe, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable, Subscription, tap } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { GoldHubService } from './services/gold-hub.service';
 import { getUser } from '@store/authentication/authentication.selector';
 import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/enviroment';
+
+interface DashboardPriceItem extends PriceData {
+  flashCss?: string;      
+  flashTimeout?: any;     
+}
 
 @Component({
   selector: 'app-user-dashboard',
@@ -22,37 +27,40 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   private goldHub = inject(GoldHubService);
   private store = inject(Store);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.isTvMode = this.router.url.includes('/tv/');
   }
 
-  // State
+  @HostListener('document:fullscreenchange')
+  onFullScreenChange() {
+    if (!this.document.fullscreenElement) {
+      this.isTvMode = false;
+      if (this.router.url.includes('/tv')) {
+        const cleanUrl = this.router.url.replace('/tv', '');
+        this.router.navigateByUrl(cleanUrl);
+      }
+    }
+  }
+
   user$!: Observable<any>;
   public apiRoot = environment.apiUrl.replace('/api', '');
 
-  // Data
-  allData: PriceData[] = [];
-  goldList: PriceData[] = [];
-  sarrafiyeList: PriceData[] = [];
-  dovizList: PriceData[] = [];
-  private previousPrices: { [key: string]: number } = {};
+  allData: DashboardPriceItem[] = [];
+  madenList: DashboardPriceItem[] = [];
+  dovizList: DashboardPriceItem[] = [];
+  bilezikList: DashboardPriceItem[] = [];
+  krediList: DashboardPriceItem[] = [];
 
-  // UI
   currentTime = new Date();
   isTvMode = false;
   isDarkMode = false;
-
-  // Converter
-  convertAmount: number = 1;
-  selectedSymbol: string = '';
-  convertResult: number = 0;
-
+  
   private subs: Subscription[] = [];
   private timeInterval: any;
 
   ngOnInit(): void {
-    // Theme Check
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       this.isDarkMode = true;
@@ -63,82 +71,89 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.goldHub.startConnection();
 
     const priceSub = this.goldHub.prices$.subscribe(data => {
-      if (data && data.length > 0) {
-        this.allData = data;
-        this.processData(data);
+  if (data && data.length > 0) {
+    const incomingData = data as DashboardPriceItem[];
 
-        if (!this.selectedSymbol && this.goldList.length > 0) {
-          this.selectedSymbol = this.goldList[0].symbol;
-          this.calculateConverter();
-        }
-      }
+    // 1. ADIM: Ticker (allData) listesini state kaybetmeden güncelle
+    // Böylece allData içindeki öğelerin flashCss özellikleri korunur ve güncellenir.
+    incomingData.forEach(item => {
+      this.updateList(this.allData, item);
     });
+
+    // 2. ADIM: Diğer kategori tablolarını güncelle (Maden, Döviz vb.)
+    this.processData(incomingData);
+  }
+});
     this.subs.push(priceSub);
 
     this.startClock();
   }
 
-  processData(data: PriceData[]) {
+  processData(data: DashboardPriceItem[]) {
     data.forEach(item => {
-      this.calculateDirection(item); // Yönünü belirle
-
-      // Hangi kategoriye ait?
-      if (item.category === 'MADEN' || item.category === 'GRAM ALTIN' || item.symbol.includes('ALTIN')) {
-        this.updateList(this.goldList, item);
+      let targetList: DashboardPriceItem[] = this.madenList;
+      switch (item.category) {
+        case 'Maden': targetList = this.madenList; break;
+        case 'Döviz': targetList = this.dovizList; break;
+        case 'Bilezik': targetList = this.bilezikList; break;
+        case 'Kredi Kartı': targetList = this.krediList; break;
+        default: targetList = this.madenList; break;
       }
-      else if (item.category === 'SARRAFIYE' || item.category === 'ZİYNET' || item.category === 'DARPHANE') {
-        this.updateList(this.sarrafiyeList, item);
-      }
-      else if (item.category === 'DÖVİZ' || item.category === 'PARİTE' || item.symbol.includes('USD') || item.symbol.includes('EUR')) {
-        this.updateList(this.dovizList, item);
-      }
+      this.updateList(targetList, item);
     });
   }
 
-  updateList(list: PriceData[], newItem: PriceData) {
+  updateList(list: DashboardPriceItem[], newItem: DashboardPriceItem) {
     const existingItem = list.find(x => x.symbol === newItem.symbol);
 
     if (existingItem) {
-      // Varsa SADECE değerlerini güncelle (Referansı bozma)
+      const oldAsk = existingItem.ask || 0;
+      const newAsk = newItem.ask || 0;
+
+      // Verileri güncelle
       existingItem.bid = newItem.bid;
       existingItem.ask = newItem.ask;
       existingItem.timestamp = newItem.timestamp;
-      existingItem.direction = newItem.direction; // Flash efekti için
+
+      // Fiyat değişikliği varsa
+      if (newAsk !== oldAsk) {
+        
+        // Eğer önceki bir timer varsa temizle
+        if (existingItem.flashTimeout) clearTimeout(existingItem.flashTimeout);
+
+        // Yönü belirle
+        if (newAsk > oldAsk) {
+            existingItem.direction = 'up';
+            existingItem.flashCss = 'text-flash-up'; // Yeşil yap (Anlık)
+        } else {
+            existingItem.direction = 'down';
+            existingItem.flashCss = 'text-flash-down'; // Kırmızı yap (Anlık)
+        }
+        
+        this.cdr.detectChanges(); // UI'ı zorla güncelle: Renk değişsin
+
+        // 200ms bekle (Göz yeşili/kırmızıyı görsün) sonra class'ı sil
+        existingItem.flashTimeout = setTimeout(() => {
+             existingItem.flashCss = ''; 
+             // Class silinince SCSS'teki 'transition: color 1.5s' devreye girer
+             // ve renk yavaşça siyaha döner.
+             this.cdr.detectChanges();
+        }, 300);
+
+      }
     } else {
-      // Yoksa listeye ekle
+      newItem.direction = 'stable';
+      newItem.flashCss = '';
       list.push(newItem);
     }
   }
 
-  trackBySymbol(index: number, item: PriceData): string {
-    return item.symbol; // Sembol (ID) değişmediyse satırı yeniden çizme
-  }
-
-  calculateDirection(item: PriceData) {
-    const prevAsk = this.previousPrices[item.symbol];
-    if (prevAsk) {
-      if (item.ask! > prevAsk) item.direction = 'up';
-      else if (item.ask! < prevAsk) item.direction = 'down';
-      else item.direction = 'stable';
-    } else {
-      item.direction = 'stable';
-    }
-    if (item.ask) this.previousPrices[item.symbol] = item.ask;
-  }
-
-  calculateConverter() {
-    const item = this.allData.find(x => x.symbol === this.selectedSymbol);
-    if (item && item.ask) {
-      this.convertResult = this.convertAmount * item.ask;
-    } else {
-      this.convertResult = 0;
-    }
+  trackBySymbol(index: number, item: DashboardPriceItem): string {
+    return item.symbol; 
   }
 
   startClock() {
-    this.timeInterval = setInterval(() => {
-      this.currentTime = new Date();
-    }, 1000);
+    this.timeInterval = setInterval(() => { this.currentTime = new Date(); }, 1000);
   }
 
   toggleTheme() {
@@ -149,18 +164,11 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   }
 
   toggleTvMode() {
-    const currentUrl = this.router.url;
-    if (this.isTvMode) {
-      const newUrl = currentUrl.replace('/tv', '');
-      this.exitFullScreen();
-      this.router.navigateByUrl(newUrl);
-      this.isTvMode = false;
-    } else {
-      const newUrl = '/tv' + currentUrl;
-      this.enterFullScreen();
-      this.router.navigateByUrl(newUrl);
-      this.isTvMode = true;
-    }
+    if (this.isTvMode) return;
+    const newUrl = '/tv' + this.router.url;
+    this.enterFullScreen();
+    this.router.navigateByUrl(newUrl);
+    this.isTvMode = true;
   }
 
   enterFullScreen() {

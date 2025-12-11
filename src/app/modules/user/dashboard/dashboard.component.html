@@ -1,227 +1,267 @@
 <div class="dashboard-wrapper" [class.tv-mode-layout]="isTvMode">
-  <div class="dashboard-content-area">
 
-    <div class="row mb-4 header-row">
-      <div class="col-12 d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm border header-panel" style="min-height: 90px;">
-        
-        <div class="d-flex align-items-center gap-3 ps-2">
-          <ng-container *ngIf="user$ | async as user">
-            <img *ngIf="user.tenantLogoUrl" 
-                 class="rounded-3 object-fit-contain border bg-white p-1" 
-                 style="width: 64px; height: 64px;"
-                 [src]="apiRoot + user.tenantLogoUrl" 
-                 alt="Logo"
-                 onerror="this.src='assets/images/users/user-dummy-img.jpg'">
+  <div class="header-section bg-white border-bottom shadow-sm">
+    <div class="container-fluid px-3 py-2 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <ng-container *ngIf="user$ | async as user">
+          <img *ngIf="user.tenantLogoUrl" class="rounded-3 object-fit-contain border bg-white p-1"
+            style="width: 48px; height: 48px;" [src]="apiRoot + user.tenantLogoUrl"
+            onerror="this.src='assets/images/users/user-dummy-img.jpg'">
 
-            <div *ngIf="!user.tenantLogoUrl" 
-                 class="avatar-md rounded-3 bg-light d-flex align-items-center justify-content-center text-dark border"
-                 style="width: 64px; height: 64px;">
-                 <span class="fw-bolder fs-2">{{ user.fullName?.charAt(0).toUpperCase() }}</span>
-            </div>
-
-            <div class="d-flex flex-column">
-              <h2 class="mb-0 fw-bolder text-dark ls-1 tenant-name">{{ user.tenantName }}</h2>
-              <span class="badge bg-light text-dark border mt-1 align-self-start">Canlı Piyasalar</span>
-            </div>
-          </ng-container>
-        </div>
-
-        <div class="d-flex align-items-center gap-4 pe-2">
-          
-          <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="checkbox">
-              <input type="checkbox" id="checkbox" [checked]="isDarkMode" (change)="toggleTheme()" />
-              <div class="slider round">
-                <i class="bx bxs-sun sun-icon"></i>
-                <i class="bx bxs-moon moon-icon"></i>
-              </div>
-            </label>
+          <div *ngIf="!user.tenantLogoUrl"
+            class="rounded-3 bg-light d-flex align-items-center justify-content-center  base-text border"
+            style="width: 48px; height: 48px;">
+            <span class="fw-bold fs-4">{{ user.fullName?.charAt(0).toUpperCase() }}</span>
           </div>
 
-          <div class="text-end">
-            <div class="display-6 fw-bold font-monospace lh-1 text-dark clock-time">
-              {{ currentTime | date:'HH:mm' }}
-            </div>
-            <div class="fs-6 text-muted font-monospace text-end">
-              {{ currentTime | date:'ss' }}
-            </div>
-          </div>
-          
-          <div class="vr h-50 my-auto bg-secondary opacity-25 mx-2"></div>
+          <div class="d-flex flex-column">
+            <h2 class="mb-0 fw-bold  base-text ls-1 tenant-name" style="font-size: 2.5rem; line-height: 1;">
+              {{ (user.tenantName || 'SARFİYUM').toLocaleUpperCase('tr-TR') }}
+            </h2>
 
-          <button class="btn btn-dark d-flex align-items-center gap-2 px-4 py-2 rounded-pill fw-bold" (click)="toggleTvMode()">
-            <i class="bx fs-5" [ngClass]="isTvMode ? 'bx-exit-fullscreen' : 'bx-fullscreen'"></i>
-            <span class="d-none d-md-inline">{{ isTvMode ? 'ÇIKIŞ' : 'TAM EKRAN' }}</span>
-          </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end lh-1">
+          <div class="fw-bold font-financial  base-text" style="font-size: 2.2rem;">
+            {{ currentTime | date:'HH:mm' }}<span class="fs-4 text-muted ms-1">{{ currentTime | date:'ss' }}</span>
+          </div>
+          <!-- <div class="small text-muted fw-bold">{{ currentTime | date:'d MMMM yyyy' }}</div> -->
+          <div class="d-flex align-items-center justify-content-center gap-2 pt-1">
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-0 px-2"
+              style="font-size: 0.7rem;">
+              <i class="bx bxs-circle fs-6 me-1 align-middle live-blink"></i>Canlı Veri
+            </span>
+          </div>
         </div>
 
+        <div class="mx-3 bg-secondary opacity-25 rounded" style="width: 2px; height: 50px;">
+        </div>
+        <div class="ios-switch-wrapper">
+          <input type="checkbox" id="themeSwitch" class="ios-checkbox" [checked]="isDarkMode" (change)="toggleTheme()">
+          <label for="themeSwitch" class="ios-label">
+            <i class="bx bxs-moon icon-moon"></i>
+            <i class="bx bxs-sun icon-sun"></i>
+            <div class="ios-ball"></div>
+          </label>
+        </div>
+
+        <button *ngIf="!isTvMode"
+          class="btn btn-dark btn-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-bold"
+          (click)="toggleTvMode()">
+          <i class="bx bx-fullscreen"></i>
+          <span class="d-none d-md-inline">TAM EKRAN</span>
+        </button>
       </div>
     </div>
-
-    <div class="row g-4 full-height-grid">
-      
-      <div class="col-xl-6 col-lg-6 grid-item">
-        <div class="card h-100 shadow-sm border-0 market-card">
-          <div class="card-header soft-gold-header py-3 px-4">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
-              <span class="icon-box bg-white text-warning rounded-circle"><i class="bx bxs-bar-chart-alt-2"></i></span>
-              ALTIN FİYATLARI
-            </h4>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0 market-table">
-                <thead class="sticky-top">
-                  <tr>
-                    <th class="ps-4">CİNS</th>
-                    <th class="text-end">ALIŞ</th>
-                    <th class="text-end pe-4">SATIŞ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of goldList; trackBy: trackBySymbol" 
-                      [ngClass]="{'flash-up': item.direction === 'up', 'flash-down': item.direction === 'down'}">
-                    <td class="ps-4 fw-bold fs-5 text-dark">{{ item.description || item.symbol }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark font-monospace">{{ item.bid | number:'1.2-2' }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark pe-4 font-monospace d-flex align-items-center justify-content-end gap-2">
-                      {{ item.ask | number:'1.2-2' }}
-                      <i class="bx fs-6" [ngClass]="{
-                        'bx-caret-up text-success': item.direction === 'up',
-                        'bx-caret-down text-danger': item.direction === 'down',
-                        'bx-minus text-muted opacity-25': item.direction === 'stable'
-                      }"></i>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-6 col-lg-6 grid-item">
-        <div class="card h-100 shadow-sm border-0 market-card">
-          <div class="card-header soft-silver-header py-3 px-4">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
-              <span class="icon-box bg-white text-secondary rounded-circle"><i class="bx bxs-coin-stack"></i></span>
-              SARRAFİYE / ZİYNET
-            </h4>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0 market-table">
-                <thead class="sticky-top">
-                  <tr>
-                    <th class="ps-4">ÜRÜN</th>
-                    <th class="text-end">ALIŞ</th>
-                    <th class="text-end pe-4">SATIŞ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of sarrafiyeList; trackBy: trackBySymbol"
-                      [ngClass]="{'flash-up': item.direction === 'up', 'flash-down': item.direction === 'down'}">
-                    <td class="ps-4 fw-bold fs-5 text-dark">{{ item.description || item.symbol }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark font-monospace">{{ item.bid | number:'1.0-0' }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark pe-4 font-monospace d-flex align-items-center justify-content-end gap-2">
-                      {{ item.ask | number:'1.0-0' }}
-                      <i class="bx fs-6" [ngClass]="{
-                        'bx-caret-up text-success': item.direction === 'up',
-                        'bx-caret-down text-danger': item.direction === 'down',
-                        'bx-minus text-muted opacity-25': item.direction === 'stable'
-                      }"></i>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-6 col-lg-6 grid-item">
-        <div class="card h-100 shadow-sm border-0 market-card">
-          <div class="card-header soft-green-header py-3 px-4">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
-              <span class="icon-box bg-white text-success rounded-circle"><i class="bx bxs-dollar-circle"></i></span>
-              DÖVİZ KURLARI
-            </h4>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0 market-table">
-                <thead class="sticky-top">
-                  <tr>
-                    <th class="ps-4">BİRİM</th>
-                    <th class="text-end">ALIŞ</th>
-                    <th class="text-end pe-4">SATIŞ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of dovizList; trackBy: trackBySymbol"
-                      [ngClass]="{'flash-up': item.direction === 'up', 'flash-down': item.direction === 'down'}">
-                    <td class="ps-4 fw-bold fs-5 text-dark">{{ item.description || item.symbol }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark font-monospace">{{ item.bid | number:'1.4-4' }}</td>
-                    <td class="text-end fs-5 fw-bold text-dark pe-4 font-monospace d-flex align-items-center justify-content-end gap-2">
-                      {{ item.ask | number:'1.4-4' }}
-                      <i class="bx fs-6" [ngClass]="{
-                        'bx-caret-up text-success': item.direction === 'up',
-                        'bx-caret-down text-danger': item.direction === 'down',
-                        'bx-minus text-muted opacity-25': item.direction === 'stable'
-                      }"></i>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-6 col-lg-6 grid-item">
-        <div class="card h-100 border-0 shadow-sm converter-card">
-          <div class="card-header soft-blue-header py-3 px-4">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
-              <span class="icon-box bg-white text-primary rounded-circle"><i class="bx bxs-calculator"></i></span>
-              ÇEVİRİCİ
-            </h4>
-          </div>
-          <div class="card-body d-flex flex-column justify-content-center gap-4 px-5 py-4">
-            
-            <div class="row g-4">
-              <div class="col-md-6">
-                <label class="form-label fs-5 fw-bold text-muted">Miktar</label>
-                <div class="input-group input-group-lg">
-                  <input type="number" class="form-control fw-bold border-2" 
-                         [(ngModel)]="convertAmount" (input)="calculateConverter()" placeholder="1">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fs-5 fw-bold text-muted">Ürün</label>
-                <select class="form-select form-select-lg fw-bold border-2" 
-                        [(ngModel)]="selectedSymbol" (change)="calculateConverter()">
-                  <option *ngFor="let item of allData" [value]="item.symbol">
-                    {{ item.description || item.symbol }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="bg-light p-4 rounded-4 text-center border-2 border-dashed mt-2 result-box">
-              <div class="text-uppercase fw-bold text-muted ls-1 mb-2">Toplam Tutar</div>
-              <h1 class="mb-0 text-dark fw-bolder display-3">
-                {{ convertResult | number:'1.2-2' }} <span class="fs-4 text-muted">₺</span>
-              </h1>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-    </div>
-
   </div>
 
-  <footer class="mt-3 text-center text-muted small fw-bold opacity-75" *ngIf="isTvMode">
+  <div class="ticker-wrap border-bottom bg-light">
+    <div class="ticker">
+      <ng-container *ngFor="let i of [1,2]">
+        <div class="ticker-item" *ngFor="let item of allData">
+          <span class="ticker-symbol">{{ item.symbol }}
+          </span>
+          <span class=" base-text font-financial ms-1" [ngClass]="item.flashCss">
+            {{ item.ask | number:'1.2-2' }}
+            <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+            <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+            <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+          </span>
+          <span class="ticker-divider">|</span>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="dashboard-content-area container-fluid px-3 py-3 flex-grow-1">
+    <div class="row g-3 full-height-grid">
+
+      <div class="col-xl-6 col-lg-6 h-100">
+        <div class="card h-100 shadow-sm border-0 market-card">
+          <div class="card-header soft-gold-header py-2 px-3">
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2  base-text" style="font-size: 2.5rem;">
+              <span class="icon-box bg-white text-warning rounded-circle"><i class="bx bxs-bar-chart-alt-2"></i></span>
+              MADEN & ZİYNET
+            </h4>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive h-100">
+              <table class="table table-hover align-middle mb-0 market-table table-striped-custom">
+                <thead class="sticky-top bg-white">
+                  <tr>
+                    <th class="ps-4 fs-3">ÜRÜN CİNSİ</th>
+                    <th class="text-end fs-3">ALIŞ</th>
+                    <th class="text-end pe-4 fs-3">SATIŞ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of madenList; trackBy: trackBySymbol">
+                    <td class="ps-4 fw-semibold fs-2  base-text">{{ item.description || item.symbol }}</td>
+
+                    <td class="text-end fs-2 font-financial base-text" [ngClass]="item.flashCss">
+                      {{ item.bid | number:'1.2-2' }}
+                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                    </td>
+
+                    <td class="text-end fs-2 font-financial  base-text pe-4 position-relative"
+                      [ngClass]="item.flashCss">
+                      {{ item.ask | number:'1.2-2' }}
+                      <span class="position-absolute end-0 top-50 translate-middle-y me-1">
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                        <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-6 col-lg-6 d-flex flex-column gap-3">
+
+        <div class="row g-3">
+          <div class="col-md-6" *ngFor="let item of dovizList; trackBy: trackBySymbol">
+            <div class="card border-0 shadow-sm doviz-card h-100" style="margin-bottom: 0 !important;"
+              [ngClass]="{'flash-border-up': item.direction === 'up', 'flash-border-down': item.direction === 'down'}">
+              <div class="card-body p-3 d-flex flex-column ">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h3 class="fw-bold mb-0  base-text fs-1  text-uppercase">{{ item.description || item.symbol }}</h3>
+                  <span class="badge bg-light  base-text border ">
+
+                    <i *ngIf="item.symbol === 'Dolar/TRY'" class="bx bx-dollar fs-4"></i>
+                    <i *ngIf="item.symbol === 'Euro/TRY'" class="bx bx-euro fs-4"></i>
+                    <!-- {{ item.symbol }} -->
+                  </span>
+                </div>
+
+                <div class="row g-0 align-items-end">
+                  <div class="col-6 border-end pe-3">
+                    <small class="text-muted fw-bold d-block mb-1 fs-2">ALIŞ</small>
+                    <span class="display-6 font-financial  base-text" style="font-size: 3.1rem;"
+                      [ngClass]="item.flashCss">
+                      {{ item.bid | number:'1.4-4' }}
+                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                    </span>
+                  </div>
+                  <div class="col-6 ps-3 text-end">
+                    <small class="text-muted fw-bold d-block mb-1 fs-2">SATIŞ</small>
+                    <span class="display-6 font-financial  base-text " style="font-size: 3.1rem;"
+                      [ngClass]="item.flashCss">
+                      {{ item.ask | number:'1.4-4' }}
+                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 flex-grow-1">
+
+          <div class="col-lg-12">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header soft-gold-header py-2 px-3">
+                <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2  base-text"
+                  style="font-size: 2.5rem;">
+                  <span class="icon-box bg-white text-warning rounded-circle"><i class="bx bxs-circle"></i></span>
+                  BİLEZİK
+                </h4>
+              </div>
+
+              <div class="card-body p-0">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead>
+                    <tr class="bg-light">
+                      <th class="ps-3 fs-3">Ürün</th>
+                      <th class="text-end fs-3">Alış</th>
+                      <th class="text-end pe-3 fs-3 ">Satış</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of bilezikList; trackBy: trackBySymbol">
+                      <td class="ps-3 fw-semibold fs-1  base-text">{{ item.description }}</td>
+                      <td class="text-end font-financial base-text" style="font-size: 2.1rem;"
+                        [ngClass]="item.flashCss">
+                        {{ item.bid | number:'1.2-2' }}
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                        <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                      </td>
+                      <td class="text-end pe-3 font-financial  base-text" style="font-size: 2.1rem;"
+                        [ngClass]="item.flashCss">
+                        {{ item.ask | number:'1.2-2' }}
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                        <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                      </td>
+                    </tr>
+                    <tr *ngIf="bilezikList.length === 0">
+                      <td colspan="3" class="text-center text-muted py-3">Bilezik verisi yok.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-12">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header soft-gold-header py-2 px-3">
+                <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2  base-text"
+                  style="font-size: 2.5rem;">
+                  <span class="icon-box bg-white text-warning rounded-circle"><i class="bx bxs-credit-card"></i></span>
+                  KREDİ KARTI FİYATLARI
+                </h4>
+              </div>
+
+              <div class="card-body p-0">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead>
+                    <tr class="bg-light">
+                      <th class="ps-3 fs-3">Ürün</th>
+                      <th class="text-end pe-3 fs-3">Satış</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of krediList; trackBy: trackBySymbol">
+                      <td class="ps-3 fw-semibold  base-text" style="font-size: 2.1rem;">{{ item.description }}</td>
+                      <td class="text-end pe-3 font-financial   base-text" style="font-size: 2.1rem;"
+                        [ngClass]="item.flashCss">
+                        {{ item.ask | number:'1.2-2' }}
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                        <i *ngIf="item.direction === 'stable'" class="bx bx-minus text-muted"></i>
+                      </td>
+                    </tr>
+                    <tr *ngIf="krediList.length === 0">
+                      <td colspan="2" class="text-center text-muted py-3">Kredi kartı verisi yok.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-muted small fw-bold opacity-75 fixed-bottom pb-1 bg-white border-top"
+    *ngIf="isTvMode">
     SARFİYUM PİYASALAR &copy; {{ currentTime | date:'yyyy' }}
   </footer>
 </div>

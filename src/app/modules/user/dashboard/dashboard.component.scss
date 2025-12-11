@@ -1,29 +1,12 @@
 // --- DEĞİŞKENLER ---
-$gold-color: #d4af37;
-$flash-green: rgba(25, 135, 84, 0.25);
-$flash-red: rgba(220, 53, 69, 0.25);
+$border-color: #d6d6d6;
+$bg-color: #f5f6f8;
 
-// --- ANİMASYONLAR ---
-.blinker { animation: blinker 1.5s linear infinite; }
-@keyframes blinker { 50% { opacity: 0; } }
-
-@keyframes flashGreenAnim { 0% { background-color: $flash-green; } 100% { background-color: transparent; } }
-@keyframes flashRedAnim { 0% { background-color: $flash-red; } 100% { background-color: transparent; } }
-.flash-up { animation: flashGreenAnim 1s ease-out; }
-.flash-down { animation: flashRedAnim 1s ease-out; }
-
-// --- SCROLLBAR ---
-.table-responsive::-webkit-scrollbar { width: 5px; }
-.table-responsive::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
-// =============================================================
-// 🔥 LAYOUT VE GRID DÜZENLEMESİ (DÜZELTİLDİ) 🔥
-// =============================================================
-
+// --- DÜZEN VE TEMEL AYARLAR ---
 :host {
   display: block;
   height: 100vh;
-  overflow: hidden; // Taşmayı kesinlikle engelle
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -31,163 +14,156 @@ $flash-red: rgba(220, 53, 69, 0.25);
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 15px; // Kenar boşluğu
-}
-
-.dashboard-content-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; // Flexbox taşma fix'i
-}
-
-// TV MODU
-.dashboard-wrapper.tv-mode-layout {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: 9999;
-  padding: 20px;
-  background-color: #f8f9fa;
-  overflow: hidden; // TV modunda da scroll olmasın
-}
-
-// Header
-.header-row {
-  flex: 0 0 auto;
-  margin-bottom: 15px !important;
-}
-
-// Grid Alanı
-.full-height-grid {
-  flex: 1; // Kalan tüm alanı kapla
-  min-height: 0;
-  padding-bottom: 0;
+  background-color: $bg-color;
   
-  // Bootstrap Gutter (g-4) yaklaşık 1.5rem (24px) boşluk bırakır.
-  // Bu yüzden yüksekliği %50'den biraz az veriyoruz ki boşlukla beraber %100 olsun.
-  .grid-item {
-    height: calc(50% - 12px); // (Gap'in yarısını çıkarıyoruz)
-    padding-bottom: 0;
+  &.tv-mode-layout {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 9999; background-color: $bg-color;
   }
 }
 
-// --- KART YAPISI ---
-.card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 12px;
+// --- RENK VE FONT AYARLARI (KRİTİK BÖLÜM) ---
 
-  .card-header {
-    flex: 0 0 auto;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    
-    // Soft Renkler
-    &.soft-gold-header { background-color: #fffbf0; border-color: #faeab8; .icon-box { color: #f59e0b; } }
-    &.soft-silver-header { background-color: #f8f9fa; border-color: #e9ecef; .icon-box { color: #6c757d; } }
-    &.soft-green-header { background-color: #eafaf1; border-color: #c8e6c9; .icon-box { color: #198754; } }
-    &.soft-blue-header { background-color: #e3f2fd; border-color: #bbdefb; .icon-box { color: #0d6efd; } }
+// 1. Finansal Font ve Geçiş Efekti
+// Buradaki 'transition' özelliği, renk yeşilden siyaha dönerken "Yavaşça" olmasını sağlar.
+.font-financial {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-weight: 600; 
+  letter-spacing: -0.5px;
+  
+  // SİHİRLİ KOD: Rengi değiştirirken 1.5 saniyede yavaşça değiştir.
+  transition: color 1.5s ease-out; 
+}
 
-    .icon-box {
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+// 2. Base Text (Rengi burada yönetiyoruz)
+// !important kullanırken dikkatli olmalıyız, animasyonu engellememeli.
+.base-text {
+  color: #000; // Varsayılan renk
+}
+
+[data-bs-theme="dark"] .base-text {
+  color: #e0e0e0 !important;
+}
+
+
+// --- FLASH CLASSLARI (ANLIK RENK DEĞİŞİMİ) ---
+
+// Yükseliş (Yeşil)
+.text-flash-up {
+  color: #198754 !important; // Rengi anında yeşil yap
+  transition: none !important; // Geçişi İPTAL ET (Anında yansın)
+}
+
+// Düşüş (Kırmızı)
+.text-flash-down {
+  color: #dc3545 !important;
+  transition: none !important; // Geçişi İPTAL ET (Anında yansın)
+}
+
+
+// --- DİĞER GÖRSEL ÖGELER ---
+
+.header-section { flex: 0 0 auto; z-index: 20; }
+
+.ticker-wrap {
+  flex: 0 0 auto; width: 100%; overflow: hidden; height: 40px;
+  background-color: #e9ecef; border-bottom: 1px solid #d0d0d0;
+  display: flex; align-items: center;
+  
+  .ticker {
+    display: flex; white-space: nowrap; animation: ticker 60s linear infinite;
+    .ticker-item {
+      display: inline-flex; align-items: center; padding: 0 1.5rem;
+      font-family: "Segoe UI", sans-serif; font-weight: 500; font-size: 1.1rem; color: #333;
+      .ticker-symbol { color: #000; margin-right: 8px; font-weight: 600; }
+      .ticker-divider { color: #bbb; margin-left: 15px; }
     }
   }
+}
 
-  .card-body {
-    flex: 1;
-    min-height: 0;
-    padding: 0;
-    position: relative;
+@keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+
+.dashboard-content-area { flex: 1; min-height: 0; }
+.full-height-grid { height: 100%; }
+
+.card {
+  border-radius: 6px;
+  .card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    &.soft-gold-header { background-color: #fffbf0; border-color: #faeab8; .icon-box { color: #f59e0b; } }
   }
 }
 
-// --- TABLOLAR ---
 .table-responsive {
   height: 100% !important;
-  max-height: none !important;
-  overflow-y: auto;
-
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    th {
-      background-color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #999;
-      padding: 12px;
-      border-bottom: 2px solid #f0f0f0;
-    }
+  thead th {
+    background-color: #fff; border-bottom: 2px solid #bbb; font-size: 0.8rem;
+    color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px;
   }
-
   td {
-    padding: 10px 12px; // Paddingi biraz kıstık ki daha çok veri sığsın
-    vertical-align: middle;
-    border-bottom: 1px solid #f9f9f9;
+    padding: 8px 12px; vertical-align: middle; border-bottom: 1px solid #dcdcdc !important;
   }
+  tr:last-child td { border-bottom: 0 !important; }
 }
 
-// --- DİĞER BİLEŞENLER ---
-.theme-switch-wrapper {
-  display: flex; align-items: center;
-  .theme-switch { display: inline-block; height: 30px; width: 60px; position: relative; input { display: none; } }
-  .slider {
-    background-color: #e2e6ea; bottom: 0; left: 0; right: 0; top: 0;
-    position: absolute; cursor: pointer; transition: .4s;
-    border-radius: 34px; border: 1px solid #d1d5db;
-    display: flex; align-items: center; justify-content: space-between; padding: 0 6px;
-    .bx { font-size: 16px; z-index: 1; }
-    .sun-icon { color: #f39c12; }
-    .moon-icon { color: #f1c40f; opacity: 0.5; }
-    &:before {
-      background-color: #fff; bottom: 3px; content: ""; height: 22px; width: 22px;
-      left: 3px; position: absolute; transition: .4s; border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;
+// Live Blink
+@keyframes blinker { 50% { opacity: 0; } }
+.live-blink { animation: blinker 1.5s infinite ease-in-out; }
+
+// Kenarlık Animasyonu (Döviz Kartları)
+@keyframes borderFlashGreen { 0% { border-color: #198754; } 100% { border-color: transparent; } }
+@keyframes borderFlashRed { 0% { border-color: #dc3545; } 100% { border-color: transparent; } }
+.flash-border-up { animation: borderFlashGreen 1s ease-out; }
+.flash-border-down { animation: borderFlashRed 1s ease-out; }
+
+// iOS Switch
+.ios-switch-wrapper {
+    position: relative; display: inline-block; vertical-align: middle;
+    .ios-checkbox { opacity: 0; position: absolute; width: 0; height: 0; }
+    .ios-label {
+        background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 50px; cursor: pointer;
+        display: flex; align-items: center; justify-content: space-between; padding: 5px; position: relative;
+        height: 32px; width: 60px; transition: background-color 0.2s; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        .icon-sun { color: #f39c12; font-size: 14px; z-index: 1; margin-left: 6px; opacity: 1; transition: 0.2s; }
+        .icon-moon { color: #f1c40f; font-size: 14px; z-index: 1; margin-right: 6px; opacity: 0.3; transition: 0.2s; }
+        .ios-ball {
+            background-color: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; height: 26px; width: 26px;
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     }
-  }
-  input:checked + .slider {
-    background-color: #343a40; border-color: #495057;
-    .sun-icon { opacity: 0.5; }
-    .moon-icon { opacity: 1; color: #fff; }
-    &:before { transform: translateX(30px); }
-  }
+    .ios-checkbox:checked + .ios-label {
+        background-color: #343a40; border-color: #495057;
+        .icon-sun { opacity: 0.3; } .icon-moon { opacity: 1; color: #fff; } .ios-ball { transform: translateX(28px); }
+    }
 }
 
-// --- DARK MODE ---
+// Dark Mode Overrides
 [data-bs-theme="dark"] {
-  .dashboard-wrapper.tv-mode-layout { background-color: #1a1d21 !important; }
-  .header-panel { background-color: #212529 !important; border-color: #343a40 !important; }
-  .text-dark { color: #e9ecef !important; }
-  .card { background-color: #212529; border: 1px solid #343a40; }
-  
-  .card-header {
-    &.soft-gold-header { background-color: #3e3218; border-color: #58451a; .icon-box { background-color: #58451a !important; color: #ffc107 !important; } }
-    &.soft-silver-header { background-color: #2c3036; border-color: #343a40; .icon-box { background-color: #343a40 !important; color: #ced4da !important; } }
-    &.soft-green-header { background-color: #132e20; border-color: #194d30; .icon-box { background-color: #194d30 !important; color: #28a745 !important; } }
-    &.soft-blue-header { background-color: #152538; border-color: #1c3a5e; .icon-box { background-color: #1c3a5e !important; color: #0d6efd !important; } }
-  }
-
-  .market-table {
-    thead th { background-color: #212529; color: #6c757d; border-bottom-color: #343a40; }
-    td { border-bottom-color: #2c3036; }
-    tr:hover { background-color: #2c3036 !important; }
-  }
-
-  .result-box { background-color: #2c3036 !important; border-color: #343a40 !important; }
-  .form-control, .form-select {
-    background-color: #2c3036; border-color: #343a40; color: #fff;
-    &:focus { border-color: #0d6efd; background-color: #2c3036; }
-  }
-  .table-responsive::-webkit-scrollbar-thumb { background: #555; }
+  .dashboard-wrapper, .tv-mode-layout { background-color: #121212; }
+  .bg-white, .header-section { background-color: #1e1e1e !important; border-bottom-color: #333 !important; }
+  .bg-light, .ticker-wrap { background-color: #252525 !important; border-bottom-color: #333 !important; }
+  .card { background-color: #1e1e1e; border: 1px solid #333; }
+  .table-responsive { thead th { background-color: #1e1e1e; color: #aaa; border-bottom-color: #444; } }
+  .ticker-item { color: #ccc !important; .ticker-symbol { color: #fff !important; } }
+  td { color: #e0e0e0; border-bottom-color: #333; }
 }
 
-// --- RESPONSIVE ---
-@media (max-width: 992px) {
-  :host { height: auto; overflow: auto; }
-  .full-height-grid .grid-item { height: auto; min-height: 400px; }
+.icon-box {
+  display: inline-flex;       // İçeriği ortalamak için flex
+  align-items: center;        // Dikey orta
+  justify-content: center;    // Yatay orta
+  width: 40px;                // Sabit genişlik
+  height: 40px;               // Sabit yükseklik (Genişlikle aynı olmalı)
+  min-width: 40px;            // Daralmayı önle
+  min-height: 40px;           // Daralmayı önle
+  line-height: 1;             // Satır yüksekliği sorununu gider
+  border-radius: 50%;         // Tam yuvarlak
+  flex-shrink: 0;             // Flex yapısı içinde sıkışıp bozulmasın
+  
+  // İkon boyutu ayarı
+  i {
+    font-size: 1.2rem;
+  }
 }
