@@ -1,95 +1,82 @@
 export type FAQType = {
-  question: string
-  answer: string
-}
+  question: string;
+  answer: string;
+};
 
 export type FAQDataType = {
-  title: string
-  faqs: FAQType[]
-}
+  title: string;
+  faqs: FAQType[];
+};
 
 export const FaqData: FAQDataType[] = [
   {
-    title: 'General',
+    title: 'Genel & Güvenlik',
     faqs: [
       {
-        question: 'Can I use Dummy FAQs for my website or project?',
+        question: 'Sarfiyum verilerimi nasıl saklıyor, güvenli mi?',
         answer:
-          'Yes, you can use Dummy FAQs to populate your website or project during development or testing phases. They help simulate the appearance and functionality of a real FAQ section without requiring actual content.',
+          'Evet, verileriniz banka düzeyinde şifreleme (SSL) ile korunmaktadır. Tüm stok ve cari verileriniz bulut sunucularımızda günlük olarak yedeklenir, böylece bilgisayarınız bozulsa bile verileriniz kaybolmaz.',
       },
       {
-        question: 'Are Dummy FAQs suitable for customer support purposes?',
+        question: 'Sistemi kullanmak için kurulum yapmam gerekir mi?',
         answer:
-          'While Dummy FAQs can be used internally for training customer support teams, they are not suitable for public-facing customer support. Real FAQs should be based on genuine customer inquiries to provide accurate and helpful information.',
+          'Hayır, Sarfiyum tamamen bulut tabanlı bir SaaS (Hizmet olarak Yazılım) projesidir. İnterneti olan herhangi bir bilgisayar, tablet veya telefondan tarayıcı üzerinden giriş yapabilirsiniz.',
       },
       {
-        question: 'Do Dummy FAQs require attribution?',
+        question: 'İnternetim kesilirse ne olur?',
         answer:
-          'No, Dummy FAQs do not require attribution since they are not based on real questions or contributed by individuals. You can use them freely for internal testing or demonstration purposes.',
-      },
-    ],
-  },
-
-  {
-    title: 'Payments',
-    faqs: [
-      {
-        question: 'Can I test my website/app with Dummy Payments?',
-        answer:
-          'Yes, Dummy Payments are commonly used by developers and businesses to test the functionality of e-commerce platforms, mobile apps, and payment gateways. They help identify and resolve issues without risking real transactions.',
-      },
-      {
-        question: 'Are Dummy Payments secure?',
-        answer:
-          "Dummy Payments used in controlled environments for training or demonstration purposes are generally secure. However, it's crucial not to confuse them with real transactions and avoid entering genuine financial information.",
-      },
-      {
-        question:
-          'How can I differentiate between a Dummy Payment and a real one?',
-        answer:
-          'Real payments involve the transfer of actual funds, resulting in a change in financial balances. Dummy Payments, on the other hand, do not involve any monetary exchange and are typically labeled or indicated as test transactions. Always verify the authenticity of transactions before proceeding with any action.',
+          'Sarfiyum bulut tabanlı çalıştığı için internet bağlantısı gerektirir. Ancak mobil uyumluluğu sayesinde, mağaza interneti kesilse bile cep telefonunuzun internetiyle işlemlerinize devam edebilirsiniz.',
       },
     ],
   },
   {
-    title: 'Refunds',
+    title: 'Stok & Ürün Yönetimi',
     faqs: [
       {
-        question: 'How do I request a refund?',
+        question: 'Barkod yazıcısı ile entegre çalışıyor mu?',
         answer:
-          'To request a refund, simply contact our customer support team through email or phone and provide details about your purchase and reason for the refund. Our representatives will guide you through the process.',
+          'Evet, Sarfiyum piyasadaki yaygın barkod yazıcıları (Zebra, Argox vb.) ile uyumludur. Ürünlerinize otomatik barkod oluşturabilir ve etiket basabilirsiniz.',
       },
       {
-        question: 'What is the refund policy?',
+        question: 'Altın ve döviz kurları otomatik güncelleniyor mu?',
         answer:
-          "Our refund policy allows customers to request a refund within 30 days of purchase for eligible products or services. Certain restrictions may apply, so it's essential to review the terms and conditions specific to your purchase.",
+          'Evet, sistemimiz canlı piyasa verileriyle entegredir. Has altın, dolar ve euro kurlarını anlık olarak çeker, böylece vitrin değerinizi güncel fiyatlar üzerinden görebilirsiniz.',
       },
       {
-        question: 'How long does it take to process a refund?',
+        question: 'Pırlanta ve sertifikalı ürün takibi yapabilir miyim?',
         answer:
-          'Refunds are typically processed within 3-5 business days after the request is approved. However, it may take longer depending on the payment method and financial institution involved.',
+          'Kesinlikle. Pırlanta ürünler için karat, renk, berraklık gibi 4C özelliklerini girebilir ve sertifika numarasıyla takip sağlayabilirsiniz.',
       },
     ],
   },
   {
-    title: 'Support',
+    title: 'Cari & Muhasebe',
     faqs: [
       {
-        question: 'How do I contact customer support?',
+        question: 'Veresiye defterimi buraya aktarabilir miyim?',
         answer:
-          'You can contact our customer support team via email, phone, or live chat. Our representatives are available to assist you during business hours, Monday through Friday.',
+          'Müşteri carilerinizi sisteme kolayca ekleyebilirsiniz. Müşterinin hem TL, hem Dolar, hem de Has Altın borcunu ayrı ayrı takip edebilirsiniz.',
       },
       {
-        question: 'Is customer support available 24/7?',
+        question: 'Fatura kesebiliyor muyum?',
         answer:
-          "Our customer support is available during regular business hours, Monday through Friday. However, you can leave us a message outside of these hours, and we'll respond to you as soon as possible.",
-      },
-      {
-        question:
-          'How long does it take to receive a response from customer support?',
-        answer:
-          'We strive to respond to all customer inquiries within 24 hours during regular business hours. Response times may vary depending on the volume of inquiries received.',
+          'Evet, e-Fatura ve e-Arşiv entegrasyonlarımız sayesinde satış yaptığınız anda faturanızı oluşturup müşterinize iletebilirsiniz.',
       },
     ],
   },
-]
+  {
+    title: 'Destek & Üyelik',
+    faqs: [
+      {
+        question: 'Programı kullanmayı öğrenmek zor mu?',
+        answer:
+          'Sarfiyum, kullanıcı dostu arayüzü ile tasarlanmıştır. Ayrıca "Yardım Merkezi" bölümündeki eğitim videolarımız ve 7/24 WhatsApp destek hattımız ile her zaman yanınızdayız.',
+      },
+      {
+        question: 'Fiyatlandırma nasıl çalışıyor?',
+        answer:
+          'Aylık veya yıllık abonelik modellerimiz mevcuttur. İlk 14 gün ücretsiz deneyebilir, memnun kalırsanız size uygun paketi seçerek devam edebilirsiniz.',
+      },
+    ],
+  },
+];

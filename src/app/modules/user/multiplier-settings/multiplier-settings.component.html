@@ -1,7 +1,6 @@
 <div class="row justify-content-center">
     <div class="col-lg-12">
         <div class="card shadow-sm border-0">
-            <!-- HEADER -->
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
                 <div>
                     <h4 class="card-title mb-1 text-primary fw-bold">Ürün & Çarpan Yönetimi</h4>
@@ -22,26 +21,27 @@
 
             <div class="card-body p-4">
 
-                <!-- LOADING STATE -->
                 <div *ngIf="isLoading && groupedSettings.length === 0" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="mt-2 text-muted">Ayarlar yükleniyor...</p>
                 </div>
 
-                <!-- CONTENT -->
                 <div *ngIf="!isLoading || groupedSettings.length > 0">
 
                     <div *ngFor="let group of groupedSettings" class="mb-5">
-                        <!-- KATEGORI BAŞLIĞI -->
                         <h5 class="text-dark fw-bold border-bottom pb-2 mb-3 d-flex align-items-center">
                             <span class="badge bg-light text-primary border me-2">{{ group.items.length }}</span>
                             {{ group.category }}
+                            <small class="text-muted ms-auto fs-6 fw-normal">
+                                <i class="bx bx-info-circle me-1"></i>Sıralamak için <i class="bx bx-menu fw-bold"></i> ikonundan tutarak sürükleyin
+                            </small>
                         </h5>
 
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle table-hover">
                                 <thead class="table-light">
                                     <tr>
+                                        <th style="width: 50px;" class="text-center bg-light"><i class="bx bx-move"></i></th>
                                         <th style="width: 5%" class="text-center">Durum</th>
                                         <th style="width: 25%">Ürün Adı</th>
                                         <th>Alış Çarpanı</th>
@@ -50,10 +50,21 @@
                                         <th style="width: 10%" class="text-center">İşlem</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr *ngFor="let item of group.items" [class.table-light]="!item.isActive">
+                                
+                                <tbody cdkDropList (cdkDropListDropped)="onDrop($event, group.items)">
+                                    
+                                    <tr *ngFor="let item of group.items" 
+                                        cdkDrag 
+                                        [cdkDragData]="item"
+                                        [class.table-light]="!item.isActive"
+                                        class="draggable-row bg-white">
 
-                                        <!-- Aktif/Pasif Toggle -->
+                                        <div *cdkDragPlaceholder class="custom-placeholder"></div>
+
+                                        <td class="text-center cursor-grab text-muted" cdkDragHandle>
+                                            <i class="bx bx-menu fs-4"></i>
+                                        </td>
+
                                         <td class="text-center">
                                             <div class="form-check form-switch d-flex justify-content-center">
                                                 <input class="form-check-input" type="checkbox" role="switch"
@@ -62,13 +73,11 @@
                                             </div>
                                         </td>
 
-                                        <!-- Ürün Adı (Hızlı Düzenleme İçin Input) -->
                                         <td>
                                             <input type="text" class="form-control fw-bold border-0 bg-transparent"
                                                 [(ngModel)]="item.name" [disabled]="!item.isActive">
                                         </td>
 
-                                        <!-- Alış Çarpanı -->
                                         <td>
                                             <div class="input-group input-group-sm">
                                                 <input type="text" class="form-control fw-semibold"
@@ -78,7 +87,6 @@
                                             </div>
                                         </td>
 
-                                        <!-- Satış Çarpanı -->
                                         <td>
                                             <div class="input-group input-group-sm">
                                                 <input type="text" class="form-control fw-semibold"
@@ -88,7 +96,6 @@
                                             </div>
                                         </td>
 
-                                        <!-- Sabit Makas -->
                                         <td>
                                             <div class="input-group input-group-sm">
                                                 <input type="text" class="form-control" [(ngModel)]="item.addonAmount"
@@ -97,15 +104,12 @@
                                             </div>
                                         </td>
 
-                                        <!-- İŞLEMLER (DÜZENLE & SİL) -->
                                         <td class="text-center" style="white-space: nowrap;">
-                                            <!-- Düzenle Butonu -->
                                             <button class="btn btn-sm btn-icon btn-outline-primary border-0 me-1"
                                                 (click)="openEditModal(item)" title="Detaylı Düzenle">
                                                 <i class="bx bx-pencil fs-5"></i>
                                             </button>
 
-                                            <!-- Sil Butonu -->
                                             <button class="btn btn-sm btn-icon btn-outline-danger border-0"
                                                 (click)="deleteProduct(item.id)" title="Sil">
                                                 <i class="bx bx-trash fs-5"></i>
@@ -123,9 +127,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- 🔥 MODAL 1: YENİ ÜRÜN EKLEME 🔥 -->
-<!-- ========================================== -->
 <ng-template #addProductModal let-modal>
     <div class="modal-header bg-light">
         <h5 class="modal-title fw-bold text-success">
@@ -141,16 +142,13 @@
                     <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
                 </select>
             </div>
-
             <div class="mb-3">
                 <label class="form-label fw-bold text-muted small">Ürün Adı</label>
                 <input type="text" class="form-control fw-bold" [(ngModel)]="newProduct.name" name="name"
                     placeholder="Örn: 22 Ayar Halhal">
             </div>
-
             <div class="mb-3">
                 <label class="form-label fw-bold text-muted small">Kaynak Veri (Endeks)</label>
-
                 <select class="form-select bg-light" [(ngModel)]="newProduct.sourceKey" name="sourceKey" disabled>
                     <option value="ALTIN">Has Altın (ALTIN)</option>
                     <option value="USDTRY">Dolar (USDTRY)</option>
@@ -158,15 +156,11 @@
                     <option value="ONS">Ons Altın (ONS)</option>
                     <option value="GUMTRY">Gümüş (GUMTRY)</option>
                 </select>
-
                 <div class="form-text fst-italic small">
-                    <i class="bx bx-info-circle me-1"></i>
-                    Yeni oluşturulan ürünler varsayılan olarak <strong>Has Altın</strong> endeksli oluşturulur.
+                    <i class="bx bx-info-circle me-1"></i> Yeni oluşturulan ürünler varsayılan olarak <strong>Has Altın</strong> endeksli oluşturulur.
                 </div>
             </div>
-
             <hr class="text-muted opacity-25">
-
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label fw-bold small">Alış Çarpanı</label>
@@ -194,10 +188,6 @@
     </div>
 </ng-template>
 
-
-<!-- ========================================== -->
-<!-- 🔥 MODAL 2: ÜRÜN DÜZENLEME (EDIT) 🔥 -->
-<!-- ========================================== -->
 <ng-template #editProductModal let-modal>
     <div class="modal-header bg-light">
         <h5 class="modal-title fw-bold text-primary">
@@ -207,7 +197,6 @@
     </div>
     <div class="modal-body p-4">
         <form>
-            <!-- Temel Bilgiler -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">Kategori</label>
@@ -217,67 +206,49 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">Kaynak (Endeks)</label>
-
-                    <select class="form-select bg-light" [(ngModel)]="editingProduct.sourceKey" name="editSource"
-                        disabled>
+                    <select class="form-select bg-light" [(ngModel)]="editingProduct.sourceKey" name="editSource" disabled>
                         <option value="ALTIN">Has Altın (ALTIN)</option>
                         <option value="USDTRY">Dolar (USDTRY)</option>
                         <option value="EURTRY">Euro (EURTRY)</option>
                         <option value="ONS">Ons Altın (ONS)</option>
                         <option value="GUMTRY">Gümüş (GUMTRY)</option>
-
-                        <option
-                            *ngIf="editingProduct.sourceKey && !['ALTIN','USDTRY','EURTRY','ONS','GUMTRY'].includes(editingProduct.sourceKey)"
-                            [value]="editingProduct.sourceKey">
+                        <option *ngIf="editingProduct.sourceKey && !['ALTIN','USDTRY','EURTRY','ONS','GUMTRY'].includes(editingProduct.sourceKey)" [value]="editingProduct.sourceKey">
                             {{ editingProduct.sourceKey }}
                         </option>
                     </select>
-
                     <div class="form-text fst-italic small">Ürün kaynağı sonradan değiştirilemez.</div>
                 </div>
             </div>
-
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted">Ürün Adı</label>
                 <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.name" name="editName">
             </div>
-
             <hr class="text-muted opacity-25">
-
-            <!-- Çarpanlar -->
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label fw-bold small text-success">Alış Çarpanı</label>
                     <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.buyMultiplier"
-                            name="editBuy" appDecimalComma>
+                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.buyMultiplier" name="editBuy" appDecimalComma>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold small text-danger">Satış Çarpanı</label>
                     <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.sellMultiplier"
-                            name="editSell" appDecimalComma>
+                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.sellMultiplier" name="editSell" appDecimalComma>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold small text-primary">Ek Makas (TL)</label>
                     <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.addonAmount"
-                            name="editAddon" appDecimalComma>
+                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.addonAmount" name="editAddon" appDecimalComma>
                         <span class="input-group-text">₺</span>
                     </div>
                 </div>
             </div>
-
             <div class="mt-4 form-check form-switch bg-light p-3 rounded border d-flex align-items-center gap-3">
-                <input class="form-check-input ms-0" type="checkbox" role="switch" id="editActive"
-                    [(ngModel)]="editingProduct.isActive" name="editActive" style="transform: scale(1.3);">
-                <label class="form-check-label fw-bold cursor-pointer" for="editActive">
-                    Ürün Yayında (Aktif)
-                </label>
+                <input class="form-check-input ms-0" type="checkbox" role="switch" id="editActive" [(ngModel)]="editingProduct.isActive" name="editActive" style="transform: scale(1.3);">
+                <label class="form-check-label fw-bold cursor-pointer" for="editActive">Ürün Yayında (Aktif)</label>
             </div>
-
         </form>
     </div>
     <div class="modal-footer bg-light border-top-0">

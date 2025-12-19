@@ -12,4 +12,5 @@ export class User {
   roles?: string[]; // JWT'den gelen roller
   token?: string
   isAdmin?: boolean
+  subscriptionEndDate?: string; // Abonelik bitiş tarihi
 }

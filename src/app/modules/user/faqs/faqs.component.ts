@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { FaqData } from './data'
-import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap'
+import { FaqData } from './data';
+import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-faqs',
@@ -9,6 +9,6 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap'
   styleUrl: './faqs.component.scss'
 })
 export class FaqsComponent {
-  title = 'FAQs';
-  faqList = FaqData
+  title = 'Sıkça Sorulan Sorular';
+  faqList = FaqData;
 }

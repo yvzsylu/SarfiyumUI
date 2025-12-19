@@ -1,35 +1,41 @@
-
-
-
-<div class="row">
+<div class="row" *ngIf="!isLoading && stats; else loadingTpl">
   <div class="col-xxl-5">
-    <dashboard-state />
+    <dashboard-state [stats]="stats" />
   </div> 
 
   <div class="col-xxl-7">
-    <dashboard-performance />
+    <dashboard-performance [monthlyRevenue]="stats.monthlyRevenue" />
   </div> 
 </div> 
 
-<div class="row">
+<div class="row" *ngIf="!isLoading && stats">
   <div class="col-lg-4">
-    <dashboard-conversions />
+    <dashboard-conversions 
+        [active]="stats.activeSubsCount" 
+        [expired]="stats.expiredSubsCount" />
   </div> 
 
   <div class="col-lg-4">
-    <dashboard-sessions-country />
+    <dashboard-sessions-country 
+        [monthly]="stats.monthlyPlanCount" 
+        [yearly]="stats.yearlyPlanCount" />
   </div> 
 
   <div class="col-lg-4">
-    <dashboard-top-pages />
+    <dashboard-top-pages [tenants]="stats.expiringTenants" />
   </div> 
 
 </div> 
 
-<div class="row">
+<div class="row" *ngIf="!isLoading && stats">
   <div class="col">
-    <dashboard-recent-order />
-    
+    <dashboard-recent-order [unpaidList]="stats.unpaidTenants" />
   </div>
-  
 </div> 
+
+<ng-template #loadingTpl>
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Veriler Yükleniyor...</p>
+    </div>
+</ng-template>

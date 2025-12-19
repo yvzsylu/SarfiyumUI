@@ -1,15 +1,13 @@
-import { CommonModule } from '@angular/common'
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { WidgetCardComponent } from '@component/widget-card/widget-card.component'
-import { stateData } from '../../data';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DashboardStats } from '../../services/dashboard.service';
 
 @Component({
   selector: 'dashboard-state',
   standalone: true,
-  imports: [CommonModule,WidgetCardComponent],
+  imports: [CommonModule],
   templateUrl: './state.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class StateComponent {
-  stateList = stateData;
+  @Input() stats!: DashboardStats;
 }

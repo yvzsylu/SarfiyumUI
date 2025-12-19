@@ -1,14 +1,65 @@
 <div class="row">
-  <div class="col-12">
-    <div class="alert alert-primary text-truncate mb-3" role="alert">
-      We regret to inform you that our server is currently experiencing technical difficulties.
+  <div class="col-md-6 mb-3">
+    <div class="card card-body">
+        <div class="d-flex mb-3 align-items-center">
+            <div class="avatar-sm flex-shrink-0 me-3">
+                <span class="avatar-title bg-primary-subtle text-primary rounded fs-3">
+                    <i class="bx bx-buildings"></i>
+                </span>
+            </div>
+            <div>
+                <h5 class="mb-1 text-muted fw-normal">Toplam Firma</h5>
+                <h3 class="mb-0 fw-bold">{{ stats.totalTenants }}</h3>
+            </div>
+        </div>
     </div>
   </div>
 
-  @for(item of stateList;track $index){
-  <div class="col-md-6">
-      <app-widget-card [item]="item" />
-  </div> 
-  }
-</div> 
+  <div class="col-md-6 mb-3">
+    <div class="card card-body">
+        <div class="d-flex mb-3 align-items-center">
+            <div class="avatar-sm flex-shrink-0 me-3">
+                <span class="avatar-title bg-success-subtle text-success rounded fs-3">
+                    <i class="bx bx-user"></i>
+                </span>
+            </div>
+            <div>
+                <h5 class="mb-1 text-muted fw-normal">Kullanıcılar</h5>
+                <h3 class="mb-0 fw-bold">{{ stats.totalUsers }}</h3>
+            </div>
+        </div>
+    </div>
+  </div>
 
+  <div class="col-md-6 mb-3">
+    <div class="card card-body">
+        <div class="d-flex mb-3 align-items-center">
+            <div class="avatar-sm flex-shrink-0 me-3">
+                <span class="avatar-title bg-info-subtle text-info rounded fs-3">
+                    <i class="bx bx-wallet"></i>
+                </span>
+            </div>
+            <div>
+                <h5 class="mb-1 text-muted fw-normal">Toplam Tahsilat</h5>
+                <h3 class="mb-0 fw-bold">{{ stats.totalRevenue | currency:'TRY':'symbol-narrow':'1.0-0' }}</h3>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card card-body">
+        <div class="d-flex mb-3 align-items-center">
+            <div class="avatar-sm flex-shrink-0 me-3">
+                <span class="avatar-title bg-danger-subtle text-danger rounded fs-3">
+                    <i class="bx bx-time-five"></i>
+                </span>
+            </div>
+            <div>
+                <h5 class="mb-1 text-muted fw-normal">Bekleyen Ödeme</h5>
+                <h3 class="mb-0 fw-bold">{{ stats.totalPendingAmount | currency:'TRY':'symbol-narrow':'1.0-0' }}</h3>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

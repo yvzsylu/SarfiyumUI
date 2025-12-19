@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
-import { topPages } from '../../data'
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'dashboard-top-pages',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './top-pages.component.html',
-  styles: ``
 })
 export class TopPagesComponent {
-  pageList = topPages
+  @Input() tenants: { tenantName: string; endDate: string; remainingDays: number }[] = [];
 }

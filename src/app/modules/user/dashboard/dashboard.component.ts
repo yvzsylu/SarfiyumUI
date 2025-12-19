@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap'; // Dropdown için
 
 import { GoldHubService } from './services/gold-hub.service';
 import { getUser } from '@store/authentication/authentication.selector';
@@ -15,10 +16,12 @@ interface DashboardPriceItem extends PriceData {
   flashTimeout?: any;     
 }
 
+type ThemeType = 'light' | 'dark' | 'financial';
+
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, DecimalPipe, DatePipe],
+  imports: [CommonModule, FormsModule, DecimalPipe, DatePipe, NgbDropdownModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -55,38 +58,52 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   currentTime = new Date();
   isTvMode = false;
-  isDarkMode = false;
+  
+  // Yeni Tema Yönetimi
+  currentTheme: ThemeType = 'light';
   
   private subs: Subscription[] = [];
   private timeInterval: any;
 
   ngOnInit(): void {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      this.isDarkMode = true;
-      this.document.documentElement.setAttribute('data-bs-theme', 'dark');
+    // Kayıtlı temayı yükle
+    const savedTheme = localStorage.getItem('theme') as ThemeType;
+    if (savedTheme) {
+      this.setTheme(savedTheme);
+    } else {
+      this.setTheme('light'); // Varsayılan
     }
 
     this.user$ = this.store.select(getUser);
     this.goldHub.startConnection();
 
     const priceSub = this.goldHub.prices$.subscribe(data => {
-  if (data && data.length > 0) {
-    const incomingData = data as DashboardPriceItem[];
-
-    // 1. ADIM: Ticker (allData) listesini state kaybetmeden güncelle
-    // Böylece allData içindeki öğelerin flashCss özellikleri korunur ve güncellenir.
-    incomingData.forEach(item => {
-      this.updateList(this.allData, item);
+      if (data && data.length > 0) {
+        const incomingData = data as DashboardPriceItem[];
+        incomingData.forEach(item => {
+          this.updateList(this.allData, item);
+        });
+        this.processData(incomingData);
+      }
     });
-
-    // 2. ADIM: Diğer kategori tablolarını güncelle (Maden, Döviz vb.)
-    this.processData(incomingData);
-  }
-});
     this.subs.push(priceSub);
 
     this.startClock();
+  }
+
+  // Tema Değiştirme Fonksiyonu
+  setTheme(theme: ThemeType) {
+    this.currentTheme = theme;
+    localStorage.setItem('theme', theme);
+    // HTML tag'ine attribute ekle: <html data-theme="dark">
+    this.document.documentElement.setAttribute('data-theme', theme);
+    
+    // Bootstrap dark mode desteği için (Tooltip vb. için gerekli olabilir)
+    if(theme === 'dark' || theme === 'financial') {
+        this.document.documentElement.setAttribute('data-bs-theme', 'dark');
+    } else {
+        this.document.documentElement.setAttribute('data-bs-theme', 'light');
+    }
   }
 
   processData(data: DashboardPriceItem[]) {
@@ -110,36 +127,27 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
       const oldAsk = existingItem.ask || 0;
       const newAsk = newItem.ask || 0;
 
-      // Verileri güncelle
       existingItem.bid = newItem.bid;
       existingItem.ask = newItem.ask;
       existingItem.timestamp = newItem.timestamp;
 
-      // Fiyat değişikliği varsa
       if (newAsk !== oldAsk) {
-        
-        // Eğer önceki bir timer varsa temizle
         if (existingItem.flashTimeout) clearTimeout(existingItem.flashTimeout);
 
-        // Yönü belirle
         if (newAsk > oldAsk) {
             existingItem.direction = 'up';
-            existingItem.flashCss = 'text-flash-up'; // Yeşil yap (Anlık)
+            existingItem.flashCss = 'text-flash-up'; 
         } else {
             existingItem.direction = 'down';
-            existingItem.flashCss = 'text-flash-down'; // Kırmızı yap (Anlık)
+            existingItem.flashCss = 'text-flash-down'; 
         }
         
-        this.cdr.detectChanges(); // UI'ı zorla güncelle: Renk değişsin
+        this.cdr.detectChanges();
 
-        // 200ms bekle (Göz yeşili/kırmızıyı görsün) sonra class'ı sil
         existingItem.flashTimeout = setTimeout(() => {
-             existingItem.flashCss = ''; 
-             // Class silinince SCSS'teki 'transition: color 1.5s' devreye girer
-             // ve renk yavaşça siyaha döner.
-             this.cdr.detectChanges();
+              existingItem.flashCss = ''; 
+              this.cdr.detectChanges();
         }, 300);
-
       }
     } else {
       newItem.direction = 'stable';
@@ -154,13 +162,6 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   startClock() {
     this.timeInterval = setInterval(() => { this.currentTime = new Date(); }, 1000);
-  }
-
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    const theme = this.isDarkMode ? 'dark' : 'light';
-    this.document.documentElement.setAttribute('data-bs-theme', theme);
-    localStorage.setItem('theme', theme);
   }
 
   toggleTvMode() {

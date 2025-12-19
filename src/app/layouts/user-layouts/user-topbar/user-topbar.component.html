@@ -1,31 +1,42 @@
-<header class="topbar">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <div class="d-flex align-items-center">
-        
-        <div class="topbar-item">
-          <button type="button" (click)="toggleMobileMenu()" class="button-toggle-menu me-2">
-            <iconify-icon icon="solar:hamburger-menu-broken" class="fs-24 align-middle"></iconify-icon>
-          </button>
+<ng-container *ngIf="user$ | async as user">
+  <header class="topbar">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div class="d-flex align-items-center">
+
+          <div class="topbar-item">
+            <button type="button" (click)="toggleMobileMenu()" class="button-toggle-menu me-2">
+              <iconify-icon icon="solar:hamburger-menu-broken" class="fs-24 align-middle"></iconify-icon>
+            </button>
+          </div>
+
+
+          <div class="topbar-item">
+            <h4 class="fw-bold topbar-button pe-none text-uppercase mb-0">{{title}}</h4>
+          </div>
         </div>
 
-        
-        <div class="topbar-item">
-          <h4 class="fw-bold topbar-button pe-none text-uppercase mb-0">{{title}}</h4>
-        </div>
-      </div>
+        <div class="d-flex align-items-center gap-1">
 
-      <div class="d-flex align-items-center gap-1">
 
-        
-        <div class="topbar-item">
-          <button type="button" class="topbar-button" (click)="changeTheme()" id="light-dark-mode">
-            <iconify-icon icon="solar:moon-bold-duotone" class="fs-24 align-middle"></iconify-icon>
-          </button>
-        </div>
+          <div class="topbar-item">
+            <span class="badge fs-3" [ngClass]="getBadgeClass(user.subscriptionEndDate)">
+
+              <i class="bx bx-time-five me-1"></i>
+              {{ user.subscriptionEndDate | remainingDays }}
+            </span>
+          </div>
 
         
-        <!-- <div ngbDropdown class="dropdown topbar-item">
+
+          <div class="topbar-item">
+            <button type="button" class="topbar-button" (click)="changeTheme()" id="light-dark-mode">
+              <iconify-icon icon="solar:moon-bold-duotone" class="fs-24 align-middle"></iconify-icon>
+            </button>
+          </div>
+
+
+          <!-- <div ngbDropdown class="dropdown topbar-item">
           <button ngbDropdownToggle type="button" class="topbar-button position-relative arrow-none" id="page-header-notifications-dropdown">
             <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-24 align-middle"></iconify-icon>
             <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">{{notificationList.length}}<span class="visually-hidden">unread messages</span></span>
@@ -73,80 +84,79 @@
           </div>
         </div> -->
 
-        
-        <div class="topbar-item d-none d-md-flex">
-          <button type="button" class="topbar-button" id="theme-settings-btn" (click)="settingMenu()"  aria-controls="theme-settings-offcanvas">
-            <iconify-icon icon="solar:settings-bold-duotone" class="fs-24 align-middle"></iconify-icon>
-          </button>
-        </div>
 
-        
-        <!-- <div class="topbar-item d-none d-md-flex">
+          <div class="topbar-item d-none d-md-flex">
+            <button type="button" class="topbar-button" id="theme-settings-btn" (click)="settingMenu()"
+              aria-controls="theme-settings-offcanvas">
+              <iconify-icon icon="solar:settings-bold-duotone" class="fs-24 align-middle"></iconify-icon>
+            </button>
+          </div>
+
+
+          <!-- <div class="topbar-item d-none d-md-flex">
           <button type="button" class="topbar-button" id="theme-settings-btn" (click)="open()" aria-controls="theme-settings-offcanvas">
             <iconify-icon icon="solar:clock-circle-bold-duotone" class="fs-24 align-middle"></iconify-icon>
           </button>
         </div> -->
 
-        
-        <div ngbDropdown class="dropdown topbar-item">
-          <a ngbDropdownToggle type="button" class="topbar-button arrow-none" id="page-header-user-dropdown">
-            <span class="d-flex align-items-center">
-              <ng-container *ngIf="user$ | async as user">
-          
-          <!-- 1. Durum: Logo VARSA (API URL + Logo Path) -->
-          <img *ngIf="user.tenantLogoUrl" 
-               class="rounded-circle object-fit-cover" 
-               width="32" 
-               height="32"
-               [src]="apiRoot + user.tenantLogoUrl" 
-               alt="Firma Logosu">
 
-          <!-- 2. Durum: Logo YOKSA (Varsayılan Avatar veya Baş Harf) -->
-          <div *ngIf="!user.tenantLogoUrl" 
-               class="avatar-xs rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center">
-               <span class="text-primary fw-bold fs-12">{{ user.fullName.charAt(0).toUpperCase() }}</span>
-          </div>
+          <div ngbDropdown class="dropdown topbar-item">
+            <a ngbDropdownToggle type="button" class="topbar-button arrow-none" id="page-header-user-dropdown">
+              <span class="d-flex align-items-center">
 
-      </ng-container>
-            </span>
-          </a>
-          <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
-            
-            <h6 class="dropdown-header">Hoşgeldin {{ (user$ | async)?.fullName || 'Kullanıcı' }}!</h6>
-            <h6 class="dropdown-header ">- {{ (user$ | async)?.tenantName }}!</h6>
+                <!-- 1. Durum: Logo VARSA (API URL + Logo Path) -->
+                <img *ngIf="user.tenantLogoUrl" class="rounded-circle object-fit-cover" width="32" height="32"
+                  [src]="apiRoot + user.tenantLogoUrl" alt="Firma Logosu">
 
-            <a class="dropdown-item" routerLink="/user/profile">
-              <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Profilim</span>
+                <!-- 2. Durum: Logo YOKSA (Varsayılan Avatar veya Baş Harf) -->
+                <div *ngIf="!user.tenantLogoUrl"
+                  class="avatar-xs rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center">
+                  <span class="text-primary fw-bold fs-12">{{ user.fullName.charAt(0).toUpperCase() }}</span>
+                </div>
+
+              </span>
             </a>
-            <!-- <a class="dropdown-item" routerLink="/apps/chat">
+            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
+
+              <h6 class="dropdown-header">Hoşgeldin {{ (user$ | async)?.fullName || 'Kullanıcı' }}!</h6>
+              <h6 class="dropdown-header ">- {{ (user$ | async)?.tenantName }}!</h6>
+
+              <a class="dropdown-item" routerLink="/user/profile">
+                <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span
+                  class="align-middle">Profilim</span>
+              </a>
+              <!-- <a class="dropdown-item" routerLink="/apps/chat">
               <i class="bx bx-message-dots text-muted fs-18 align-middle me-1"></i><span class="align-middle">Messages</span>
             </a>
 
             <a class="dropdown-item" routerLink="/pages/pricing">
               <i class="bx bx-wallet text-muted fs-18 align-middle me-1"></i><span class="align-middle">Pricing</span>
             </a> -->
-            <a class="dropdown-item" routerLink="/user/faqs">
-              <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Yardım</span>
-            </a>
-            <!-- <a class="dropdown-item" routerLink="/auth/lock-screen">
+              <a class="dropdown-item" routerLink="/user/faqs">
+                <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span
+                  class="align-middle">Yardım</span>
+              </a>
+              <!-- <a class="dropdown-item" routerLink="/auth/lock-screen">
               <i class="bx bx-lock text-muted fs-18 align-middle me-1"></i><span class="align-middle">Lock screen</span>
             </a> -->
 
-            <div class="dropdown-divider my-1"></div>
+              <div class="dropdown-divider my-1"></div>
 
-            <a class="dropdown-item text-danger" role="button" (click)="logout()">
-              <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Çıkış Yap</span>
-            </a>
+              <a class="dropdown-item text-danger" role="button" (click)="logout()">
+                <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Çıkış Yap</span>
+              </a>
+            </div>
           </div>
+
+          <form class="app-search d-none d-md-block ms-2">
+            <div class="position-relative">
+              <input type="search" class="form-control" placeholder="Search..." autocomplete="off" value="">
+              <iconify-icon icon="solar:magnifer-linear" class="search-widget-icon"></iconify-icon>
+            </div>
+          </form>
         </div>
-
-        <form class="app-search d-none d-md-block ms-2">
-          <div class="position-relative">
-            <input type="search" class="form-control" placeholder="Search..." autocomplete="off" value="">
-            <iconify-icon icon="solar:magnifer-linear" class="search-widget-icon"></iconify-icon>
-          </div>
-        </form>
       </div>
     </div>
-  </div>
-</header>
+  </header>
+
+</ng-container>

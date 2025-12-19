@@ -1,0 +1,70 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Yeni Abonelik Oluştur</h4>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="addForm" (ngSubmit)="onSubmit()">
+                    
+                    <h5 class="mb-3 text-primary"><i class="bx bx-calendar-check"></i> Abonelik Detayları</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Firma (Kuyumcu) Seçiniz</label>
+                            <select class="form-select" formControlName="tenantId"
+                                    [ngClass]="{'is-invalid': submitted && f['tenantId'].errors}">
+                                <option value="">Seçiniz...</option>
+                                <option *ngFor="let tenant of tenantList" [value]="tenant.id">
+                                    {{ tenant.name }} ({{ tenant.city }}/{{ tenant.district }})
+                                </option>
+                            </select>
+                            <div *ngIf="submitted && f['tenantId'].errors" class="invalid-feedback">Firma seçimi zorunludur.</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Plan Tipi</label>
+                            <select class="form-select" formControlName="planType"
+                                    [ngClass]="{'is-invalid': submitted && f['planType'].errors}">
+                                <option [value]="1">Aylık Plan</option>
+                                <option [value]="2">Yıllık Plan</option>
+                            </select>
+                            <div *ngIf="submitted && f['planType'].errors" class="invalid-feedback">Plan seçimi zorunludur.</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tutar (TL)</label>
+                            <input type="number" class="form-control" formControlName="amount"
+                                   [ngClass]="{'is-invalid': submitted && f['amount'].errors}">
+                            <div *ngIf="submitted && f['amount'].errors" class="invalid-feedback">Tutar girilmesi zorunludur.</div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Yönetici Notu (Opsiyonel)</label>
+                            <textarea class="form-control" formControlName="note" rows="2" 
+                                      placeholder="Örn: Havale ile ödendi, kampanya uygulandı vb."></textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="isPaidSwitch" formControlName="isPaid">
+                                <label class="form-check-label" for="isPaidSwitch">Ödeme Tahsil Edildi mi?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <a routerLink="/admin/customers/list" class="btn btn-secondary me-2">İptal</a>
+                            <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                                <i class="bx bx-save"></i> Kaydet ve Başlat
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

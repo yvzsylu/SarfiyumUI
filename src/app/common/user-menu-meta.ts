@@ -40,17 +40,17 @@ export const MENU: MenuItem[] = [
     label: 'Profilim',
     link: '/user/profile',
   },
-  {
-    key: 'other-apps',
-    label: 'Diğer Uygulamalar',
-    isTitle: true,
-  },
-  {
-    key: 'todo',
-    icon: 'solar:checklist-bold-duotone',
-    label: 'Todo',
-    link: '/user/apps/todo',
-  },
+  // {
+  //   key: 'other-apps',
+  //   label: 'Diğer Uygulamalar',
+  //   isTitle: true,
+  // },
+  // {
+  //   key: 'todo',
+  //   icon: 'solar:checklist-bold-duotone',
+  //   label: 'Todo',
+  //   link: '/user/apps/todo',
+  // },
   {
     key: 'support',
     label: 'Destek',

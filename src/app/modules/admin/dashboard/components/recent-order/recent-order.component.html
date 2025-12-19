@@ -1,97 +1,44 @@
 <div class="card">
-  <div class="card-body">
-    <div class="d-flex align-items-center justify-content-between">
-      <h4 class="card-title">
-        Recent Orders
-      </h4>
-
-      <a href="javascript:void(0);" class="btn btn-sm btn-soft-primary">
-        <i class="bx bx-plus me-1"></i>Create Order
-      </a>
-    </div>
+  <div class="card-header d-flex align-items-center justify-content-between">
+     <h4 class="card-title">Ödenmemiş Abonelikler / Bekleyen Ödemeler</h4>
+     <a routerLink="/admin/subscriptions/list" class="btn btn-sm btn-soft-primary">Tümünü Gör</a>
   </div>
   
   <div class="table-responsive table-centered">
     <table class="table mb-0">
       <thead class="bg-light bg-opacity-50">
         <tr>
-          <th class="ps-3">
-            Order ID.
-          </th>
-          <th>
-            Date
-          </th>
-          <th>
-            Product
-          </th>
-          <th>
-            Customer Name
-          </th>
-          <th>
-            Email ID
-          </th>
-          <th>
-            Phone No.
-          </th>
-          <th>
-            Address
-          </th>
-          <th>
-            Payment Type
-          </th>
-          <th>
-            Status
-          </th>
+          <th class="ps-3">Firma</th>
+          <th>Plan</th>
+          <th>Tutar</th>
+          <th>Oluşturulma Tarihi</th>
+          <th>Durum</th>
+          <th>İşlem</th>
         </tr>
       </thead>
       
       <tbody>
-        @for(item of orders;track $index){
-        <tr>
-          <td class="ps-3">
-            <a routerLink="/orders/detail">{{item.order_id}}</a>
-          </td>
-          <td>{{item.date}}</td>
+        <tr *ngFor="let item of unpaidList">
+          <td class="ps-3 fw-semibold">{{ item.tenantName }}</td>
+          <td>{{ item.planName }}</td>
+          <td class="text-danger fw-bold">{{ item.amount | currency:'TRY':'symbol-narrow':'1.2-2' }}</td>
+          <td>{{ item.dueDate | date:'dd.MM.yyyy' }}</td>
           <td>
-            <img [src]="item.image" alt="product-1(1)" class="img-fluid avatar-sm">
+             <span class="badge bg-soft-danger text-danger">Ödenmedi</span>
           </td>
           <td>
-            <a href="javascript:void(0);">{{item.name}}</a>
-          </td>
-          <td>{{item.email}}</td>
-          <td>{{item.phone}}</td>
-          <td>{{item.location}}</td>
-          <td>{{item.payment_method}}</td>
-          <td>
-            <i class="bx bxs-circle me-1" [ngClass]="{'text-success':item.status=='Completed','text-primary':item.status=='Processing'}"></i>{{item.status}}
+            <a [routerLink]="['/admin/subscriptions/list', {tenantId: item.tenantId}]" class="btn btn-sm btn-light">
+                <i class="bx bx-show"></i> Detay
+            </a>
           </td>
         </tr>
-        }
+        <tr *ngIf="unpaidList.length === 0">
+            <td colspan="6" class="text-center py-4 text-success">
+                <i class="bx bx-check-circle fs-1"></i> <br>
+                Harika! Bekleyen ödeme bulunmuyor.
+            </td>
+        </tr>
       </tbody>
-      
     </table>
-    
-  </div>
-  
-
-  <div class="card-footer border-top">
-    <div class="row g-3">
-      <div class="col-sm">
-        <div class="text-muted">
-          Showing
-          <span class="fw-semibold">5</span>
-          of
-          <span class="fw-semibold">90,521</span>
-          orders
-        </div>
-      </div>
-
-      <div class="col-sm-auto">
-        <ngb-pagination [collectionSize]="30" [page]="1" class="m-0">
-          <ng-template ngbPaginationPrevious><i class="bx bx-left-arrow-alt"></i></ng-template>
-          <ng-template ngbPaginationNext><i class="bx bx-right-arrow-alt"></i></ng-template>
-        </ngb-pagination>
-      </div>
-    </div>
   </div>
 </div>

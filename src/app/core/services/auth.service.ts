@@ -22,6 +22,7 @@ interface JwtPayload {
   roles: string | string[]; 
   exp: number;
   iss: string;
+  subscriptionEndDate?: string; // Abonelik bitiş tarihi
 }
 
 @Injectable({ providedIn: 'root' })
@@ -81,7 +82,8 @@ getUserFromCookie(): User | null {
       id: decoded.userId,
       username: decoded.sub,
       email: decoded.email,
-      fullName: decoded.fullName, 
+      fullName: decoded.fullName,
+      subscriptionEndDate: decoded.subscriptionEndDate, 
       tenantId: decoded.tenantId,
       tenantName: decoded.tenantName,
       tenantLogoUrl: decoded.tenantLogoUrl,

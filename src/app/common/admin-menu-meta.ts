@@ -107,45 +107,65 @@ export const MENU: MenuItem[] = [
     ],
   },
   {
-    key: 'symbol-category',
+    key: 'subscription',
     icon: 'solar:users-group-two-rounded-bold-duotone',
-    label: 'Sembol Kategorileri',
+    label: 'Abonelikler',
     collapsed: true,
     subMenu: [
       {
-        key: 'symbol-category-list',
-        label: 'Sembol Kategori Listesi',
-        link: '/admin/symbol-categories/list',
-        parentKey: 'symbol-category',
+        key: 'subscription-list',
+        label: 'Abonelik Listesi',
+        link: '/admin/subscriptions/list',
+        parentKey: 'subscription',
       },
       {
-        key: 'symbol-category-add',
-        label: 'Sembol Kategori Ekle',
-        link: '/admin/symbol-categories/add',
-        parentKey: 'symbol-category',
+        key: 'subscription-add',
+        label: 'Abonelik Ekle',
+        link: '/admin/subscriptions/add',
+        parentKey: 'subscription',
       }
     ],
   },
-  {
-    key: 'symbol',
-    icon: 'solar:users-group-two-rounded-bold-duotone',
-    label: 'Semboller',
-    collapsed: true,
-    subMenu: [
-      {
-        key: 'symbol-list',
-        label: 'Sembol Listesi',
-        link: '/admin/symbols/list',
-        parentKey: 'symbol',
-      },
-      {
-        key: 'symbol-add',
-        label: 'Sembol Ekle',
-        link: '/admin/symbols/add',
-        parentKey: 'symbol',
-      }
-    ],
-  },
+  // {
+  //   key: 'symbol-category',
+  //   icon: 'solar:users-group-two-rounded-bold-duotone',
+  //   label: 'Sembol Kategorileri',
+  //   collapsed: true,
+  //   subMenu: [
+  //     {
+  //       key: 'symbol-category-list',
+  //       label: 'Sembol Kategori Listesi',
+  //       link: '/admin/symbol-categories/list',
+  //       parentKey: 'symbol-category',
+  //     },
+  //     {
+  //       key: 'symbol-category-add',
+  //       label: 'Sembol Kategori Ekle',
+  //       link: '/admin/symbol-categories/add',
+  //       parentKey: 'symbol-category',
+  //     }
+  //   ],
+  // },
+  // {
+  //   key: 'symbol',
+  //   icon: 'solar:users-group-two-rounded-bold-duotone',
+  //   label: 'Semboller',
+  //   collapsed: true,
+  //   subMenu: [
+  //     {
+  //       key: 'symbol-list',
+  //       label: 'Sembol Listesi',
+  //       link: '/admin/symbols/list',
+  //       parentKey: 'symbol',
+  //     },
+  //     {
+  //       key: 'symbol-add',
+  //       label: 'Sembol Ekle',
+  //       link: '/admin/symbols/add',
+  //       parentKey: 'symbol',
+  //     }
+  //   ],
+  // },
 
   {
     key: 'other-apps',

@@ -1,16 +1,13 @@
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { orderList } from '../../data';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'dashboard-recent-order',
   standalone: true,
-  imports: [CommonModule, NgbPaginationModule,RouterLink],
+  imports: [CommonModule, RouterModule],
   templateUrl: './recent-order.component.html',
-  styles: ``,
 })
 export class RecentOrderComponent {
-  orders = orderList;
+  @Input() unpaidList: { tenantId: string; tenantName: string; planName: string; amount: number; dueDate: string }[] = [];
 }

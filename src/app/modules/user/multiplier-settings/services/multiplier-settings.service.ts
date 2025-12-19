@@ -41,6 +41,12 @@ export interface CategoryDto {
   orderIndex: number;
 }
 
+export interface UpdateProductOrderDto {
+    productId: string;
+    newIndex: number;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,4 +77,8 @@ export class SettingsService {
   toggleStatus(id: string, isActive: boolean) {
     return this.api.patch<string>(`${this.endpoint}/status/${id}`, isActive);
   }
+
+  updateProductOrder(orderList: UpdateProductOrderDto[]) {
+    return this.api.patch(`${this.endpoint}/reorder`, orderList);
+    }
 }

@@ -1,15 +1,18 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SettingsService, TenantProductDto, UpdateTenantProductDto, CreateTenantProductDto, CategoryDto } from './services/multiplier-settings.service';
+import { SettingsService, TenantProductDto, UpdateTenantProductDto, CreateTenantProductDto, CategoryDto, UpdateProductOrderDto } from './services/multiplier-settings.service';
 import Swal from 'sweetalert2';
 import { DecimalCommaDirective } from '@/app/core/directive/decimal-comma.directive';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
+// CDK Importları (Sürükle Bırak İçin)
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+
 @Component({
   selector: 'app-multiplier-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, DecimalCommaDirective],
+  imports: [CommonModule, FormsModule, DecimalCommaDirective, DragDropModule],
   templateUrl: './multiplier-settings.component.html',
   styles: [`
     input[type=number]::-webkit-inner-spin-button, 
@@ -18,6 +21,32 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     .table-hover tbody tr:hover { background-color: #f8f9fa; }
     .action-btn { transition: all 0.2s; }
     .action-btn:hover { transform: scale(1.1); }
+    .cursor-grab { cursor: grab; }
+    .cursor-grab:active { cursor: grabbing; }
+
+    /* CDK Drag Styles */
+    .cdk-drag-preview {
+        box-sizing: border-box;
+        border-radius: 4px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        background: #fff;
+        display: table;
+        width: 100%;
+    }
+    .cdk-drag-preview td {
+        padding: 8px;
+        vertical-align: middle;
+        border-bottom: 1px solid #ddd;
+    }
+    .cdk-drag-placeholder {
+        opacity: 0;
+    }
+    .cdk-drag-animating {
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+    .draggable-row:active {
+        background-color: #f8f9fa;
+    }
   `]
 })
 export class MultiplierSettingsComponent implements OnInit {
@@ -34,7 +63,6 @@ export class MultiplierSettingsComponent implements OnInit {
     buyMultiplier: '1,0000', sellMultiplier: '1,0000', addonAmount: '0,00'
   };
 
-  // Düzenlenecek ürün için geçici model
   editingProduct: any = {};
 
   @ViewChild('addProductModal') addProductModal!: ElementRef;
@@ -51,7 +79,7 @@ export class MultiplierSettingsComponent implements OnInit {
       next: (res) => {
         const formattedData = res.map((item) => ({
           ...item,
-          // String formatına çevir (UI için)
+          // Formatlanmış string değerler
           buyMultiplier: this.formatNumber(item.buyMultiplier),
           sellMultiplier: this.formatNumber(item.sellMultiplier),
           addonAmount: this.formatNumber(item.addonAmount)
@@ -80,35 +108,46 @@ export class MultiplierSettingsComponent implements OnInit {
 
     this.groupedSettings = Object.keys(groups).map(key => ({
       category: key,
-      items: groups[key]
+      // KRİTİK NOKTA: Backend'den geleni orderIndex'e göre kesinlikle sıralıyoruz.
+      items: groups[key].sort((a: any, b: any) => (a.orderIndex || 9999) - (b.orderIndex || 9999))
     }));
   }
 
-  // --- EDIT MODAL ---
+  // --- DRAG & DROP FONKSİYONU ---
+  onDrop(event: CdkDragDrop<any[]>, groupItems: any[]) {
+    // 1. UI'da yerini değiştir
+    moveItemInArray(groupItems, event.previousIndex, event.currentIndex);
 
+    // 2. Yeni sıraları oluştur (1'den başlayarak)
+    const reorderedList: UpdateProductOrderDto[] = groupItems.map((item, index) => ({
+        productId: item.id,
+        newIndex: index + 1
+    }));
+
+    // 3. Backend'e gönder (Sessizce kaydet)
+    this.settingsService.updateProductOrder(reorderedList).subscribe({
+        next: () => console.log('Sıralama güncellendi'),
+        error: () => Swal.fire('Hata', 'Sıralama kaydedilemedi.', 'error')
+    });
+  }
+
+  // --- EDIT MODAL ---
   openEditModal(item: any) {
-    // Referansı koparmak için kopyasını alıyoruz (UI anlık bozulmasın diye)
     this.editingProduct = { ...item };
-    
-    // Kategori ID'sini bulmak gerekebilir (Backend dönüyorsa direkt ata)
-    // Eğer backend categoryId dönmüyorsa categoryName'den bulmaya çalışabiliriz
     if (!this.editingProduct.categoryId) {
         const cat = this.categories.find(c => c.name === item.categoryName);
         if (cat) this.editingProduct.categoryId = cat.id;
     }
-
     this.modalService.open(this.editProductModal, { centered: true });
   }
 
   saveEditedProduct() {
     this.isLoading = true;
-    
-    // Tekil güncellemeyi backend'e liste içinde gönderiyoruz (Endpoint list bekliyor)
     const updateDto: UpdateTenantProductDto = {
         id: this.editingProduct.id,
         name: this.editingProduct.name,
-        categoryId: this.editingProduct.categoryId, // Kategori değişimi
-        sourceKey: this.editingProduct.sourceKey,   // Kaynak değişimi
+        categoryId: this.editingProduct.categoryId,
+        sourceKey: this.editingProduct.sourceKey,
         buyMultiplier: this.parseCurrency(this.editingProduct.buyMultiplier),
         sellMultiplier: this.parseCurrency(this.editingProduct.sellMultiplier),
         addonAmount: this.parseCurrency(this.editingProduct.addonAmount),
@@ -120,14 +159,13 @@ export class MultiplierSettingsComponent implements OnInit {
             this.modalService.dismissAll();
             this.isLoading = false;
             Swal.fire('Güncellendi', 'Ürün başarıyla güncellendi.', 'success');
-            this.loadData(); // Listeyi yenile
+            this.loadData();
         },
         error: () => this.isLoading = false
     });
   }
 
   // --- SAVE ALL ---
-
   saveAll() {
     Swal.fire({
       title: 'Kaydetmek istiyor musunuz?',
@@ -149,7 +187,6 @@ export class MultiplierSettingsComponent implements OnInit {
         id: item.id,
         name: item.name,
         categoryId: item.categoryId,
-        // Toplu kayıtta kategori/sourceKey değişimi genelde yapılmaz ama eklenebilir
         buyMultiplier: this.parseCurrency(item.buyMultiplier),
         sellMultiplier: this.parseCurrency(item.sellMultiplier),
         addonAmount: this.parseCurrency(item.addonAmount),
@@ -167,7 +204,6 @@ export class MultiplierSettingsComponent implements OnInit {
   }
 
   // --- CREATE & DELETE ---
-
   openModal(content: any) {
     this.modalService.open(content, { centered: true });
   }

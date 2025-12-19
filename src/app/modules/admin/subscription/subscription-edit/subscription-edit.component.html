@@ -1,0 +1,65 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Abonelik Düzenle</h4>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+                    
+                    <div class="alert alert-warning">
+                        <i class="bx bx-error"></i> 
+                        <strong>Dikkat:</strong> Plan tipini değiştirmek, firmanın abonelik bitiş tarihini otomatik olarak yeniden hesaplayacaktır.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" formControlName="status">
+                                <option [value]="1">Aktif</option>
+                                <option [value]="2">Süresi Doldu (Expired)</option>
+                                <option [value]="3">İptal Edildi</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Plan Tipi</label>
+                            <select class="form-select" formControlName="planType">
+                                <option [value]="1">Aylık Plan</option>
+                                <option [value]="2">Yıllık Plan</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tutar (TL)</label>
+                            <input type="number" class="form-control" formControlName="amount">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Not</label>
+                            <textarea class="form-control" formControlName="note" rows="2"></textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" formControlName="isPaid">
+                                <label class="form-check-label">Ödeme Tahsil Edildi</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <a routerLink="/admin/subscriptions/list" class="btn btn-secondary me-2">İptal</a>
+                            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                                Güncelle
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

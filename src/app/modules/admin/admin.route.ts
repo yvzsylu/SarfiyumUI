@@ -51,6 +51,11 @@ export const ADMIN_ROUTES: Routes = [
       import('../admin/customer/customer.route').then(m => m.CUSTOMERS_ROUTES)
   },
   {
+    path: 'subscriptions',
+    loadChildren: () => 
+      import('../admin/subscription/subscription.route').then(m => m.SUBSCRIPTION_ROUTES)
+  },
+  {
     path: 'roles',
     loadChildren: () => 
       import('../admin/roles/role.route').then(m => m.ROLE_ROUTES)

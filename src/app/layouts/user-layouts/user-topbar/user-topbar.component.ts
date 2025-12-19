@@ -26,6 +26,8 @@ import { getUser } from '@store/authentication/authentication.selector';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/enviroment'; // Environment dosya yolunu kontrol et
+import { RemainingDaysPipe } from '@/app/core/pipes/remaining-days.pipe';
+
 
 @Component({
   selector: 'app-user-topbar',
@@ -36,6 +38,7 @@ import { environment } from '../../../../environments/enviroment'; // Environmen
     NgbOffcanvasModule,
     SimplebarAngularModule,
     NgbDropdownModule,
+    RemainingDaysPipe
   ],
   templateUrl: './user-topbar.component.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -63,12 +66,12 @@ export class UserTopbarComponent implements OnInit {
   ngOnInit(): void {
     console.log(this.apiRoot);
     // Store'dan kullanıcıyı dinle
- this.user$ = this.store.select(getUser).pipe(
-   tap(user => {
-     // Debug için loglayabilirsin:
-     // console.log('User Topbar Data:', user);
-   })
- );
+    this.user$ = this.store.select(getUser).pipe(
+      tap(user => {
+        // Debug için loglayabilirsin:
+        // console.log('User Topbar Data:', user);
+      })
+    );
     // this.user$ = this.store.select(getUser).pipe(
     // tap(user => {
     //   if(user?.tenantLogoUrl) {
@@ -77,7 +80,7 @@ export class UserTopbarComponent implements OnInit {
     //      console.log('Oluşan Final URL:', this.apiRoot + user.tenantLogoUrl);
     //   }
     // })
-  // );
+    // );
   }
 
   settingMenu() {
@@ -88,6 +91,23 @@ export class UserTopbarComponent implements OnInit {
     this.mobileMenuButtonClicked.emit();
   }
 
+
+  // HTML'de kullanmak için:
+  getBadgeClass(dateString: string | undefined): string {
+    if (!dateString) return 'bg-secondary text-white';
+
+    const endDate = new Date(dateString);
+    const now = new Date();
+
+    // Milisaniye farkı
+    const diffTime = endDate.getTime() - now.getTime();
+    // Gün farkı
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'bg-danger-subtle text-danger'; // Süre doldu (Kırmızı)
+    if (diffDays <= 7) return 'bg-warning-subtle text-warning'; // 7 günden az (Sarı)
+    return 'bg-success-subtle text-success'; // Güvende (Yeşil)
+  }
   changeTheme() {
     const color = document.documentElement.getAttribute('data-bs-theme');
     if (color == 'light') {
