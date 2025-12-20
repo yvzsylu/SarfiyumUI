@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Sarfiyum": {  
+    "Sarfiyum": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -49,7 +49,23 @@
                 ]
               }
             },
-            "allowedCommonJsDependencies": ["moment","dayjs","apexcharts","jsvectormap","jsvectormap/dist/maps/world.js","jsvectormap/dist/maps/russia.js","jsvectormap/dist/maps/canada.js","jsvectormap/dist/maps/iraq.js","jsvectormap/dist/maps/spain.js","sweetalert2","gumshoejs","choices.js","dropzone","deepmerge","quill-delta"]
+            "allowedCommonJsDependencies": [
+              "moment",
+              "dayjs",
+              "apexcharts",
+              "jsvectormap",
+              "jsvectormap/dist/maps/world.js",
+              "jsvectormap/dist/maps/russia.js",
+              "jsvectormap/dist/maps/canada.js",
+              "jsvectormap/dist/maps/iraq.js",
+              "jsvectormap/dist/maps/spain.js",
+              "sweetalert2",
+              "gumshoejs",
+              "choices.js",
+              "dropzone",
+              "deepmerge",
+              "quill-delta"
+            ]
           },
           "configurations": {
             "production": {
@@ -77,6 +93,9 @@
                 "styles": {
                   "minify": true,
                   "inlineCritical": false
+                },
+                "fonts": {
+                  "inline": false
                 }
               }
             },
