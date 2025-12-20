@@ -5,9 +5,12 @@
 
       <div class="d-flex align-items-center gap-3">
         <ng-container *ngIf="user$ | async as user">
-          <img *ngIf="user.tenantLogoUrl" class="rounded-3 object-fit-contain border bg-white p-1"
+          <!-- <img *ngIf="user.tenantLogoUrl" class="rounded-3 object-fit-contain border bg-white p-1"
             style="width: 48px; height: 48px;" [src]="apiRoot + user.tenantLogoUrl"
-            onerror="this.src='assets/images/users/user-dummy-img.jpg'">
+            onerror="this.src='assets/images/users/user-dummy-img.jpg'"> -->
+
+          <img *ngIf="user.tenantLogoUrl" class="rounded-3" [src]="apiRoot + user.tenantLogoUrl"
+            onerror="this.onerror=null; this.src='assets/images/users/user-dummy-img.jpg'">
 
           <div *ngIf="!user.tenantLogoUrl"
             class="rounded-3 bg-light d-flex align-items-center justify-content-center base-text border"
