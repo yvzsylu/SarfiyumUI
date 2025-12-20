@@ -25,8 +25,7 @@ export class ProfileComponent implements OnInit {
   isLoading = false;
   isUploading = false;
 
-  // API Kök Dizini (Resimler için)
-  // Örn: https://localhost:7140/api -> https://localhost:7140
+
   public apiRoot = environment.apiUrl.replace('/api', '');
 
   get initials(): string {

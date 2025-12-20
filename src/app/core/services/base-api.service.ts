@@ -12,7 +12,7 @@ import { ServiceResult } from '../models/service-result.model';
 export class BaseApiService {
   private http = inject(HttpClient);
   private toastr = inject(ToastrService);
-  private apiUrl = environment.apiUrl; // örn: https://localhost:7140/api
+  private apiUrl = environment.apiUrl; 
 
   // GET İsteği
   get<T>(endpoint: string): Observable<T> {

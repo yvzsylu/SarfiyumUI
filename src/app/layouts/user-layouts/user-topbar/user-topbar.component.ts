@@ -58,9 +58,7 @@ export class UserTopbarComponent implements OnInit {
   // Kullanıcı verisi observable'ı
   user$!: Observable<any>;
 
-  // API Kök Dizini (Resimler için)
-  // environment.apiUrl genelde "https://localhost:7140/api" şeklindedir.
-  // Resimler root'ta (/uploads/...) olduğu için /api kısmını siliyoruz.
+
   public apiRoot = environment.apiUrl.replace('/api', '');
 
   ngOnInit(): void {
