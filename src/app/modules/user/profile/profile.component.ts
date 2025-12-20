@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PersonalInfoComponent } from './components/personal-info/personal-info.component';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProfileService, UserProfileDto } from './services/profile.service';
-import { environment } from '../../../../environments/enviroment'; // Yolunu kontrol et (environment.ts)
+import { environment } from '../../../../environments/environment'; // Yolunu kontrol et (environment.ts)
 import { ToastrService } from 'ngx-toastr';
 
 @Component({

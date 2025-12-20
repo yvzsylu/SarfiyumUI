@@ -25,7 +25,7 @@ import { logout } from '@store/authentication/authentication.actions';
 import { getUser } from '@store/authentication/authentication.selector';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../../../environments/enviroment'; // Environment dosya yolunu kontrol et
+import { environment } from '../../../../environments/environment'; // Environment dosya yolunu kontrol et
 import { RemainingDaysPipe } from '@/app/core/pipes/remaining-days.pipe';
 
 

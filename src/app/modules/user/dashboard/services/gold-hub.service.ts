@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service'; 
 // PriceData modelinin yolunu projene göre ayarla:
 import { PriceData } from '@/app/core/models/price-data.model'; 
-import { environment } from '@environment/enviroment';
+import { environment } from '@environment/environment';
 
 @Injectable({
   providedIn: 'root' 

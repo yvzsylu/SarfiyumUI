@@ -6,7 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 
 import type { User } from '@/app/store/authentication/auth.model';
-import { environment } from '../../../environments/enviroment';
+import { environment } from '../../../environments/environment';
 // ServiceResult modelini import et (yolunu projene göre ayarla)
 import { ServiceResult } from '@/app/core/models/service-result.model'; 
 

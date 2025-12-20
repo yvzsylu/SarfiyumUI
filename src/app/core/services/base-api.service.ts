@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
-import { environment } from '../../../environments/enviroment'; // apiUrl buradan gelecek
+import { environment } from '../../../environments/environment'; // apiUrl buradan gelecek
 import { ServiceResult } from '../models/service-result.model';
 
 @Injectable({

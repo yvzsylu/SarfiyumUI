@@ -9,7 +9,7 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap'; // Dropdown içi
 import { GoldHubService } from './services/gold-hub.service';
 import { getUser } from '@store/authentication/authentication.selector';
 import { PriceData } from '@/app/core/models/price-data.model';
-import { environment } from '@environment/enviroment';
+import { environment } from '@environment/environment';
 
 interface DashboardPriceItem extends PriceData {
   flashCss?: string;      
