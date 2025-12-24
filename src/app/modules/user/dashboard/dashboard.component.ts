@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap'; // Dropdown için
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { GoldHubService } from './services/gold-hub.service';
 import { getUser } from '@store/authentication/authentication.selector';
@@ -54,24 +54,23 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   madenList: DashboardPriceItem[] = [];
   dovizList: DashboardPriceItem[] = [];
   bilezikList: DashboardPriceItem[] = [];
+  ataResatList: DashboardPriceItem[] = []; // 🔥 Yeni Liste
   krediList: DashboardPriceItem[] = [];
 
   currentTime = new Date();
   isTvMode = false;
   
-  // Yeni Tema Yönetimi
   currentTheme: ThemeType = 'light';
   
   private subs: Subscription[] = [];
   private timeInterval: any;
 
   ngOnInit(): void {
-    // Kayıtlı temayı yükle
-    const savedTheme = localStorage.getItem('theme') as ThemeType;
+    const savedTheme = localStorage.getItem('dashboard_theme') as ThemeType;
     if (savedTheme) {
       this.setTheme(savedTheme);
     } else {
-      this.setTheme('light'); // Varsayılan
+      this.setTheme('light'); 
     }
 
     this.user$ = this.store.select(getUser);
@@ -91,28 +90,21 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.startClock();
   }
 
-  // Tema Değiştirme Fonksiyonu
   setTheme(theme: ThemeType) {
     this.currentTheme = theme;
-    localStorage.setItem('theme', theme);
-    // HTML tag'ine attribute ekle: <html data-theme="dark">
-    this.document.documentElement.setAttribute('data-theme', theme);
-    
-    // Bootstrap dark mode desteği için (Tooltip vb. için gerekli olabilir)
-    if(theme === 'dark' || theme === 'financial') {
-        this.document.documentElement.setAttribute('data-bs-theme', 'dark');
-    } else {
-        this.document.documentElement.setAttribute('data-bs-theme', 'light');
-    }
+    localStorage.setItem('dashboard_theme', theme); 
+    this.cdr.detectChanges();
   }
 
   processData(data: DashboardPriceItem[]) {
     data.forEach(item => {
-      let targetList: DashboardPriceItem[] = this.madenList;
+      let targetList: DashboardPriceItem[];
+      
       switch (item.category) {
         case 'Maden': targetList = this.madenList; break;
         case 'Döviz': targetList = this.dovizList; break;
         case 'Bilezik': targetList = this.bilezikList; break;
+        case 'Ata & Reşat': targetList = this.ataResatList; break; // 🔥 Yeni Kategori Match
         case 'Kredi Kartı': targetList = this.krediList; break;
         default: targetList = this.madenList; break;
       }
@@ -130,6 +122,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
       existingItem.bid = newItem.bid;
       existingItem.ask = newItem.ask;
       existingItem.timestamp = newItem.timestamp;
+      existingItem.description = newItem.description;
 
       if (newAsk !== oldAsk) {
         if (existingItem.flashTimeout) clearTimeout(existingItem.flashTimeout);
@@ -147,7 +140,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
         existingItem.flashTimeout = setTimeout(() => {
               existingItem.flashCss = ''; 
               this.cdr.detectChanges();
-        }, 300);
+        }, 400);
       }
     } else {
       newItem.direction = 'stable';

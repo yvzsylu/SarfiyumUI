@@ -1,65 +1,57 @@
 // --- TEMA VE RENK DEĞİŞKENLERİ ---
 
-// 1. VARSAYILAN (LIGHT)
-// Component içine hapsolması için :host kullanıyoruz.
-:host {
+// Dashboard içindeki tüm renk yönetimini .dashboard-wrapper üzerinden yapıyoruz.
+// Bu sayede global <html> etiketindeki data-theme değişse bile burası kendi içinde kalır.
+
+.dashboard-wrapper {
+  // 1. VARSAYILAN (LIGHT - AYDINLIK)
   --bg-body: #f5f6f8;
   --bg-card: #ffffff;
   --bg-header: #ffffff;
   --bg-ticker: #e9ecef;
-  
-  --text-main: #000000;       // Ana metin
-  --text-muted: #6c757d;      // Yan metin
-  --text-title: #86754A;      // Başlık Rengi (Koyu Altın - Light mod için)
-  --text-th: #666666;         // Tablo başlıkları (Thead)
-  
+  --text-main: #000000;
+  --text-muted: #6c757d;
+  --text-title: #86754a;
+  --text-th: #666666;
   --border-color: #d6d6d6;
-  --border-subtle: rgba(0,0,0,0.1);
-  
-  --card-header-bg: #fffbf0;  // Kart başlık arka planı
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --card-header-bg: #fffbf0;
   --card-header-border: #faeab8;
   --icon-bg: #ffffff;
-}
 
-// 2. DARK MODE
-// :host-context ile üst elementteki data-theme'i yakalıyoruz.
-:host-context([data-theme="dark"]) {
-  --bg-body: #121212;
-  --bg-card: #1e1e1e;
-  --bg-header: #1e1e1e;
-  --bg-ticker: #252525;
-  
-  --text-main: #e0e0e0;
-  --text-muted: #a0a0a0;
-  --text-title: #86754A;      // Premium Gold (Karanlıkta parlayan)
-  --text-th: #888888;         // Tablo başlıkları biraz daha silik
-  
-  --border-color: #333333;
-  --border-subtle: #333333;
-  
-  --card-header-bg: #2b2510;  // Koyu kahve/sarı
-  --card-header-border: #4a3e1b;
-  --icon-bg: #333333;
-}
+  // 2. DARK MODE (KARANLIK)
+  &[data-dashboard-theme="dark"] {
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --bg-header: #1e1e1e;
+    --bg-ticker: #252525;
+    --text-main: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --text-title: #86754a;
+    --text-th: #888888;
+    --border-color: #333333;
+    --border-subtle: #333333;
+    --card-header-bg: #2b2510;
+    --card-header-border: #4a3e1b;
+    --icon-bg: #333333;
+  }
 
-// 3. FİNANSAL (MAVİ) TEMA - DÜZELTİLDİ
-:host-context([data-theme="financial"]) {
-  --bg-body: #0b1a33;         // Derin Lacivert
-  --bg-card: #132240;         // Kart Laciverti
-  --bg-header: #0f2242;
-  --bg-ticker: #162a52;
-  
-  --text-main: #ffffff;       // Yazılar net beyaz
-  --text-muted: #8fa6d1;      // Muted alanlar mavi-gri
-  --text-title: #86754A;      // PREMIUM GOLD RENGİ
-  --text-th: #7b96c4;         // Tablo başlıkları (Veriden ayrışsın diye soluk mavi)
-  
-  --border-color: #1e3a6e;
-  --border-subtle: #1e3a6e;
-  
-  --card-header-bg: #162a52;  // Kart başlığı gövdeden bir tık koyu/farklı
-  --card-header-border: #2c4a80;
-  --icon-bg: #0b1a33;
+  // 3. FİNANSAL (MAVİ) TEMA
+  &[data-dashboard-theme="financial"] {
+    --bg-body: #0b1a33;
+    --bg-card: #132240;
+    --bg-header: #0f2242;
+    --bg-ticker: #162a52;
+    --text-main: #ffffff;
+    --text-muted: #8fa6d1;
+    --text-title: #86754a;
+    --text-th: #7b96c4;
+    --border-color: #1e3a6e;
+    --border-subtle: #1e3a6e;
+    --card-header-bg: #162a52;
+    --card-header-border: #2c4a80;
+    --icon-bg: #0b1a33;
+  }
 }
 
 // --- TEMEL DÜZEN ---
@@ -76,10 +68,14 @@
   height: 100%;
   background-color: var(--bg-body);
   transition: background-color 0.3s ease, color 0.3s ease;
-  
+
   &.tv-mode-layout {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 9999; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
     background-color: var(--bg-body);
   }
 }
@@ -94,88 +90,113 @@
   color: var(--text-muted) !important;
 }
 
-// Fiyatlar için font - Kalınlık senin istediğin gibi 600
 .font-financial {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
-  font-weight: 600; 
+  font-weight: 600;
   letter-spacing: -0.5px;
-  transition: color 1.5s ease-out; 
+  transition: color 1.5s ease-out;
+}
+
+.py-2 {
+    padding-top: 0.60rem !important;
+    padding-bottom: 0.60rem !important;
 }
 
 // --- FLASH ANİMASYONLARI ---
 .text-flash-up {
-  color: #2ecc71 !important; 
+  color: #2ecc71 !important;
   text-shadow: 0 0 5px rgba(46, 204, 113, 0.4);
   transition: none !important;
 }
 
 .text-flash-down {
-  color: #ff4757 !important; 
+  color: #ff4757 !important;
   text-shadow: 0 0 5px rgba(255, 71, 87, 0.4);
   transition: none !important;
 }
 
 // --- HEADER ---
 .header-section {
-  flex: 0 0 auto; z-index: 20;
+  flex: 0 0 auto;
+  z-index: 20;
   background-color: var(--bg-header);
   border-bottom: 1px solid var(--border-color) !important;
-  
+
   .tenant-name {
-      color: var(--text-main); // İsim rengi temaya göre
+    color: var(--text-main);
   }
 }
 
 // --- TICKER ---
 .ticker-wrap {
-  flex: 0 0 auto; width: 100%; overflow: hidden; height: 40px;
-  background-color: var(--bg-ticker); 
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: hidden;
+  height: 50px;
+  background-color: var(--bg-ticker);
   border-bottom: 1px solid var(--border-color);
-  display: flex; align-items: center;
-  
+  display: flex;
+  align-items: center;
+
   .ticker {
-    display: flex; white-space: nowrap; animation: ticker 60s linear infinite;
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 60s linear infinite;
     .ticker-item {
-      display: inline-flex; align-items: center; padding: 0 1.5rem;
-      font-family: "Segoe UI", sans-serif; font-weight: 500; font-size: 1.1rem;
-      .ticker-symbol { 
-          color: var(--text-main); // Sembol ana renk
-          margin-right: 8px; font-weight: 600; 
+      display: inline-flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      font-family: "Segoe UI", sans-serif;
+      font-weight: 500;
+      font-size: 2.3rem;
+      .ticker-symbol {
+        color: var(--text-main);
+        margin-right: 8px;
+        font-weight: 600;
       }
-      .ticker-divider { color: var(--border-color); margin-left: 15px; }
+      .ticker-divider {
+        color: var(--border-color);
+        margin-left: 15px;
+      }
     }
   }
 }
-@keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+@keyframes ticker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
 
 // --- İÇERİK ALANI VE KARTLAR ---
-.dashboard-content-area { flex: 1; min-height: 0; }
-.full-height-grid { height: 100%; }
+.dashboard-content-area {
+  flex: 1;
+  min-height: 0;
+}
+.full-height-grid {
+  height: 100%;
+}
 
 .card {
   border-radius: 6px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  
+
   .card-header {
     border-bottom: 1px solid var(--border-subtle);
-    
-    // Kart Başlığı Alanı
-    &.soft-gold-header { 
-        background-color: var(--card-header-bg); 
-        border-color: var(--card-header-border);
-        
-        // Kart Başlığı Rengi (Gold)
-        .card-title {
-             color: var(--text-title) !important; 
-        }
 
-        .icon-box { 
-            color: var(--text-title) !important; // İkon da Gold
-            background-color: var(--icon-bg) !important;
-        } 
+    &.soft-gold-header {
+      background-color: var(--card-header-bg);
+      border-color: var(--card-header-border);
+
+      .card-title {
+        color: var(--text-title) !important;
+      }
+
+      .icon-box {
+        color: var(--text-title) !important;
+        background-color: var(--icon-bg) !important;
+      }
     }
   }
 }
@@ -184,130 +205,127 @@
 .table-responsive {
   height: 100% !important;
   thead th {
-    background-color: var(--bg-card); // Header rengi kartla aynı olsun, sadece alt çizgi ayıran
-    border-bottom: 2px solid var(--border-color); 
-    
-    // Tablo başlıkları için özel renk (Veriden ayrışsın)
+    background-color: var(--bg-card);
+    border-bottom: 2px solid var(--border-color);
     color: var(--text-th);
-    
-    font-size: 0.8rem; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px; 
-    padding: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    // padding: 12px;
   }
   td {
-    padding: 8px 12px; vertical-align: middle; 
+    padding: 8px 12px;
+    vertical-align: middle;
     border-bottom: 1px solid var(--border-subtle) !important;
-    color: var(--text-main); // Veriler ana renk (Beyaz/Siyah)
+    color: var(--text-main);
   }
-  tr:last-child td { border-bottom: 0 !important; }
+  tr:last-child td {
+    border-bottom: 0 !important;
+  }
 }
 
-// Hover Efekti
+ .table-sm > :not(caption) > * > * {
+    padding-bottom: 0.1rem !important;
+    padding-top: 0.1rem !important;
+    padding-left : 1.5rem !important;
+  }
+
+// --- HOVER EFEKTLERİ ---
 .table-hover > tbody > tr:hover > * {
-    background-color: rgba(0, 0, 0, 0.03);
-    color: var(--text-main);
-}
-[data-theme="dark"] .table-hover > tbody > tr:hover > *,
-[data-theme="financial"] .table-hover > tbody > tr:hover > * {
-    background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--text-main), 0.03);
+  color: var(--text-main);
 }
 
 // --- DİĞER BİLEŞENLER ---
 .badge-soft {
+  background-color: var(--bg-ticker);
+  color: var(--text-main);
+  border-color: var(--border-subtle) !important;
+}
+
+.doviz-card h3 {
+  color: var(--text-main);
+}
+
+// Finansal modda döviz başlığı da Gold olsun
+.dashboard-wrapper[data-dashboard-theme="financial"] .doviz-card h3 {
+  color: var(--text-title);
+}
+
+.dropdown-item {
+  cursor: pointer;
+  &.active {
     background-color: var(--bg-ticker);
     color: var(--text-main);
-    border-color: var(--border-subtle) !important;
+    font-weight: 600;
+  }
+  &:hover {
+    background-color: var(--bg-ticker);
+  }
 }
 
-// Döviz kart başlığı (Özel durum)
-.doviz-card h3 {
-    color: var(--text-main); // Varsayılan
-}
-// Finansal modda döviz başlığı da Gold olsun
-:host-context([data-theme="financial"]) .doviz-card h3 {
-    color: var(--text-title);
-}
-
-// Dropdown Menü
-.dropdown-item {
-    cursor: pointer;
-    &.active {
-        background-color: var(--bg-ticker);
-        color: var(--text-main);
-        font-weight: 600;
-    }
-    &:hover {
-        background-color: var(--bg-ticker);
-    }
-}
-
+// --- ICON BOX ---
 .icon-box {
-  display: inline-flex;       // Flexbox yapısı
-  align-items: center;        // Dikeyde tam orta
-  justify-content: center;    // Yatayda tam orta
-  
-  width: 46px;                // Boyutu 2px büyüttüm daha ferah olsun
-  height: 46px; 
-  min-width: 46px; 
-  min-height: 46px;
-  
-  padding: 0;                 // İç boşlukları sıfırla
-  border-radius: 12px;        // Modern köşe
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 35px;
+  min-width: 35px;
+  min-height: 35px;
+  border-radius: 12px;
   flex-shrink: 0;
-  
-  // İKON AYARLARI
-  i { 
-      font-size: 1.7rem;      // İkon boyutu
-      line-height: 0;         // KRİTİK: Satır yüksekliğini sıfırla ki yukarı kaymasın
-      display: block;         // Block eleman gibi davransın
-      margin: 0;              // Dış boşluğu sıfırla
-      
-      // OPTİK DÜZELTME: 
-      // İkonlar bazen font yapısı gereği 1-2 piksel yukarıda durur. 
-      // Bunu dengelemek için çok hafif aşağı itiyoruz.
-      transform: translateY(1px); 
-      
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1)); 
+
+  i {
+    font-size: 1.5rem;
+    line-height: 0;
+    display: block;
+    margin: 0;
+    transform: translateY(1px);
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
   }
 
-  // 1. VARSAYILAN (LIGHT MODE)
+  // Varsayılan Light Stil
   background: linear-gradient(135deg, #fffbf0 0%, #fff3cd 100%);
   border: 1px solid #faeab8;
   color: #d48806;
 }
 
-// 2. DARK MODE İÇİN
-:host-context([data-theme="dark"]) .icon-box {
-    background: linear-gradient(135deg, #3d3014 0%, #2b2510 100%);
-    border: 1px solid #4a3e1b;
-    color: #f0b90b;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+// Dark Mode İkon Kutusu
+.dashboard-wrapper[data-dashboard-theme="dark"] .icon-box {
+  background: linear-gradient(135deg, #3d3014 0%, #2b2510 100%);
+  border: 1px solid #4a3e1b;
+  color: #f0b90b;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-// 3. FİNANSAL (MAVİ) TEMA (GLASSY & PREMIUM)
-:host-context([data-theme="financial"]) .icon-box {
-    // Glassmorphism (Buzlu cam etkisi)
-    background: rgba(255, 255, 255, 0.08); 
-    border: 1px solid rgba(230, 180, 80, 0.4); // Çerçeve biraz daha belirgin
-    color: #86754A; // Premium Gold Rengi
-    
-    // Hafif altın parlaması
-    box-shadow: inset 0 0 10px rgba(230, 180, 80, 0.1); 
-    
-    i {
-        // İkonun kendisine hafif parlama veriyoruz
-        filter: drop-shadow(0 0 8px rgba(230, 180, 80, 0.5)); 
-    }
+// Financial Mode İkon Kutusu
+.dashboard-wrapper[data-dashboard-theme="financial"] .icon-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(230, 180, 80, 0.4);
+  color: var(--text-title);
+  box-shadow: inset 0 0 10px rgba(230, 180, 80, 0.1);
+  i {
+    filter: drop-shadow(0 0 8px rgba(230, 180, 80, 0.5));
+  }
 }
 
-.live-blink { animation: blinker 1.5s infinite ease-in-out; }
-@keyframes blinker { 50% { opacity: 0; } }
+.live-blink {
+  animation: blinker 1.5s infinite ease-in-out;
+}
+@keyframes blinker {
+  50% { opacity: 0; }
+}
 
-// Kenarlık Animasyonu
-@keyframes borderFlashGreen { 0% { border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); } 100% { border-color: transparent; } }
-@keyframes borderFlashRed { 0% { border-color: #ff4757; box-shadow: 0 0 10px rgba(255, 71, 87, 0.2); } 100% { border-color: transparent; } }
+@keyframes borderFlashGreen {
+  0% { border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
+  100% { border-color: transparent; }
+}
+@keyframes borderFlashRed {
+  0% { border-color: #ff4757; box-shadow: 0 0 10px rgba(255, 71, 87, 0.2); }
+  100% { border-color: transparent; }
+}
 
 .flash-border-up { animation: borderFlashGreen 1s ease-out; }
 .flash-border-down { animation: borderFlashRed 1s ease-out; }

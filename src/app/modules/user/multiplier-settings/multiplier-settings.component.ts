@@ -18,7 +18,7 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
-    .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    .table-hover tbody tr:hover { background-color: rgba(var(--vz-primary-rgb), 0.05); }
     .action-btn { transition: all 0.2s; }
     .action-btn:hover { transform: scale(1.1); }
     .cursor-grab { cursor: grab; }
@@ -29,14 +29,14 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
         box-sizing: border-box;
         border-radius: 4px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        background: #fff;
+        background: var(--vz-card-bg-custom, #fff);
         display: table;
         width: 100%;
     }
     .cdk-drag-preview td {
         padding: 8px;
         vertical-align: middle;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
     }
     .cdk-drag-placeholder {
         opacity: 0;
@@ -45,7 +45,7 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
         transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
     }
     .draggable-row:active {
-        background-color: #f8f9fa;
+        background-color: rgba(var(--vz-primary-rgb), 0.05);
     }
   `]
 })
@@ -79,7 +79,6 @@ export class MultiplierSettingsComponent implements OnInit {
       next: (res) => {
         const formattedData = res.map((item) => ({
           ...item,
-          // Formatlanmış string değerler
           buyMultiplier: this.formatNumber(item.buyMultiplier),
           sellMultiplier: this.formatNumber(item.sellMultiplier),
           addonAmount: this.formatNumber(item.addonAmount)
@@ -108,23 +107,41 @@ export class MultiplierSettingsComponent implements OnInit {
 
     this.groupedSettings = Object.keys(groups).map(key => ({
       category: key,
-      // KRİTİK NOKTA: Backend'den geleni orderIndex'e göre kesinlikle sıralıyoruz.
       items: groups[key].sort((a: any, b: any) => (a.orderIndex || 9999) - (b.orderIndex || 9999))
     }));
   }
 
+  // --- KREDİ KARTI ÖZEL MANTIK ---
+  
+  /**
+   * Seçili kategori ID'sinin "Kredi Kartı" olup olmadığını kontrol eder
+   */
+  isCreditCard(categoryId: string): boolean {
+    const cat = this.categories.find(c => c.id === categoryId);
+    return cat?.name === 'Kredi Kartı';
+  }
+
+  /**
+   * Kategori değiştiğinde tetiklenir
+   */
+  onCategoryChange(event: any) {
+    if (this.isCreditCard(this.newProduct.categoryId)) {
+      // Kredi kartı ise alış çarpanını pasifize et (0 gönder)
+      this.newProduct.buyMultiplier = '0,00';
+    } else {
+      this.newProduct.buyMultiplier = '1,0000';
+    }
+  }
+
   // --- DRAG & DROP FONKSİYONU ---
   onDrop(event: CdkDragDrop<any[]>, groupItems: any[]) {
-    // 1. UI'da yerini değiştir
     moveItemInArray(groupItems, event.previousIndex, event.currentIndex);
 
-    // 2. Yeni sıraları oluştur (1'den başlayarak)
     const reorderedList: UpdateProductOrderDto[] = groupItems.map((item, index) => ({
         productId: item.id,
         newIndex: index + 1
     }));
 
-    // 3. Backend'e gönder (Sessizce kaydet)
     this.settingsService.updateProductOrder(reorderedList).subscribe({
         next: () => console.log('Sıralama güncellendi'),
         error: () => Swal.fire('Hata', 'Sıralama kaydedilemedi.', 'error')
@@ -148,7 +165,8 @@ export class MultiplierSettingsComponent implements OnInit {
         name: this.editingProduct.name,
         categoryId: this.editingProduct.categoryId,
         sourceKey: this.editingProduct.sourceKey,
-        buyMultiplier: this.parseCurrency(this.editingProduct.buyMultiplier),
+        // Kredi kartı ise alış çarpanını 0 gönderiyoruz
+        buyMultiplier: this.isCreditCard(this.editingProduct.categoryId) ? 0 : this.parseCurrency(this.editingProduct.buyMultiplier),
         sellMultiplier: this.parseCurrency(this.editingProduct.sellMultiplier),
         addonAmount: this.parseCurrency(this.editingProduct.addonAmount),
         isActive: this.editingProduct.isActive
@@ -187,7 +205,8 @@ export class MultiplierSettingsComponent implements OnInit {
         id: item.id,
         name: item.name,
         categoryId: item.categoryId,
-        buyMultiplier: this.parseCurrency(item.buyMultiplier),
+        // Kredi kartı grubundaysa alış çarpanını 0, değilse girilen değeri gönder
+        buyMultiplier: item.categoryName === 'Kredi Kartı' ? 0 : this.parseCurrency(item.buyMultiplier),
         sellMultiplier: this.parseCurrency(item.sellMultiplier),
         addonAmount: this.parseCurrency(item.addonAmount),
         isActive: item.isActive
@@ -213,7 +232,7 @@ export class MultiplierSettingsComponent implements OnInit {
       name: this.newProduct.name,
       categoryId: this.newProduct.categoryId,
       sourceKey: this.newProduct.sourceKey,
-      buyMultiplier: this.parseCurrency(this.newProduct.buyMultiplier),
+      buyMultiplier: this.isCreditCard(this.newProduct.categoryId) ? 0 : this.parseCurrency(this.newProduct.buyMultiplier),
       sellMultiplier: this.parseCurrency(this.newProduct.sellMultiplier),
       addonAmount: this.parseCurrency(this.newProduct.addonAmount),
       orderIndex: 99
@@ -258,12 +277,13 @@ export class MultiplierSettingsComponent implements OnInit {
 
   // --- UTILS ---
   formatNumber(val: number): string {
-    return val != null ? val.toString().replace('.', ',') : '';
+    return val != null ? val.toString().replace('.', ',') : '0,00';
   }
 
   parseCurrency(val: any): number {
     if (!val) return 0;
     if (typeof val === 'number') return val;
-    return parseFloat(val.toString().replace(',', '.'));
+    const cleanVal = val.toString().replace(',', '.');
+    return parseFloat(cleanVal) || 0;
   }
 }

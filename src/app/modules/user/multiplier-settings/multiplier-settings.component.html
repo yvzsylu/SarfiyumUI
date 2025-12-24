@@ -1,11 +1,10 @@
 <div class="row justify-content-center">
     <div class="col-lg-12">
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center border-bottom">
                 <div>
                     <h4 class="card-title mb-1 text-primary fw-bold">Ürün & Çarpan Yönetimi</h4>
-                    <p class="text-muted small mb-0">Mağazanızda gösterilecek ürünleri ve kar marjlarını buradan
-                        yönetebilirsiniz.</p>
+                    <p class="text-muted small mb-0">Mağazanızda gösterilecek ürünleri ve kar marjlarını buradan yönetebilirsiniz.</p>
                 </div>
 
                 <div class="d-flex gap-2">
@@ -20,31 +19,29 @@
             </div>
 
             <div class="card-body p-4">
-
                 <div *ngIf="isLoading && groupedSettings.length === 0" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="mt-2 text-muted">Ayarlar yükleniyor...</p>
                 </div>
 
                 <div *ngIf="!isLoading || groupedSettings.length > 0">
-
                     <div *ngFor="let group of groupedSettings" class="mb-5">
-                        <h5 class="text-dark fw-bold border-bottom pb-2 mb-3 d-flex align-items-center">
-                            <span class="badge bg-light text-primary border me-2">{{ group.items.length }}</span>
+                        <h5 class="fw-bold border-bottom pb-2 mb-3 d-flex align-items-center">
+                            <span class="badge bg-primary-subtle text-primary border me-2">{{ group.items.length }}</span>
                             {{ group.category }}
                             <small class="text-muted ms-auto fs-6 fw-normal">
-                                <i class="bx bx-info-circle me-1"></i>Sıralamak için <i class="bx bx-menu fw-bold"></i> ikonundan tutarak sürükleyin
+                                <i class="bx bx-info-circle me-1"></i>Sıralamak için sürükleyin
                             </small>
                         </h5>
 
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle table-hover">
-                                <thead class="table-light">
+                                <thead class="bg-light-subtle">
                                     <tr>
-                                        <th style="width: 50px;" class="text-center bg-light"><i class="bx bx-move"></i></th>
+                                        <th style="width: 50px;" class="text-center"><i class="bx bx-move"></i></th>
                                         <th style="width: 5%" class="text-center">Durum</th>
                                         <th style="width: 25%">Ürün Adı</th>
-                                        <th>Alış Çarpanı</th>
+                                        <th *ngIf="group.category !== 'Kredi Kartı'">Alış Çarpanı</th>
                                         <th>Satış Çarpanı</th>
                                         <th>Sabit Makas (TL)</th>
                                         <th style="width: 10%" class="text-center">İşlem</th>
@@ -52,14 +49,11 @@
                                 </thead>
                                 
                                 <tbody cdkDropList (cdkDropListDropped)="onDrop($event, group.items)">
-                                    
                                     <tr *ngFor="let item of group.items" 
                                         cdkDrag 
                                         [cdkDragData]="item"
-                                        [class.table-light]="!item.isActive"
-                                        class="draggable-row bg-white">
-
-                                        <div *cdkDragPlaceholder class="custom-placeholder"></div>
+                                        [class.opacity-50]="!item.isActive"
+                                        class="draggable-row">
 
                                         <td class="text-center cursor-grab text-muted" cdkDragHandle>
                                             <i class="bx bx-menu fs-4"></i>
@@ -68,50 +62,46 @@
                                         <td class="text-center">
                                             <div class="form-check form-switch d-flex justify-content-center">
                                                 <input class="form-check-input" type="checkbox" role="switch"
-                                                    [(ngModel)]="item.isActive" title="Aktif/Pasif"
-                                                    style="cursor: pointer;">
+                                                    [(ngModel)]="item.isActive">
                                             </div>
                                         </td>
 
                                         <td>
-                                            <input type="text" class="form-control fw-bold border-0 bg-transparent"
+                                            <input type="text" class="form-control fw-bold border-0 bg-transparent text-body"
                                                 [(ngModel)]="item.name" [disabled]="!item.isActive">
                                         </td>
 
-                                        <td>
+                                        <td *ngIf="group.category !== 'Kredi Kartı'">
                                             <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control fw-semibold"
+                                                <input type="text" class="form-control fw-semibold bg-transparent text-body"
                                                     [(ngModel)]="item.buyMultiplier" appDecimalComma
-                                                    [disabled]="!item.isActive" placeholder="1,0000">
-                                                <span class="input-group-text text-muted bg-light">x</span>
+                                                    [disabled]="!item.isActive">
+                                                <span class="input-group-text text-muted bg-light-subtle">x</span>
                                             </div>
                                         </td>
 
                                         <td>
                                             <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control fw-semibold"
+                                                <input type="text" class="form-control fw-semibold bg-transparent text-body"
                                                     [(ngModel)]="item.sellMultiplier" appDecimalComma
-                                                    [disabled]="!item.isActive" placeholder="1,0000">
-                                                <span class="input-group-text text-muted bg-light">x</span>
+                                                    [disabled]="!item.isActive">
+                                                <span class="input-group-text text-muted bg-light-subtle">x</span>
                                             </div>
                                         </td>
 
                                         <td>
                                             <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" [(ngModel)]="item.addonAmount"
-                                                    appDecimalComma [disabled]="!item.isActive" placeholder="0,00">
-                                                <span class="input-group-text text-muted bg-light">₺</span>
+                                                <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="item.addonAmount"
+                                                    appDecimalComma [disabled]="!item.isActive">
+                                                <span class="input-group-text text-muted bg-light-subtle">₺</span>
                                             </div>
                                         </td>
 
                                         <td class="text-center" style="white-space: nowrap;">
-                                            <button class="btn btn-sm btn-icon btn-outline-primary border-0 me-1"
-                                                (click)="openEditModal(item)" title="Detaylı Düzenle">
+                                            <button class="btn btn-sm btn-icon btn-soft-primary me-1" (click)="openEditModal(item)">
                                                 <i class="bx bx-pencil fs-5"></i>
                                             </button>
-
-                                            <button class="btn btn-sm btn-icon btn-outline-danger border-0"
-                                                (click)="deleteProduct(item.id)" title="Sil">
+                                            <button class="btn btn-sm btn-icon btn-soft-danger" (click)="deleteProduct(item.id)">
                                                 <i class="bx bx-trash fs-5"></i>
                                             </button>
                                         </td>
@@ -120,7 +110,6 @@
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -128,85 +117,79 @@
 </div>
 
 <ng-template #addProductModal let-modal>
-    <div class="modal-header bg-light">
+    <div class="modal-header bg-light-subtle">
         <h5 class="modal-title fw-bold text-success">
             <i class="bx bx-plus-circle me-2"></i>Yeni Ürün Oluştur
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body p-4">
         <form>
             <div class="mb-3">
                 <label class="form-label fw-bold text-muted small">Kategori</label>
-                <select class="form-select" [(ngModel)]="newProduct.categoryId" name="category">
+                <select class="form-select bg-transparent text-body" [(ngModel)]="newProduct.categoryId" name="category" (change)="onCategoryChange($event)">
                     <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
                 </select>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold text-muted small">Ürün Adı</label>
-                <input type="text" class="form-control fw-bold" [(ngModel)]="newProduct.name" name="name"
-                    placeholder="Örn: 22 Ayar Halhal">
+                <input type="text" class="form-control fw-bold bg-transparent text-body" [(ngModel)]="newProduct.name" name="name" placeholder="Örn: 22 Ayar Halhal">
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold text-muted small">Kaynak Veri (Endeks)</label>
-                <select class="form-select bg-light" [(ngModel)]="newProduct.sourceKey" name="sourceKey" disabled>
+                <select class="form-select bg-light-subtle text-body" [(ngModel)]="newProduct.sourceKey" name="sourceKey" disabled>
                     <option value="ALTIN">Has Altın (ALTIN)</option>
                     <option value="USDTRY">Dolar (USDTRY)</option>
                     <option value="EURTRY">Euro (EURTRY)</option>
                     <option value="ONS">Ons Altın (ONS)</option>
                     <option value="GUMTRY">Gümüş (GUMTRY)</option>
                 </select>
-                <div class="form-text fst-italic small">
-                    <i class="bx bx-info-circle me-1"></i> Yeni oluşturulan ürünler varsayılan olarak <strong>Has Altın</strong> endeksli oluşturulur.
+                <div class="form-text fst-italic small text-muted">
+                    <i class="bx bx-info-circle me-1"></i> Yeni ürünler varsayılan olarak <strong>Has Altın</strong> endekslidir.
                 </div>
             </div>
             <hr class="text-muted opacity-25">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-4" *ngIf="!isCreditCard(newProduct.categoryId)">
                     <label class="form-label fw-bold small">Alış Çarpanı</label>
-                    <input type="text" class="form-control" [(ngModel)]="newProduct.buyMultiplier" name="buy"
-                        appDecimalComma placeholder="0,916">
+                    <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="newProduct.buyMultiplier" name="buy" appDecimalComma>
                 </div>
-                <div class="col-md-4">
+                <div [class]="isCreditCard(newProduct.categoryId) ? 'col-md-6' : 'col-md-4'">
                     <label class="form-label fw-bold small">Satış Çarpanı</label>
-                    <input type="text" class="form-control" [(ngModel)]="newProduct.sellMultiplier" name="sell"
-                        appDecimalComma placeholder="0,930">
+                    <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="newProduct.sellMultiplier" name="sell" appDecimalComma>
                 </div>
-                <div class="col-md-4">
+                <div [class]="isCreditCard(newProduct.categoryId) ? 'col-md-6' : 'col-md-4'">
                     <label class="form-label fw-bold small">Ek Makas (TL)</label>
-                    <input type="text" class="form-control" [(ngModel)]="newProduct.addonAmount" name="addon"
-                        appDecimalComma placeholder="0,00">
+                    <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="newProduct.addonAmount" name="addon" appDecimalComma>
                 </div>
             </div>
         </form>
     </div>
-    <div class="modal-footer bg-light border-top-0">
+    <div class="modal-footer bg-light-subtle">
         <button type="button" class="btn btn-secondary px-4" (click)="modal.dismiss()">İptal</button>
-        <button type="button" class="btn btn-success px-4" (click)="createProduct()" [disabled]="!newProduct.name">
-            <i class="bx bx-check me-1"></i> Oluştur
-        </button>
+        <button type="button" class="btn btn-success px-4" (click)="createProduct()" [disabled]="!newProduct.name">Oluştur</button>
     </div>
 </ng-template>
 
 <ng-template #editProductModal let-modal>
-    <div class="modal-header bg-light">
+    <div class="modal-header bg-light-subtle">
         <h5 class="modal-title fw-bold text-primary">
             <i class="bx bx-edit me-2"></i>Ürün Düzenle
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body p-4">
         <form>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">Kategori</label>
-                    <select class="form-select" [(ngModel)]="editingProduct.categoryId" name="editCategory">
+                    <select class="form-select bg-transparent text-body" [(ngModel)]="editingProduct.categoryId" name="editCategory">
                         <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">Kaynak (Endeks)</label>
-                    <select class="form-select bg-light" [(ngModel)]="editingProduct.sourceKey" name="editSource" disabled>
+                    <select class="form-select bg-light-subtle text-body" [(ngModel)]="editingProduct.sourceKey" name="editSource" disabled>
                         <option value="ALTIN">Has Altın (ALTIN)</option>
                         <option value="USDTRY">Dolar (USDTRY)</option>
                         <option value="EURTRY">Euro (EURTRY)</option>
@@ -216,45 +199,38 @@
                             {{ editingProduct.sourceKey }}
                         </option>
                     </select>
-                    <div class="form-text fst-italic small">Ürün kaynağı sonradan değiştirilemez.</div>
                 </div>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted">Ürün Adı</label>
-                <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.name" name="editName">
+                <input type="text" class="form-control fw-bold bg-transparent text-body" [(ngModel)]="editingProduct.name" name="editName">
             </div>
             <hr class="text-muted opacity-25">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-4" *ngIf="editingProduct.categoryName !== 'Kredi Kartı'">
                     <label class="form-label fw-bold small text-success">Alış Çarpanı</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.buyMultiplier" name="editBuy" appDecimalComma>
-                    </div>
+                    <input type="text" class="form-control fw-bold bg-transparent text-body" [(ngModel)]="editingProduct.buyMultiplier" name="editBuy" appDecimalComma>
                 </div>
-                <div class="col-md-4">
+                <div [class]="editingProduct.categoryName === 'Kredi Kartı' ? 'col-md-6' : 'col-md-4'">
                     <label class="form-label fw-bold small text-danger">Satış Çarpanı</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.sellMultiplier" name="editSell" appDecimalComma>
-                    </div>
+                    <input type="text" class="form-control fw-bold bg-transparent text-body" [(ngModel)]="editingProduct.sellMultiplier" name="editSell" appDecimalComma>
                 </div>
-                <div class="col-md-4">
+                <div [class]="editingProduct.categoryName === 'Kredi Kartı' ? 'col-md-6' : 'col-md-4'">
                     <label class="form-label fw-bold small text-primary">Ek Makas (TL)</label>
                     <div class="input-group">
-                        <input type="text" class="form-control fw-bold" [(ngModel)]="editingProduct.addonAmount" name="editAddon" appDecimalComma>
-                        <span class="input-group-text">₺</span>
+                        <input type="text" class="form-control fw-bold bg-transparent text-body" [(ngModel)]="editingProduct.addonAmount" name="editAddon" appDecimalComma>
+                        <span class="input-group-text bg-light-subtle text-muted">₺</span>
                     </div>
                 </div>
             </div>
-            <div class="mt-4 form-check form-switch bg-light p-3 rounded border d-flex align-items-center gap-3">
+            <div class="mt-4 form-check form-switch bg-light-subtle p-3 rounded border d-flex align-items-center gap-3">
                 <input class="form-check-input ms-0" type="checkbox" role="switch" id="editActive" [(ngModel)]="editingProduct.isActive" name="editActive" style="transform: scale(1.3);">
                 <label class="form-check-label fw-bold cursor-pointer" for="editActive">Ürün Yayında (Aktif)</label>
             </div>
         </form>
     </div>
-    <div class="modal-footer bg-light border-top-0">
+    <div class="modal-footer bg-light-subtle">
         <button type="button" class="btn btn-secondary px-4" (click)="modal.dismiss()">Vazgeç</button>
-        <button type="button" class="btn btn-primary px-4" (click)="saveEditedProduct()">
-            <i class="bx bx-save me-1"></i> Güncelle
-        </button>
+        <button type="button" class="btn btn-primary px-4" (click)="saveEditedProduct()">Güncelle</button>
     </div>
 </ng-template>

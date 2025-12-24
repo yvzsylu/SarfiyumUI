@@ -1,0 +1,34 @@
+// Sürükle bırak sırasında satırın görünümü
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  display: table;
+  background-color: var(--vz-card-bg-custom, #fff); // Temaya duyarlı arka plan
+}
+
+.draggable-row {
+  transition: background-color 0.2s;
+  background-color: transparent !important; // Satır arka planını temizle
+}
+
+// Input odaklandığında veya devre dışı kaldığında görünüm
+.form-control:disabled {
+  background-color: rgba(var(--vz-light-rgb), 0.5) !important;
+  opacity: 0.6;
+}
+
+// Karanlık modda tablo kenarlıkları ve yazı renkleri için düzeltme
+:host-context([data-layout-mode="dark"]) {
+  .table-bordered {
+    border-color: #323940;
+  }
+  .input-group-text {
+    background-color: #212529;
+    border-color: #323940;
+    color: #adb5bd;
+  }
+}
+
+.cursor-grab { cursor: grab; }
+.cursor-grab:active { cursor: grabbing; }
