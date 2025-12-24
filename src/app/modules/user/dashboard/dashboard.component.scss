@@ -115,6 +115,18 @@
   transition: none !important;
 }
 
+.tenant-name {
+  // Buradaki fontu yukarıdakilerden biriyle değiştir:
+  font-family: 'Montserrat', sans-serif !important; 
+  
+  font-size: 4.5rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--text-main), #86754a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
 
 .tenant-logo {
   height: 50px;
