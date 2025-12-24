@@ -4,7 +4,7 @@
     <div class="container-fluid px-3 py-1 d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center gap-3">
         <ng-container *ngIf="user$ | async as user">
-          <img *ngIf="user.tenantLogoUrl" class="rounded-3" [src]="apiRoot + user.tenantLogoUrl"
+          <img *ngIf="user.tenantLogoUrl" class="rounded-3 tenant-logo" [src]="apiRoot + user.tenantLogoUrl"
             onerror="this.onerror=null; this.src='assets/images/users/user-dummy-img.jpg'">
 
           <div *ngIf="!user.tenantLogoUrl"
@@ -14,7 +14,7 @@
           </div>
 
           <div class="d-flex flex-column">
-            <h2 class="mb-0 fw-bold base-text ls-1 tenant-name" style="font-size: 4rem; line-height: 1;">
+            <h2 class="mb-0 fw-bold base-text ls-1 tenant-name" style="font-size: 5rem; line-height: 1;">
               {{ (user.tenantName || 'SARFİYUM').toLocaleUpperCase('tr-TR') }}
             </h2>
           </div>
@@ -23,7 +23,7 @@
 
       <div class="d-flex align-items-center gap-3">
         <div class="text-end lh-1">
-          <div class="fw-bold font-financial base-text" style="font-size: 4.5rem;">
+          <div class="fw-bold font-financial base-text" style="font-size: 6rem;">
             {{ currentTime | date:'HH:mm' }}<span class="fs-4 text-muted ms-1 opacity-75">{{ currentTime | date:'ss' }}</span>
           </div>
           
@@ -78,7 +78,6 @@
             <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
             <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
           </span>
-          <span class="ticker-divider">|</span>
         </div>
       </ng-container>
     </div>
@@ -90,7 +89,7 @@
       <div class="col-xl-6 col-lg-6 h-100">
         <div class="card h-100 shadow-sm border-0 market-card">
           <div class="card-header soft-gold-header py-2 px-3">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.2rem;">
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
               <span class="icon-box"><i class="bx bx-diamond"></i></span>
               SARRAFİYE
             </h4>
@@ -107,18 +106,21 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of madenList; trackBy: trackBySymbol">
-                    <td class="ps-4 fw-semibold base-text" style="font-size: 2.85rem;">{{ item.description || item.symbol }}</td>
-                    <td class="text-end font-financial base-text" style="font-size: 2.85rem;" [ngClass]="item.flashCss">
+                    <td class="ps-4 fw-semibold base-text" style="font-size: 3.25rem;">{{ item.description || item.symbol }}</td>
+                    <td class="text-end font-financial base-text" style="font-size: 3.25rem;" [ngClass]="item.flashCss">
                       {{ item.bid | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     </td>
-                    <td class="text-end font-financial base-text pe-4" style="font-size: 2.85rem;" [ngClass]="item.flashCss">
+                    <td class="text-end font-financial base-text pe-4" style="font-size: 3.25rem;" [ngClass]="item.flashCss">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     </td>
                   </tr>
+                  <tr *ngIf="madenList.length === 0">
+                    <td colspan="3" class="text-center text-muted py-2">Veri bekleniyor...</td>
+                </tr>
                 </tbody>
               </table>
             </div>
@@ -143,13 +145,13 @@
                 <div class="row g-0 align-items-end">
                   <div class="col-6 border-end">
                     <small class="text-muted fw-bold d-block mb-1 fs-4">ALIŞ</small>
-                    <span class="display-6 font-financial base-text" style="font-size: 3.1rem;" [ngClass]="item.flashCss">
+                    <span class="display-6 font-financial base-text" style="font-size: 4rem;" [ngClass]="item.flashCss">
                       {{ item.bid | number:'1.4-4' }}
                     </span>
                   </div>
                   <div class="col-6  text-end">
                     <small class="text-muted fw-bold d-block mb-1 fs-4">SATIŞ</small>
-                    <span class="display-6 font-financial base-text" style="font-size: 3.1rem;" [ngClass]="item.flashCss">
+                    <span class="display-6 font-financial base-text" style="font-size: 4rem;" [ngClass]="item.flashCss">
                       {{ item.ask | number:'1.4-4' }}
                     </span>
                   </div>
@@ -161,7 +163,7 @@
 
         <div class="card shadow-sm border-0 flex-grow-1">
           <div class="card-header soft-gold-header py-2 px-3">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.2rem;">
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
               <span class="icon-box"><i class="bx bx-doughnut-chart"></i></span>
               BİLEZİK
             </h4>
@@ -177,9 +179,12 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of bilezikList; trackBy: trackBySymbol">
-                  <td class="ps-3 fw-semibold fs-1 base-text">{{ item.description }}</td>
-                  <td class="text-end font-financial base-text" style="font-size: 2.5rem;" [ngClass]="item.flashCss">{{ item.bid | number:'1.2-2' }}</td>
-                  <td class="text-end pe-3 font-financial base-text" style="font-size: 2.5rem;" [ngClass]="item.flashCss">{{ item.ask | number:'1.2-2' }}</td>
+                  <td class="ps-3 fw-semibold base-text" style="font-size: 2.9rem">{{ item.description }}</td>
+                  <td class="text-end font-financial base-text" style="font-size: 2.9rem;" [ngClass]="item.flashCss">{{ item.bid | number:'1.2-2' }}</td>
+                  <td class="text-end pe-3 font-financial base-text" style="font-size: 2.9rem;" [ngClass]="item.flashCss">{{ item.ask | number:'1.2-2' }}</td>
+                </tr>
+                <tr *ngIf="bilezikList.length === 0">
+                    <td colspan="3" class="text-center text-muted py-2">Veri bekleniyor...</td>
                 </tr>
               </tbody>
             </table>
@@ -188,7 +193,7 @@
 
         <div class="card shadow-sm border-0 flex-grow-1">
           <div class="card-header soft-gold-header py-2 px-3">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.2rem;">
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
               <span class="icon-box"><i class="bx bx-medal"></i></span>
               ATA & REŞAT
             </h4>
@@ -204,9 +209,9 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of ataResatList; trackBy: trackBySymbol">
-                  <td class="ps-3 fw-semibold fs-1 base-text">{{ item.description }}</td>
-                  <td class="text-end font-financial base-text" style="font-size: 2.5rem;" [ngClass]="item.flashCss">{{ item.bid | number:'1.2-2' }}</td>
-                  <td class="text-end pe-3 font-financial base-text" style="font-size: 2.5rem;" [ngClass]="item.flashCss">{{ item.ask | number:'1.2-2' }}</td>
+                  <td class="ps-3 fw-semibold base-text" style="font-size: 2.9rem">{{ item.description }}</td>
+                  <td class="text-end font-financial base-text" style="font-size: 2.9rem" [ngClass]="item.flashCss">{{ item.bid | number:'1.2-2' }}</td>
+                  <td class="text-end pe-3 font-financial base-text" style="font-size: 2.9rem;" [ngClass]="item.flashCss">{{ item.ask | number:'1.2-2' }}</td>
                 </tr>
                 <tr *ngIf="ataResatList.length === 0">
                     <td colspan="3" class="text-center text-muted py-2">Veri bekleniyor...</td>
@@ -218,7 +223,7 @@
 
         <div class="card shadow-sm border-0">
           <div class="card-header soft-gold-header py-2 px-3">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.2rem;">
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
               <span class="icon-box"><i class="bx bx-credit-card-front"></i></span>
               KREDİ KARTI FİYATLARI
             </h4>
@@ -233,10 +238,13 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of krediList; trackBy: trackBySymbol">
-                  <td class="ps-3 fw-semibold base-text " style="font-size: 2.5rem;">{{ item.description }}</td>
-                  <td class="text-end pe-3 font-financial base-text " style="font-size: 2.5rem;" [ngClass]="item.flashCss">
+                  <td class="ps-3 fw-semibold base-text " style="font-size: 2.9rem;">{{ item.description }}</td>
+                  <td class="text-end pe-3 font-financial base-text " style="font-size: 2.9rem;" [ngClass]="item.flashCss">
                     {{ item.ask | number:'1.2-2' }}
                   </td>
+                </tr>
+                <tr *ngIf="krediList.length === 0">
+                    <td colspan="2" class="text-center text-muted py-2">Veri bekleniyor...</td>
                 </tr>
               </tbody>
             </table>
@@ -247,7 +255,7 @@
     </div>
   </div>
 
-  <footer class="text-center text-muted small fw-bold opacity-75 fixed-bottom pb-1 border-top bg-card" *ngIf="isTvMode">
+  <footer class="text-center text-muted small fw-bold opacity-75 fixed-bottom pb-1 bg-card" *ngIf="isTvMode">
     SARFİYUM PİYASALAR &copy; {{ currentTime | date:'yyyy' }}
   </footer>
 </div>

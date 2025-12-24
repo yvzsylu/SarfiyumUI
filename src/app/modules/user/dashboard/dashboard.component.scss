@@ -111,6 +111,13 @@
   transition: none !important;
 }
 
+
+.tenant-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
 .text-flash-down {
   color: #ff4757 !important;
   text-shadow: 0 0 5px rgba(255, 71, 87, 0.4);
@@ -145,6 +152,7 @@
     white-space: nowrap;
     animation: ticker 60s linear infinite;
     .ticker-item {
+      border-left: 1px solid rgb(179, 179, 179);
       display: inline-flex;
       align-items: center;
       padding: 0 1.5rem;
@@ -155,10 +163,6 @@
         color: var(--text-main);
         margin-right: 8px;
         font-weight: 600;
-      }
-      .ticker-divider {
-        color: var(--border-color);
-        margin-left: 15px;
       }
     }
   }
