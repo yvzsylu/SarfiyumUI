@@ -5,8 +5,10 @@ import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { jwtDecode } from 'jwt-decode'; // 🔥 1. IMPORT EKLENDİ
 
 import { GoldHubService } from './services/gold-hub.service';
+import { AuthenticationService } from '@/app/core/services/auth.service'; // 🔥 2. IMPORT EKLENDİ
 import { getUser } from '@store/authentication/authentication.selector';
 import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/environment';
@@ -27,7 +29,10 @@ type ThemeType = 'light' | 'dark' | 'financial';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class UserDashboardComponent implements OnInit, OnDestroy {
+  
+  // Servisler
   private goldHub = inject(GoldHubService);
+  private authService = inject(AuthenticationService); // 🔥 3. SERVİS INJECT EDİLDİ
   private store = inject(Store);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
@@ -54,7 +59,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   madenList: DashboardPriceItem[] = [];
   dovizList: DashboardPriceItem[] = [];
   bilezikList: DashboardPriceItem[] = [];
-  ataResatList: DashboardPriceItem[] = []; // 🔥 Yeni Liste
+  ataResatList: DashboardPriceItem[] = [];
   krediList: DashboardPriceItem[] = [];
 
   currentTime = new Date();
@@ -64,8 +69,10 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   
   private subs: Subscription[] = [];
   private timeInterval: any;
+  private logoutTimer: any; // 🔥 4. TIMER DEĞİŞKENİ
 
   ngOnInit(): void {
+    // Tema Ayarları
     const savedTheme = localStorage.getItem('dashboard_theme') as ThemeType;
     if (savedTheme) {
       this.setTheme(savedTheme);
@@ -74,8 +81,11 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.user$ = this.store.select(getUser);
+    
+    // Hub Başlat
     this.goldHub.startConnection();
 
+    // Veri Akışı
     const priceSub = this.goldHub.prices$.subscribe(data => {
       if (data && data.length > 0) {
         const incomingData = data as DashboardPriceItem[];
@@ -88,7 +98,62 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.subs.push(priceSub);
 
     this.startClock();
+
+    // 🔥 5. AUTO LOGOUT MANTIĞINI BAŞLAT
+    this.initAutoLogout();
   }
+
+  // =================================================================
+  // 🔥 AUTO LOGOUT LOGIC START
+  // =================================================================
+  initAutoLogout() {
+    const user = this.authService.user;
+
+    // Kullanıcıda 'viewer' rolü var mı kontrol et
+    const isViewer = user?.roles?.some(r => r.toLowerCase() === 'viewer');
+
+    if (isViewer) {
+      const token = this.authService.session; 
+      if (!token) return;
+
+      try {
+        const decoded: any = jwtDecode(token);
+        const expTimestamp = decoded.exp; // Unix timestamp (saniye)
+
+        if (expTimestamp) {
+          const expirationDate = new Date(expTimestamp * 1000); // Milisaniyeye çevir
+          const now = new Date();
+          
+          // Kalan süreyi hesapla
+          const timeLeft = expirationDate.getTime() - now.getTime();
+
+          // Konsola bilgi bas (Debug için)
+          console.log(`👁️ Viewer Modu Aktif. Kalan Süre: ${(timeLeft / 1000 / 60).toFixed(2)} dakika.`);
+
+          if (timeLeft > 0) {
+            // Süre dolduğunda çalışacak sayaç
+            this.logoutTimer = setTimeout(() => {
+              this.handleExpiration();
+            }, timeLeft);
+          } else {
+            // Süre zaten geçmişse hemen at
+            this.handleExpiration();
+          }
+        }
+      } catch (error) {
+        console.error('Token decode hatası:', error);
+      }
+    }
+  }
+
+  handleExpiration() {
+    // Çıkış yap ve login'e gönder
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
+  }
+  // =================================================================
+  // 🔥 AUTO LOGOUT LOGIC END
+  // =================================================================
 
   setTheme(theme: ThemeType) {
     this.currentTheme = theme;
@@ -104,7 +169,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
         case 'Maden': targetList = this.madenList; break;
         case 'Döviz': targetList = this.dovizList; break;
         case 'Bilezik': targetList = this.bilezikList; break;
-        case 'Ata & Reşat': targetList = this.ataResatList; break; // 🔥 Yeni Kategori Match
+        case 'Ata & Reşat': targetList = this.ataResatList; break;
         case 'Kredi Kartı': targetList = this.krediList; break;
         default: targetList = this.madenList; break;
       }
@@ -177,6 +242,10 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
     if (this.timeInterval) clearInterval(this.timeInterval);
+    
+    // 🔥 6. TIMER TEMİZLİĞİ
+    if (this.logoutTimer) clearTimeout(this.logoutTimer);
+
     this.goldHub.stopConnection();
   }
 }

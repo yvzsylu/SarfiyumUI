@@ -33,7 +33,7 @@ export const routes: Routes = [
     path: 'user',
     component: UserLayoutComponent,
     canActivate: [AuthGuard],
-    data: { role: 'user' },
+    data: { roles: ['user','viewer'] },
     loadChildren: () =>
       import('./modules/user/user.route').then((mod) => mod.USER_ROUTES),
   },
@@ -48,7 +48,7 @@ export const routes: Routes = [
       {
         // SADECE USER ROTASI VAR. Admin buraya erişemez (404 verir).
         path: 'user',
-        data: { role: 'user' },
+        data: { roles: ['user','viewer']  },
         loadChildren: () => import('./modules/user/user.route').then((mod) => mod.USER_ROUTES),
       }
     ]

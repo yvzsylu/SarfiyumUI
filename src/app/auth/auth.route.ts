@@ -14,5 +14,5 @@ export const AUTH_ROUTES: Route[] = [
     component: ResetPasswordComponent,
     data: { title: 'Şifreyi Sıfırla' },
   },
-  
+
 ];

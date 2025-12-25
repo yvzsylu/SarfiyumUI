@@ -13,6 +13,9 @@ import { Store } from '@ngrx/store';
 import { changesidebarsize } from '@store/layout/layout-action';
 import { getSidebarsize } from '@store/layout/layout-selector';
 import { SimplebarAngularModule } from 'simplebar-angular';
+import { getUser } from '@/app/store/authentication/authentication.selector';
+import { take } from 'rxjs';
+
 
 @Component({
   selector: 'app-user-sidebar',
@@ -59,7 +62,31 @@ export class UserSidebarComponent {
   }
 
   initMenu(): void {
-    this.menuItems = MENU;
+    // Store'dan kullanıcıyı dinliyoruz
+    this.store.select(getUser).pipe(take(1)).subscribe((user) => {
+      
+      // Kullanıcı veya roller yoksa varsayılan olarak boş dizi veya tüm menü dönebilirsin
+      // Güvenlik için: User yoksa menü de yok diyebiliriz ama genelde full menü defaulttur
+      if (!user) {
+        this.menuItems = MENU;
+        return;
+      }
+
+      // Küçük harf duyarlılığı ile 'viewer' kontrolü
+      const isViewer = user.roles?.some((r: string) => r.toLowerCase() === 'viewer');
+
+      if (isViewer) {
+        // Viewer için yasaklı alanlar
+        const restrictedKeys = ['settings', 'profile', 'users', 'viewer'];
+
+        this.menuItems = MENU.filter((item) => {
+          return !restrictedKeys.includes(item.key || '');
+        });
+      } else {
+        // Admin veya User ise her şeyi görsün
+        this.menuItems = MENU;
+      }
+    });
   }
 
   ngAfterViewInit() {

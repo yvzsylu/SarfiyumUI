@@ -40,21 +40,28 @@ export class AuthGuard implements CanActivate {
     }
 
     // 4. Rol Kontrolü (Admin/User)
-    const expectedRole = route.data['role'] as 'admin' | 'user' | undefined;
-    
-    if (expectedRole) {
-       const userRoles = Array.isArray(currentUser.roles) 
-            ? currentUser.roles 
-            : [currentUser.roles];
+    // --- GELİŞMİŞ ROL KONTROLÜ ---
+    // Rotadan gelen beklenen rolleri al (Dizi veya Tekil olabilir)
+    const expectedRoles = route.data['roles'] as string[];
+    const expectedSingleRole = route.data['role'] as string;
 
-       // --- DÜZELTME BURADA YAPILDI ---
-       // 'r &&' ekleyerek r'nin undefined olmadığından emin olduk.
-       // Ayrıca 'currentUser.roles' undefined gelme ihtimaline karşı güvenli hale getirdik.
-       const hasRole = userRoles.some(r => r && r.toLowerCase() === expectedRole.toLowerCase());
+    if (expectedRoles || expectedSingleRole) {
+      // Beklenenleri küçük harf diziye çevir
+      const rolesToMatch = expectedRoles 
+        ? expectedRoles.map(r => r.toLowerCase()) 
+        : [expectedSingleRole.toLowerCase()];
 
-       if (!hasRole) {
-         return this.router.createUrlTree(['/auth/login']);
-       }
+      const userRoles = Array.isArray(currentUser.roles) 
+        ? currentUser.roles 
+        : [currentUser.roles];
+
+      // Kullanıcının rollerinden en az biri beklenen listede var mı?
+      const hasRole = userRoles.some(r => r && rolesToMatch.includes(r.toLowerCase()));
+
+      if (!hasRole) {
+        // Yetki yoksa dashboard'a veya hata sayfasına atabilirsin
+        return this.router.createUrlTree(['/user/dashboard']); 
+      }
     }
 
     return true;

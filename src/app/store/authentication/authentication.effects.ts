@@ -61,28 +61,37 @@ export class AuthenticationEffects {
   );
 
   // 2. REDIRECT EFFECT (Yönlendirme Mantığı)
-  loginRedirect$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(loginSuccess),
-        // DEĞİŞİKLİK 2: redirect parametresini karşılıyoruz
-        tap(({ user, redirect }) => { 
-          
-          // Eğer redirect FALSE ise (F5 durumu) fonksiyonu burada kes, yönlendirme yapma.
-          if (!redirect) {
-             return; 
-          }
+loginRedirect$ = createEffect(
+  () =>
+    this.actions$.pipe(
+      ofType(loginSuccess),
+      tap(({ user, redirect }) => { 
+        
+        if (!redirect) {
+           return; 
+        }
 
-          // Eğer redirect TRUE ise yönlendirmeyi yap
-          if (user.isAdmin) {
-            this.router.navigate(['/admin/dashboard']); 
-          } else {
-            this.router.navigate(['/user/dashboard']); 
-          }
-        })
-      ),
-    { dispatch: false }
-  );
+        // Kullanıcının Viewer olup olmadığını kontrol et
+        const isViewer = user.roles?.includes('viewer');
+
+        if (user.isAdmin) {
+          // Sistem Genel Admini (Sarfiyum Yönetici)
+          this.router.navigate(['/admin/dashboard']); 
+        } 
+        else if (isViewer) {
+          // Sadece izleme yetkisi olan kullanıcı (Kuyumcu İzleyicisi)
+          this.router.navigate(['/user/dashboard']); 
+        }
+        else {
+          // Standart Tenant User/Manager
+          this.router.navigate(['/user/dashboard']); 
+        }
+      })
+    ),
+  { dispatch: false }
+);
+
+
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(logout),

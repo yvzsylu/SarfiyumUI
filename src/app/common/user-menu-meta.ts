@@ -21,7 +21,7 @@ export const MENU: MenuItem[] = [
     key: 'dashboards',
     icon: 'solar:widget-5-bold-duotone',
     label: 'Dashboard',
-    link:'/user/dashboard',
+    link: '/user/dashboard',
   },
   {
     key: 'settings',
@@ -29,6 +29,7 @@ export const MENU: MenuItem[] = [
     label: 'Çarpan Ayarları',
     link: '/user/multiplier-settings',
   },
+  
   {
     key: 'users',
     label: 'Kullanıcı Ayarları',
@@ -39,6 +40,26 @@ export const MENU: MenuItem[] = [
     icon: 'solar:chat-square-like-bold-duotone',
     label: 'Profilim',
     link: '/user/profile',
+  },
+  {
+    key: 'viewer',
+    icon: 'solar:user-speak-rounded-bold-duotone',
+    label: 'Kullanıcılar',
+    collapsed: true,
+    subMenu: [
+      {
+        key: 'viewer-list',
+        label: 'Kullanıcı Listesi',
+        link: '/user/viewers/list',
+        parentKey: 'viewer',
+      },
+      {
+        key: 'viewer-create',
+        label: 'Kullanıcı Ekle',
+        link: '/user/viewers/add',
+        parentKey: 'viewer',
+      },
+    ],
   },
   // {
   //   key: 'other-apps',

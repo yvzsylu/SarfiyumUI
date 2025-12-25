@@ -1,0 +1,72 @@
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Yeni Kullanıcı Ekle</h4>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="addForm" (ngSubmit)="onSubmit()">
+                    
+                    <h5 class="mb-3 text-primary mt-2"><i class="bx bx-user-circle"></i> Kullanıcı Bilgileri</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ad Soyad</label>
+                        <input type="text" class="form-control" formControlName="fullName"
+                               [ngClass]="{'is-invalid': submitted && f['fullName'].errors}">
+                        <div *ngIf="submitted && f['fullName'].errors" class="invalid-feedback">
+                            Ad Soyad zorunludur.
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" formControlName="username"
+                                   [ngClass]="{'is-invalid': submitted && f['username'].errors}">
+                            <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+                                En az 3 karakter gereklidir.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">E-Posta</label>
+                            <input type="email" class="form-control" formControlName="email"
+                                   [ngClass]="{'is-invalid': submitted && f['email'].errors}">
+                            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                                Geçerli bir e-posta giriniz.
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 text-primary mt-4"><i class="bx bx-lock-alt"></i> Güvenlik</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre</label>
+                            <input type="password" class="form-control" formControlName="password"
+                                   [ngClass]="{'is-invalid': submitted && f['password'].errors}">
+                            <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                                Şifre en az 6 karakter olmalıdır.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre Tekrar</label>
+                            <input type="password" class="form-control" formControlName="confirmPassword"
+                                   [ngClass]="{'is-invalid': submitted && (f['confirmPassword'].errors || addForm.errors?.['mismatch'])}">
+                            <div *ngIf="submitted && addForm.errors?.['mismatch']" class="invalid-feedback">
+                                Şifreler uyuşmuyor.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <a routerLink="/user/viewers" class="btn btn-secondary me-2">İptal</a>
+                        <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                            <i class="bx bx-save"></i> Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
