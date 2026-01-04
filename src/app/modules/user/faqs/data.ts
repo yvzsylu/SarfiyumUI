@@ -29,41 +29,41 @@ export const FaqData: FAQDataType[] = [
       },
     ],
   },
-  {
-    title: 'Stok & Ürün Yönetimi',
-    faqs: [
-      {
-        question: 'Barkod yazıcısı ile entegre çalışıyor mu?',
-        answer:
-          'Evet, Sarfiyum piyasadaki yaygın barkod yazıcıları (Zebra, Argox vb.) ile uyumludur. Ürünlerinize otomatik barkod oluşturabilir ve etiket basabilirsiniz.',
-      },
-      {
-        question: 'Altın ve döviz kurları otomatik güncelleniyor mu?',
-        answer:
-          'Evet, sistemimiz canlı piyasa verileriyle entegredir. Has altın, dolar ve euro kurlarını anlık olarak çeker, böylece vitrin değerinizi güncel fiyatlar üzerinden görebilirsiniz.',
-      },
-      {
-        question: 'Pırlanta ve sertifikalı ürün takibi yapabilir miyim?',
-        answer:
-          'Kesinlikle. Pırlanta ürünler için karat, renk, berraklık gibi 4C özelliklerini girebilir ve sertifika numarasıyla takip sağlayabilirsiniz.',
-      },
-    ],
-  },
-  {
-    title: 'Cari & Muhasebe',
-    faqs: [
-      {
-        question: 'Veresiye defterimi buraya aktarabilir miyim?',
-        answer:
-          'Müşteri carilerinizi sisteme kolayca ekleyebilirsiniz. Müşterinin hem TL, hem Dolar, hem de Has Altın borcunu ayrı ayrı takip edebilirsiniz.',
-      },
-      {
-        question: 'Fatura kesebiliyor muyum?',
-        answer:
-          'Evet, e-Fatura ve e-Arşiv entegrasyonlarımız sayesinde satış yaptığınız anda faturanızı oluşturup müşterinize iletebilirsiniz.',
-      },
-    ],
-  },
+  // {
+  //   title: 'Stok & Ürün Yönetimi',
+  //   faqs: [
+  //     {
+  //       question: 'Barkod yazıcısı ile entegre çalışıyor mu?',
+  //       answer:
+  //         'Evet, Sarfiyum piyasadaki yaygın barkod yazıcıları (Zebra, Argox vb.) ile uyumludur. Ürünlerinize otomatik barkod oluşturabilir ve etiket basabilirsiniz.',
+  //     },
+  //     {
+  //       question: 'Altın ve döviz kurları otomatik güncelleniyor mu?',
+  //       answer:
+  //         'Evet, sistemimiz canlı piyasa verileriyle entegredir. Has altın, dolar ve euro kurlarını anlık olarak çeker, böylece vitrin değerinizi güncel fiyatlar üzerinden görebilirsiniz.',
+  //     },
+  //     {
+  //       question: 'Pırlanta ve sertifikalı ürün takibi yapabilir miyim?',
+  //       answer:
+  //         'Kesinlikle. Pırlanta ürünler için karat, renk, berraklık gibi 4C özelliklerini girebilir ve sertifika numarasıyla takip sağlayabilirsiniz.',
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: 'Cari & Muhasebe',
+  //   faqs: [
+  //     {
+  //       question: 'Veresiye defterimi buraya aktarabilir miyim?',
+  //       answer:
+  //         'Müşteri carilerinizi sisteme kolayca ekleyebilirsiniz. Müşterinin hem TL, hem Dolar, hem de Has Altın borcunu ayrı ayrı takip edebilirsiniz.',
+  //     },
+  //     {
+  //       question: 'Fatura kesebiliyor muyum?',
+  //       answer:
+  //         'Evet, e-Fatura ve e-Arşiv entegrasyonlarımız sayesinde satış yaptığınız anda faturanızı oluşturup müşterinize iletebilirsiniz.',
+  //     },
+  //   ],
+  // },
   {
     title: 'Destek & Üyelik',
     faqs: [
