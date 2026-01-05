@@ -13,7 +13,8 @@ import {
   logoutSuccess,
 } from './authentication.actions';
 import { AuthenticationService } from '@/app/core/services/auth.service';
-import type { User } from './auth.model';
+// Model importlarını kontrol et
+import { ServiceResult } from '@/app/core/models/service-result.model'; 
 
 @Injectable()
 export class AuthenticationEffects {
@@ -22,26 +23,39 @@ export class AuthenticationEffects {
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
-  // 1. LOGIN EFFECT (Sadece API ve Token İşlemi)
+  // 1. LOGIN EFFECT
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(login),
       exhaustMap(({ username, password, rememberMe }) =>
         this.authService.login(username, password, rememberMe).pipe(
-          map((user: User) => {
-            this.toastr.success('Giriş Başarılı', 'Yönlendiriliyorsunuz...');
-            // Redirect: true çünkü kullanıcı butona bastı
-            return loginSuccess({ user, redirect: true });
+          map((res: ServiceResult<string>) => { // 🔥 Servisten gelen tip artık ServiceResult
+            
+            // 1. Servis başarılı mı döndü?
+            if (res.isSuccess && res.data) {
+                this.toastr.success('Giriş Başarılı', 'Yönlendiriliyorsunuz...');
+                
+                // 🔥 User objesini authService üzerinden alıyoruz (veya token'ı decode ediyoruz)
+                // AuthenticationService.login içinde zaten this.user'ı set etmiştik.
+                // Güvenli olsun diye tekrar token decode da yapabiliriz veya servisteki user'ı alabiliriz.
+                // En temizi servisteki decodeToken metodunu kullanmak:
+                const user = this.authService.decodeToken(res.data);
+
+                // Redirect: true çünkü kullanıcı butona bastı
+                return loginSuccess({ user, redirect: true });
+            } else {
+                // Backend 200 dönse bile isSuccess false ise hata fırlat
+                throw new Error(res.errors?.[0] || 'Giriş başarısız.');
+            }
           }),
           catchError((err) => {
-            // --- errorMessage DEĞİŞKENİNİ BURADA TANIMLIYORUZ ---
             let errorMessage = 'Giriş işlemi başarısız.';
 
             // 1. Backend ServiceResult hatası (errors array)
             if (err.error && err.error.errors && Array.isArray(err.error.errors)) {
               errorMessage = err.error.errors[0];
             }
-            // 2. JS Error nesnesi
+            // 2. JS Error nesnesi (throw new Error ile fırlattıklarımız buraya düşer)
             else if (err.message) {
                errorMessage = err.message;
             }
@@ -52,7 +66,6 @@ export class AuthenticationEffects {
 
             this.toastr.error(errorMessage, 'Hata');
             
-            // Artık errorMessage tanımlı olduğu için hata vermeyecek
             return of(loginFailure({ error: errorMessage }));
           })
         )
@@ -60,36 +73,37 @@ export class AuthenticationEffects {
     )
   );
 
-  // 2. REDIRECT EFFECT (Yönlendirme Mantığı)
-loginRedirect$ = createEffect(
-  () =>
-    this.actions$.pipe(
-      ofType(loginSuccess),
-      tap(({ user, redirect }) => { 
-        
-        if (!redirect) {
-           return; 
-        }
+  // 2. REDIRECT EFFECT (Yönlendirme Mantığı - Burası Aynı Kalıyor)
+  loginRedirect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(loginSuccess),
+        tap(({ user, redirect }) => { 
+          
+          if (!redirect) {
+             return; 
+          }
 
-        // Kullanıcının Viewer olup olmadığını kontrol et
-        const isViewer = user.roles?.includes('viewer');
+          // Role kontrolü (Güvenli olması için küçük harfe çevirerek kontrol)
+          const roles = user.roles?.map(r => r.toLowerCase()) || [];
+          const isViewer = roles.includes('viewer');
 
-        if (user.isAdmin) {
-          // Sistem Genel Admini (Sarfiyum Yönetici)
-          this.router.navigate(['/admin/dashboard']); 
-        } 
-        else if (isViewer) {
-          // Sadece izleme yetkisi olan kullanıcı (Kuyumcu İzleyicisi)
-          this.router.navigate(['/user/dashboard']); 
-        }
-        else {
-          // Standart Tenant User/Manager
-          this.router.navigate(['/user/dashboard']); 
-        }
-      })
-    ),
-  { dispatch: false }
-);
+          if (user.isAdmin) {
+            // Sistem Genel Admini
+            this.router.navigate(['/admin/dashboard']); 
+          } 
+          else if (isViewer) {
+            // Sadece izleme yetkisi olan kullanıcı
+            this.router.navigate(['/user/dashboard']); 
+          }
+          else {
+            // Standart Tenant User/Manager
+            this.router.navigate(['/user/dashboard']); 
+          }
+        })
+      ),
+    { dispatch: false }
+  );
 
 
   logout$ = createEffect(() =>

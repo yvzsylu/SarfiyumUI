@@ -2,11 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service'; 
-import { Router } from '@angular/router'; // 🔥 EKLENDİ
+import { Router } from '@angular/router';
+import { jwtDecode } from 'jwt-decode'; // 🔥 1. IMPORT EKLENDİ
 
 import { PriceData } from '@/app/core/models/price-data.model'; 
 import { environment } from '@environment/environment';
-import { AuthenticationService } from '@/app/core/services/auth.service'; // 🔥 EKLENDİ
+import { AuthenticationService } from '@/app/core/services/auth.service';
 
 @Injectable({
   providedIn: 'root' 
@@ -21,7 +22,6 @@ export class GoldHubService {
   
   private readonly authSessionKey = '_AuthSessionKey'; 
   
-  // 🔥 SERVİSLER EKLENDİ
   private cookieService = inject(CookieService); 
   private authService = inject(AuthenticationService);
   private router = inject(Router);
@@ -29,7 +29,6 @@ export class GoldHubService {
   constructor() { }
 
   public startConnection(): void {
-    // Eğer zaten bağlıysa tekrar başlatma
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) return;
 
     const token = this.cookieService.get(this.authSessionKey);
@@ -44,7 +43,6 @@ export class GoldHubService {
       .withUrl(this.apiUrl, {
         accessTokenFactory: () => token 
       })
-      // Otomatik bağlanmayı açık bırakıyoruz, ama token bitmişse aşağıda yakalayacağız
       .withAutomaticReconnect()
       .build();
 
@@ -54,52 +52,74 @@ export class GoldHubService {
         this.connectionStatus$.next('Bağlandı');
         console.log('✅ GoldHub Bağlantısı Başarılı');
         
-        // 🔥 EVENT DİNLEYİCİLERİ BAŞLAT
         this.registerEvents();
       })
       .catch(err => {
         this.connectionStatus$.next('Bağlantı Hatası');
         console.error('SignalR Bağlantı Hatası:', err);
-        this.handleAuthError(err); // Hata 401 ise at
+        this.handleAuthError(err);
       });
   }
 
   private registerEvents() {
-    // Fiyatları Dinle
+    // 1. Fiyatları Dinle
     this.hubConnection?.on('ReceivePrices', (data: PriceData[]) => {
       this.prices$.next(data);
     });
 
-    // 🔥 BAĞLANTI KAPANDIĞINDA (Server Abort ettiğinde burası çalışır)
+    // =================================================================
+    // 🔥 2. CONCURRENT SESSION CONTROL (CANLI KICK)
+    // =================================================================
+    this.hubConnection?.on('ForceCheckSession', (serverSessionId: string, serverClientSource: string) => {
+        // console.log('🔔 Sunucudan oturum kontrol isteği geldi:', serverClientSource);
+
+        // a. Bu mesaj Web (Angular) için mi?
+        if (serverClientSource !== 'Web' && serverClientSource !== '1') {
+            return; // Mesaj mobil için, biz Web'iz. İlgilenme.
+        }
+
+        // b. Token'ı al ve SessionId kontrolü yap
+        const token = this.authService.session;
+        if (!token) return;
+
+        try {
+            const decoded: any = jwtDecode(token);
+            // Token içindeki claim ismi backend'de 'SessionId' olarak eklenmişti.
+            const mySessionId = decoded.SessionId || decoded.sessionId;
+
+            // c. Eğer Backend'den gelen ID ile bendeki ID farklıysa -> ATILDIM
+            if (mySessionId && mySessionId !== serverSessionId) {
+                console.warn('⛔ Hesabınız başka bir tarayıcıda açıldı. Oturum kapatılıyor.');
+                // alert("Hesabınız başka bir cihazda açıldığı için sonlandırılıyor."); // İsteğe bağlı uyarı
+                this.forceLogout();
+            }
+        } catch (error) {
+            console.error('Session check sırasında token decode hatası:', error);
+        }
+    });
+    // =================================================================
+
+    // 3. Bağlantı Koptuğunda
     this.hubConnection?.onclose((error) => {
       console.warn('⚠️ Hub Bağlantısı Koptu:', error);
 
-      // Backend Context.Abort() yaptığında bazen error undefined gelebilir,
-      // veya "Server closed the connection" diyebilir.
-      // Her durumda Viewer kullanıcısıysak ve bağlantı koptuysa token'ı kontrol etmeliyiz.
-      
       this.checkAndLogoutIfExpired();
 
-      if (error && error.message.includes('401')) {
-        this.forceLogout();
+      // Eğer hata "401" içeriyorsa veya sunucu tarafından zorla kapatıldıysa
+      // ve kullanıcı hala login görünüyorsa
+      if (this.authService.isLoggedIn()) {
+          // Normal internet kopması değilse (error genelde null olmaz sunucu attığında)
+          // Burada da tetiklenebilir ama ForceCheckSession daha garantidir.
       }
     });
   }
 
-  // Token süresi bitmişse kullanıcıyı at
   private checkAndLogoutIfExpired() {
-    const user = this.authService.user;
+    const validUser = this.authService.getUserFromCookie();
     
-    // Sadece Viewer ise bu kontrolü yap (Admin/User'ın interneti kopmuş olabilir, onları atma)
-    if (user?.roles?.some(r => r.toLowerCase() === 'viewer')) {
-        // Token'ın süresi bitmiş mi diye Auth Service'e güveniyoruz
-        // AuthService.getUserFromCookie() metodu süresi biten token'ı null dönüyordu.
-        const validUser = this.authService.getUserFromCookie();
-        
-        if (!validUser) {
-            console.log('⏳ Viewer süresi dolduğu için bağlantı sonlandırılıyor...');
-            this.forceLogout();
-        }
+    if (!validUser) {
+        console.log('⏳ Oturum süresi dolduğu veya geçersiz olduğu için bağlantı sonlandırılıyor...');
+        this.forceLogout();
     }
   }
 
@@ -110,7 +130,7 @@ export class GoldHubService {
   }
 
   private forceLogout() {
-    this.stopConnection(); // Tekrar bağlanmayı durdur
+    this.stopConnection(); 
     this.authService.logout();
     this.router.navigate(['/auth/login']);
   }

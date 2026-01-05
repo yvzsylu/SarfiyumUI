@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators'; // tap eklendi
 import { ToastrService } from 'ngx-toastr';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
+import { Observable } from 'rxjs';
 
 import type { User } from '@/app/store/authentication/auth.model';
 import { environment } from '../../../environments/environment';
-// ServiceResult modelini import et (yolunu projene göre ayarla)
+// ServiceResult modelin
 import { ServiceResult } from '@/app/core/models/service-result.model'; 
 
 interface JwtPayload {
@@ -22,7 +23,9 @@ interface JwtPayload {
   roles: string | string[]; 
   exp: number;
   iss: string;
-  subscriptionEndDate?: string; // Abonelik bitiş tarihi
+  subscriptionEndDate?: string;
+  SessionId?: string; 
+  ClientSource?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -31,49 +34,41 @@ export class AuthenticationService {
   public readonly authSessionKey = '_AuthSessionKey';
   
   private cookieService = inject(CookieService);
-  // Toastr genelde Effect tarafında kullanılır ama burada kalsın istersen
   private toastr = inject(ToastrService); 
 
   constructor(private http: HttpClient) {}
 
-getUserFromCookie(): User | null {
-    // 1. Cookie var mı?
+  getUserFromCookie(): User | null {
     const token = this.cookieService.get(this.authSessionKey);
 
     if (!token) return null;
 
     try {
       const decoded = jwtDecode<JwtPayload>(token);
-      // console.log('🔓 [2] Token Ham Decode:', decoded);
-
+      
       const currentTime = Date.now() / 1000;
       if (decoded.exp && decoded.exp < currentTime) {
-        // console.warn('⌛ [3] Token Süresi Dolmuş!');
         this.cookieService.delete(this.authSessionKey);
         return null;
       }
       
       const userResult = this.decodeToken(token);
-        // console.log('✅ [4] User Modeli Oluşturuldu:', userResult);
+      this.user = userResult; 
       return userResult;
 
     } catch (error) {
-      // console.error('❌ [Error] Token Decode Hatası:', error);
       return null;
     }
   }
 
-  // GÜNCELLENMİŞ DECODE METODU
   public decodeToken(token: string): User {
     const decoded = jwtDecode<JwtPayload>(token);
 
-    // Rol yönetimi: String gelirse Array'e çevir
     let userRoles: string[] = [];
     if (decoded.roles) {
         if (Array.isArray(decoded.roles)) {
             userRoles = decoded.roles.map(r => r.toLowerCase());
         } else {
-            // Tek string gelirse (Senin durumun: "Admin")
             userRoles = [decoded.roles.toLowerCase()];
         }
     }
@@ -93,58 +88,57 @@ getUserFromCookie(): User | null {
     };
   }
 
-  // Login dönüş tipini Observable<User> olarak düşünebiliriz
-  login(username: string, password: string, rememberMe: boolean) {
-    // 1. Değişiklik: Dönüş tipi ServiceResult<string> oldu
-    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/login`, { username, password })
+  // 🔥 DÜZELTİLDİ: Artık ServiceResult<string> dönüyor.
+  // Store/Effect tarafındaki yapın bozulmayacak.
+  login(username: string, password: string, rememberMe: boolean): Observable<ServiceResult<string>> {
+    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/login`, { 
+        username, 
+        password,
+        clientSource: 1 // 🔥 1 = Web (Backend Enum karşılığı)
+    })
       .pipe(
+        // 'map' yerine 'tap' veya veriyi değiştirmeyen bir 'map' kullanıyoruz.
+        // Yan etkileri (Cookie kaydetme, User state'i güncelleme) burada hallediyoruz.
         map((res) => {
-          // 2. Değişiklik: isSuccess kontrolü ve data'dan token alma
           if (res.isSuccess && res.data) {
-            const token = res.data; // Backend artık direkt token string dönüyor wrapper içinde
+            const token = res.data;
+            
+            // Servis içindeki user state'ini güncelle
             const user = this.decodeToken(token);
             this.user = user;
             
+            // Cookie'ye kaydet
             this.saveSession(token, rememberMe);
 
-            // 2. Kullanıcı Adını Hatırla (UX İçin - LocalStorage)
+            // LocalStorage işlemleri
             if (rememberMe) {
               localStorage.setItem('remembered_username', username);
               localStorage.setItem('is_remembered', 'true');
             } else {
-              // Eğer tiki kaldırdıysa hafızadan da sil
               localStorage.removeItem('remembered_username');
               localStorage.removeItem('is_remembered');
             }
-
-            return user;
           }
           
-          // Eğer 200 dönüp isSuccess false ise (nadir durum ama mümkün)
-          throw new Error(res.errors?.[0] || 'Login failed');
+          // 🔥 ÖNEMLİ: Gelen yanıtı (ServiceResult) olduğu gibi geri döndürüyoruz.
+          // Böylece NGRX Effect tarafında res.isSuccess kontrolünü yapmaya devam edebilirsin.
+          return res;
         })
       );
   }
 
-  // --- YENİ EKLENEN: ŞİFRE SIFIRLAMA ---
-  resetPassword(email: string) {
-    // Backend: POST api/Auth/reset-password
-    // Body: { email: "..." }
-    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/reset-password`, { email })
-      .pipe(
-        map((res) => {
-          if (res.isSuccess) {
-            return res.data; // Başarılı mesajı döner
-          }
-          throw new Error(res.errors?.[0] || 'Password reset failed');
-        })
-      );
+  // Reset password için de aynı yapı
+  resetPassword(email: string): Observable<ServiceResult<string>> {
+    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/reset-password`, { email });
   }
-  // -------------------------------------
 
   logout(): void {
     this.removeSession();
     this.user = null;
+  }
+
+  isLoggedIn(): boolean {
+      return !!this.getUserFromCookie();
   }
 
   get session(): string {
@@ -162,6 +156,4 @@ getUserFromCookie(): User | null {
   removeSession(): void {
     this.cookieService.delete(this.authSessionKey);
   }
-
-  
 }
