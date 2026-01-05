@@ -5,6 +5,8 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthenticationService } from '@/app/core/services/auth.service';
 import { LogoBoxComponent } from '@component/logo-box.component';
 import { ToastrService } from 'ngx-toastr';
+// ServiceResult tipini import etmeyi unutma (Path projene göre değişebilir)
+// import { ServiceResult } from '@/app/core/models/service-result.model'; 
 
 @Component({
   selector: 'app-reset-password',
@@ -41,17 +43,35 @@ export class ResetPasswordComponent {
     this.isLoading = true;
     const email = this.resetForm.value.email;
 
+    // Servis artık ServiceResult<string> dönüyor
     this.authService.resetPassword(email).subscribe({
-      next: (message) => {
+      next: (res) => { 
         this.isLoading = false;
-        this.toastr.success(message, 'Başarılı');
-        // Kullanıcıyı login sayfasına yönlendir (veya mesajı okuması için beklet)
-        setTimeout(() => this.router.navigate(['/auth/login']), 3000);
+
+        // 🔥 DÜZELTME: isSuccess kontrolü ve data erişimi
+        if (res.isSuccess) {
+            // Başarılı mesajı 'res.data' içindedir
+            this.toastr.success(res.data || 'İşlem başarılı.', 'Başarılı');
+            
+            // Yönlendirme
+            setTimeout(() => this.router.navigate(['/auth/login']), 3000);
+        } else {
+            // Backend 200 dönse bile mantıksal hata varsa (örn: Kullanıcı pasif)
+            const errorMsg = res.errors?.[0] || 'İşlem başarısız oldu.';
+            this.toastr.error(errorMsg, 'Hata');
+        }
       },
       error: (err) => {
         this.isLoading = false;
-        // Hata mesajı BaseService veya Interceptor tarafından gösterilmiyorsa burada göster:
-        const errorMsg = err.message || 'Bir hata oluştu.';
+        // HTTP hataları (404, 500 vb.) buraya düşer
+        let errorMsg = 'Bir hata oluştu.';
+        
+        if (err.error && err.error.errors && Array.isArray(err.error.errors)) {
+             errorMsg = err.error.errors[0];
+        } else if (err.message) {
+             errorMsg = err.message;
+        }
+
         this.toastr.error(errorMsg, 'Hata');
       }
     });
