@@ -59,8 +59,14 @@ export const routes: Routes = [
     loadChildren: () => 
       import('./modules/shared/error-404/error-404.route').then(m => m.ERROR_404_ROUTES)
   },
+  {
+    path: 'privacy-policy',
+    loadChildren: () => 
+      import('./modules/shared/privacy-policy/privacy-policy.route').then(m => m.PRIVACY_POLICY_ROUTES)
+  },
   // ----------------------------------
 
   // Wildcard her zaman EN SONDA olmalı (Doğru yapmışsın)
-  { path: '**', redirectTo: '404' }
+  { path: '**', redirectTo: '404' },
+  
 ];
