@@ -9,35 +9,44 @@
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   
-  --bg-body: #f5f6f8;
-  --bg-card: #ffffff;
-  --bg-header: #ffffff;
-  --bg-ticker: #e9ecef;
+  --bg-body: #F7F7F7;
+  --bg-card: #EEEDED;
+  --bg-header: #EEEDED;
+  --bg-ticker: #EEEDED;
   --text-main: #000000;
   --text-muted: #6c757d;
-  --text-title: #86754a;
+  --text-title: #F9F8F6;
   --text-th: #666666;
   --border-color: #d6d6d6;
   --border-subtle: rgba(0, 0, 0, 0.1);
-  --card-header-bg: #fffbf0;
-  --card-header-border: #faeab8;
-  --icon-bg: #ffffff;
+  --card-header-bg: #313647;
+  --card-header-border: #313647;
+  --icon-bg: #c2c2c2;
+  --icon-border: #c2c2c2;
+  --item-description-bg: #f1cc27f1  ;
+  --table-head-row-bg: #313647;
+  --table-head-row-text: #F9F8F6;
+
 
   // 2. DARK MODE (KARANLIK)
   &[data-dashboard-theme="dark"] {
-    --bg-body: #121212;
-    --bg-card: #1e1e1e;
-    --bg-header: #1e1e1e;
-    --bg-ticker: #252525;
+    --bg-body: #121212; 
+    --bg-card: #222831;
+    --bg-header: #222831;
+    --bg-ticker: #222831;
     --text-main: #e0e0e0;
     --text-muted: #a0a0a0;
-    --text-title: #86754a;
+    --text-title: #EEEEEE;
     --text-th: #888888;
     --border-color: #333333;
     --border-subtle: #333333;
-    --card-header-bg: #2b2510;
-    --card-header-border: #4a3e1b;
-    --icon-bg: #333333;
+    --card-header-bg: #5d543b;
+    --card-header-border: #5d543b ;
+    --icon-bg: #393E46;
+    --icon-border: #393E46;
+    --item-description-bg: #393E46;
+    --table-head-row-bg: #5d543b;
+    --table-head-row-text: #EEEEEE;
   }
 
   // 3. FİNANSAL (MAVİ) TEMA
@@ -48,13 +57,20 @@
     --bg-ticker: #162a52;
     --text-main: #ffffff;
     --text-muted: #8fa6d1;
-    --text-title: #86754a;
+    --text-title: #F9F5EB;
     --text-th: #7b96c4;
     --border-color: #1e3a6e;
     --border-subtle: #1e3a6e;
-    --card-header-bg: #162a52;
-    --card-header-border: #2c4a80;
-    --icon-bg: #0b1a33;
+    --card-header-bg: #4988C4;
+    --card-header-border: #4988C4;
+    --icon-bg: #0F2854;
+    --icon-border: #0F2854;
+    --item-description-bg: #374f79;
+    --table-head-row-bg: #4988C4;
+    --table-head-row-text: #F9F5EB;
+
+
+
   }
 }
 
@@ -83,6 +99,33 @@
     background-color: var(--bg-body);
   }
 }
+.table-head-row-color {
+  background-color: var(--table-head-row-bg) !important;
+  color: var(--table-head-row-text) !important;
+}
+.item-description {
+//  background-color: var(--item-description-bg);
+
+ background: linear-gradient(
+    to right, 
+    var(--item-description-bg) 0%,    /* Başlangıç rengi (Mavi) */
+    var(--item-description-bg) 99.50%,   /* %70'e kadar Mavi kal (Yazı net okunsun) */
+    var(--bg-card) 100%   /* En sonda yandaki hücrenin rengine (#121212) dönüş */
+  );
+
+}
+.card-body {
+  height: 100%;       // Kapsayıcı %100 yükseklikte olmalı
+  overflow: hidden;   // Asla scroll çıkmasın
+  padding: 0 !important; // İçerideki padding'i sıfırla ki hesap şaşmasın
+}
+
+.display-6 {
+  font-size: 3.5rem;
+} 
+
+
+
 
 // --- YAZI TİPLERİ VE RENKLER ---
 .base-text {
@@ -128,6 +171,11 @@
   letter-spacing: 1px;
 }
 
+.container-fluid {
+  // padding-left: 0rem !important;
+  // padding-right: 0rem !important;
+  max-width: 100% !important;
+}
 .tenant-logo {
   height: 50px;
   width: auto;
@@ -157,7 +205,7 @@
   flex: 0 0 auto;
   width: 100%;
   overflow: hidden;
-  height: 50px;
+  height: 61px;
   background-color: var(--bg-ticker);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -212,6 +260,7 @@
   border: 1px solid var(--border-subtle);
 
   .card-header {
+    padding: 5px 5px 5px 12px;
     border-bottom: 1px solid var(--border-subtle);
 
     &.soft-gold-header {
@@ -224,7 +273,9 @@
 
       .icon-box {
         color: var(--text-title) !important;
-        background-color: var(--icon-bg) !important;
+        background: var(--icon-bg) !important;
+        border-color: var(--icon-border) !important;
+
       }
     }
   }
@@ -260,12 +311,12 @@
 .table-sm> :not(caption)>*>* {
   padding-bottom: 0.1rem !important;
   padding-top: 0.1rem !important;
-  padding-left: 1.5rem !important;
+  padding-left: 1rem !important;
 }
 
 // --- HOVER EFEKTLERİ ---
 .table-hover>tbody>tr:hover>* {
-  background-color: rgba(var(--text-main), 0.03);
+  // background-color: rgba(var(--text-main), 0.03);
   color: var(--text-main);
 }
 
@@ -348,6 +399,95 @@
 
 .live-blink {
   animation: blinker 1.5s infinite ease-in-out;
+}
+
+
+
+// Tablo Ayarları
+table {
+  width: 100%;
+  height: 100%;       // Tablo tüm alanı kaplasın
+  table-layout: fixed; // Sütun genişlikleri içeriğe göre oynamasın, sabit kalsın
+  
+  // HEADER KISMI (Sabit bir yükseklik veriyoruz, örneğin %10)
+  thead {
+    // height: 10%; 
+    th {
+      font-size: 1.5vh; // Header yazıları ekrana göre sabit kalsın, çok büyümesin
+    }
+  }
+
+  // GÖVDE KISMI (Kalan %90'ı satırlara böleceğiz)
+  tbody {
+    height: 90%; 
+    display: table-row-group;
+
+    tr {
+      // FORMÜL: (Kalan Alan / Ürün Sayısı)
+      height: calc(100% / var(--item-count)); 
+    }
+
+    td {
+      // DİKEY ORTALAMA
+      vertical-align: middle;
+      white-space: nowrap; // Yazılar alt satıra inmesin
+      
+      // --- EN ÖNEMLİ KISIM: FONT HESAPLAMA ---
+      // Mantık: (Kapsayıcı Yüksekliği / Adet) * 0.5 (Yazı oranı)
+      // clamp(MinimumBoyut, HesaplananDeğer, MaksimumBoyut)
+      
+      // Büyük listeler için (Sol taraf - Sarrafiye gibi):
+      font-size: clamp(1rem, calc( (80vh / var(--item-count)) * 0.73 ), 5rem);
+      
+      // Küçük listeler için (Sağ taraf - Bilezik, Ata vb. gibi):
+      // font-size: clamp(0.8rem, calc( (25vh / var(--item-count)) * 0.5 ), 3rem);
+      
+      line-height: 1; // Satır aralığını sıkı tutuyoruz
+      padding: 0 0px 0 0  !important; // Sadece yanlardan biraz boşluk, dikey padding yok!
+    }
+  }
+}
+
+// --- SAĞ TARAFTAKİ 3 KÜÇÜK TABLO İÇİN ÖZEL SIKIŞTIRMA AYARI ---
+// Bu kod, sadece sağ taraftaki 'flex: 1' olan kartları hedefler.
+
+.d-flex.flex-column[style*="min-height: 0"] table {
+  
+  // Tabloyu %100 yüksekliğe zorla
+  height: 100% !important;
+  
+  tbody {
+    display: table-row-group;
+    height: 100% !important; // Body de %100 olsun
+
+    tr {
+      // SİHİRLİ SATIR: Mevcut alanı (100%) ürün sayısına böl.
+      // 5 ürün varsa her satır %20 yükseklik alır.
+      height: calc(100% / var(--item-count));
+    }
+
+    td {
+      // 1. Paddingleri ve boşlukları yok et (Yer kazanmak için)
+      // padding: 0 4px !important;
+      
+      // 2. Satır aralığını yazı boyutuna eşitle
+      line-height: 1 !important;
+      
+      // 3. Yazı taşmasın
+      white-space: nowrap;
+      overflow: hidden;
+      
+      // 4. MATEMATİKSEL FONT HESABI
+      // 22vh = Sağdaki bir kartın yaklaşık yüksekliği.
+      // Bunu ürün sayısına bölüyoruz ve 0.5 ile çarpıp (yarısı kadar) font yapıyoruz.
+      // clamp(minimum, hesaplanan, maksimum)
+      font-size: clamp(1rem, calc( (66vh / var(--item-count)) * 0.5 ), 3.2rem) !important;
+      
+      // Dikeyde tam ortala
+      vertical-align: middle !important;
+      border-bottom: 1px solid rgba(0,0,0,0.05); // Çizgiyi incelt
+    }
+  }
 }
 
 @keyframes blinker {

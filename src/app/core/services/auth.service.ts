@@ -9,22 +9,22 @@ import { Observable } from 'rxjs';
 import type { User } from '@/app/store/authentication/auth.model';
 import { environment } from '../../../environments/environment';
 // ServiceResult modelin
-import { ServiceResult } from '@/app/core/models/service-result.model'; 
+import { ServiceResult } from '@/app/core/models/service-result.model';
 
 interface JwtPayload {
   sub: string;
   jti: string;
   userId: string;
   email: string;
-  fullName: string; 
+  fullName: string;
   tenantId: string;
   tenantName: string;
   tenantLogoUrl: string;
-  roles: string | string[]; 
+  roles: string | string[];
   exp: number;
   iss: string;
   subscriptionEndDate?: string;
-  SessionId?: string; 
+  SessionId?: string;
   ClientSource?: string;
 }
 
@@ -32,11 +32,11 @@ interface JwtPayload {
 export class AuthenticationService {
   user: User | null = null;
   public readonly authSessionKey = '_AuthSessionKey';
-  
-  private cookieService = inject(CookieService);
-  private toastr = inject(ToastrService); 
 
-  constructor(private http: HttpClient) {}
+  private cookieService = inject(CookieService);
+  private toastr = inject(ToastrService);
+
+  constructor(private http: HttpClient) { }
 
   getUserFromCookie(): User | null {
     const token = this.cookieService.get(this.authSessionKey);
@@ -45,15 +45,15 @@ export class AuthenticationService {
 
     try {
       const decoded = jwtDecode<JwtPayload>(token);
-      
+
       const currentTime = Date.now() / 1000;
       if (decoded.exp && decoded.exp < currentTime) {
         this.cookieService.delete(this.authSessionKey);
         return null;
       }
-      
+
       const userResult = this.decodeToken(token);
-      this.user = userResult; 
+      this.user = userResult;
       return userResult;
 
     } catch (error) {
@@ -66,11 +66,11 @@ export class AuthenticationService {
 
     let userRoles: string[] = [];
     if (decoded.roles) {
-        if (Array.isArray(decoded.roles)) {
-            userRoles = decoded.roles.map(r => r.toLowerCase());
-        } else {
-            userRoles = [decoded.roles.toLowerCase()];
-        }
+      if (Array.isArray(decoded.roles)) {
+        userRoles = decoded.roles.map(r => r.toLowerCase());
+      } else {
+        userRoles = [decoded.roles.toLowerCase()];
+      }
     }
 
     return {
@@ -78,7 +78,7 @@ export class AuthenticationService {
       username: decoded.sub,
       email: decoded.email,
       fullName: decoded.fullName,
-      subscriptionEndDate: decoded.subscriptionEndDate, 
+      subscriptionEndDate: decoded.subscriptionEndDate,
       tenantId: decoded.tenantId,
       tenantName: decoded.tenantName,
       tenantLogoUrl: decoded.tenantLogoUrl,
@@ -91,22 +91,29 @@ export class AuthenticationService {
   // 🔥 DÜZELTİLDİ: Artık ServiceResult<string> dönüyor.
   // Store/Effect tarafındaki yapın bozulmayacak.
   login(username: string, password: string, rememberMe: boolean): Observable<ServiceResult<string>> {
-    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/login`, { 
-        username, 
+    return this.http.post<ServiceResult<string>>(`${environment.apiUrl}/auth/login`,
+      {
+        username,
         password,
         clientSource: 1 // 🔥 1 = Web (Backend Enum karşılığı)
-    })
+      },
+      // 🔥 DÜZELTME BURADA:
+      // Bu Header'ı ekleyerek Interceptor'a "Sakın Token Ekleme" diyoruz.
+      {
+        headers: { 'X-Skip-Interceptor': 'true' }
+      }
+    )
       .pipe(
         // 'map' yerine 'tap' veya veriyi değiştirmeyen bir 'map' kullanıyoruz.
         // Yan etkileri (Cookie kaydetme, User state'i güncelleme) burada hallediyoruz.
         map((res) => {
           if (res.isSuccess && res.data) {
             const token = res.data;
-            
+            console.log('Gelen Token:', token);
             // Servis içindeki user state'ini güncelle
             const user = this.decodeToken(token);
             this.user = user;
-            
+
             // Cookie'ye kaydet
             this.saveSession(token, rememberMe);
 
@@ -119,7 +126,7 @@ export class AuthenticationService {
               localStorage.removeItem('is_remembered');
             }
           }
-          
+
           // 🔥 ÖNEMLİ: Gelen yanıtı (ServiceResult) olduğu gibi geri döndürüyoruz.
           // Böylece NGRX Effect tarafında res.isSuccess kontrolünü yapmaya devam edebilirsin.
           return res;
@@ -138,7 +145,7 @@ export class AuthenticationService {
   }
 
   isLoggedIn(): boolean {
-      return !!this.getUserFromCookie();
+    return !!this.getUserFromCookie();
   }
 
   get session(): string {
@@ -147,9 +154,9 @@ export class AuthenticationService {
 
   saveSession(token: string, rememberMe: boolean = false): void {
     if (rememberMe) {
-      this.cookieService.set(this.authSessionKey, token, 7, '/'); 
+      this.cookieService.set(this.authSessionKey, token, 7, '/');
     } else {
-      this.cookieService.set(this.authSessionKey, token, undefined, '/'); 
+      this.cookieService.set(this.authSessionKey, token, undefined, '/');
     }
   }
 
