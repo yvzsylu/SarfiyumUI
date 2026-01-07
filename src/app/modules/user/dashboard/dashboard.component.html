@@ -137,15 +137,15 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of madenList; trackBy: trackBySymbol">
-                  <td class="ps-4 fw-semibold base-text item-description">{{ item.description || item.symbol
+                  <td class="ps-4 fw-semibold base-text item-description" style="font-size: 4.5rem !important;">{{ item.description || item.symbol
                     }}</td>
-                  <td class="text-end font-financial base-text" style="  padding-left: 0rem !important;"
+                  <td class="text-end font-financial base-text" style="  padding-left: 0rem !important;font-size: 4.2rem !important;"
                     [ngClass]="item.flashCss">
                     {{ item.bid | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                     <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                   </td>
-                  <td class="text-end font-financial base-text pe-4" style="  padding-left: 0rem !important;"
+                  <td class="text-end font-financial base-text pe-4" style="  padding-left: 0rem !important;font-size: 4.2rem !important;"
                     [ngClass]="item.flashCss">
                     {{ item.ask | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
