@@ -52,20 +52,62 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  customizableColors = [
-    { label: 'Kart Arkaplan', var: '--bg-card', value: '#EEEDED' },
-    { label: 'Header Arkaplan', var: '--bg-header', value: '#EEEDED' },
-    { label: 'Ticker (Kayan Bant)', var: '--bg-ticker', value: '#EEEDED' },
-    { label: 'Ürün Açıklama Bg', var: '--item-description-bg', value: '#f1cc27' },
-    { label: 'Tablo Başlık Yazı', var: '--table-head-row-text', value: '#F9F8F6' },
-    { label: 'Başlık Yazıları (Title)', var: '--text-title', value: '#F9F8F6' },
-    { label: 'İkon Arkaplan', var: '--icon-bg', value: '#c2c2c2' },
-    { label: 'İkon Çerçeve', var: '--icon-border', value: '#c2c2c2' },
-    { label: 'Kart Başlık Bg', var: '--card-header-bg', value: '#313647' },
-    { label: 'Kart Başlık Çerçeve', var: '--card-header-border', value: '#313647' },
-    { label: 'Tablo Başlık Bg', var: '--table-head-row-bg', value: '#313647' },
-  ];
+  themeDefaults: any = {
+    light: {
+      '--bg-card': '#EEEDED',
+      '--bg-header': '#EEEDED',
+      '--bg-ticker': '#EEEDED',
+      '--item-description-bg': '#f1cc27',
+      '--table-head-row-text': '#F9F8F6',
+      '--text-title': '#F9F8F6',
+      '--icon-bg': '#c2c2c2',
+      '--icon-border': '#c2c2c2',
+      '--card-header-bg': '#313647',
+      '--card-header-border': '#313647',
+      '--table-head-row-bg': '#313647',
+    },
+    dark: {
+      '--bg-card': '#222831',
+      '--bg-header': '#222831',
+      '--bg-ticker': '#222831',
+      '--item-description-bg': '#393E46',
+      '--table-head-row-text': '#EEEEEE',
+      '--text-title': '#EEEEEE',
+      '--icon-bg': '#393E46',
+      '--icon-border': '#393E46',
+      '--card-header-bg': '#5d543b',
+      '--card-header-border': '#5d543b',
+      '--table-head-row-bg': '#5d543b',
+    },
+    financial: {
+      '--bg-card': '#132240',
+      '--bg-header': '#0f2242',
+      '--bg-ticker': '#162a52',
+      '--item-description-bg': '#374f79',
+      '--table-head-row-text': '#F9F5EB',
+      '--text-title': '#F9F5EB',
+      '--icon-bg': '#0F2854',
+      '--icon-border': '#0F2854',
+      '--card-header-bg': '#4988C4',
+      '--card-header-border': '#4988C4',
+      '--table-head-row-bg': '#4988C4',
+    }
+  };
 
+  // Başlangıç listesi (Boş olabilir, ngOnInit'te dolduracağız)
+  customizableColors = [
+    { label: 'Kart Arkaplan', var: '--bg-card', value: '' },
+    { label: 'Header Arkaplan', var: '--bg-header', value: '' },
+    { label: 'Ticker (Kayan Bant)', var: '--bg-ticker', value: '' },
+    { label: 'Ürün Açıklama Bg', var: '--item-description-bg', value: '' },
+    { label: 'Tablo Başlık Yazı', var: '--table-head-row-text', value: '' },
+    { label: 'Başlık Yazıları (Title)', var: '--text-title', value: '' },
+    { label: 'İkon Arkaplan', var: '--icon-bg', value: '' },
+    { label: 'İkon Çerçeve', var: '--icon-border', value: '' },
+    { label: 'Kart Başlık Bg', var: '--card-header-bg', value: '' },
+    { label: 'Kart Başlık Çerçeve', var: '--card-header-border', value: '' },
+    { label: 'Tablo Başlık Bg', var: '--table-head-row-bg', value: '' },
+  ];
   isColorMenuOpen = false;
 
   // 🔥 YENİ: Rengi anlık olarak değiştiren fonksiyon
@@ -79,14 +121,27 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Rengi sıfırlamak istersen diye opsiyonel metod (Wrapper üzerindeki style'ı siler)
+  syncColorPickers(theme: ThemeType) {
+    const currentDefaults = this.themeDefaults[theme];
+
+    if (currentDefaults) {
+      this.customizableColors.forEach(colorItem => {
+        // Obje içinden hex kodunu bul ve value'ya ata
+        colorItem.value = currentDefaults[colorItem.var];
+      });
+    }
+  }
+
+  // resetCustomColors fonksiyonun da şu şekilde olmalı (Hatırlatma):
   resetCustomColors() {
     const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
     if (wrapper) {
       this.customizableColors.forEach(c => wrapper.style.removeProperty(c.var));
     }
+    // Resetlenince inputlar da temanın orijinaline dönsün
+    this.syncColorPickers(this.currentTheme);
   }
-
+  
   toggleColorMenu() {
     this.isColorMenuOpen = !this.isColorMenuOpen;
   }
@@ -198,6 +253,13 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   setTheme(theme: ThemeType) {
     this.currentTheme = theme;
     localStorage.setItem('dashboard_theme', theme);
+
+    // 🔥 2. ADIM: Tema değişince önce manuel ayarları sıfırla
+    this.resetCustomColors();
+
+    // 🔥 3. ADIM: Color picker inputlarını yeni temaya göre güncelle
+    this.syncColorPickers(theme);
+
     this.cdr.detectChanges();
   }
 
