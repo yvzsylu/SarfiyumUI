@@ -401,7 +401,73 @@
   animation: blinker 1.5s infinite ease-in-out;
 }
 
+// --- CUSTOM THEME SUBMENU (ÖZELLEŞTİRME) ---
 
+.custom-theme-item {
+  position: relative; 
+
+  // 🔥 DEĞİŞİKLİK 1: :hover seçicisini sildik.
+  // Artık sadece 'menu-open' sınıfı varsa (yani tıklanmışsa) görünür.
+  &.menu-open .custom-theme-submenu {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.custom-theme-submenu {
+  display: none; // Varsayılan gizli
+  position: absolute;
+  
+  // Konum Ayarları
+  top: -5px;      
+  right: 100%;    
+  margin-right: 0; 
+  
+  // Görsel Ayarlar
+  width: 300px;
+  max-height: 600px;
+  z-index: 1050;
+  
+  background-color: #fff;
+  transform: translateX(-10px); // Hafif solda dursun
+  border: 1px solid #ddd; 
+  box-shadow: -5px 5px 15px rgba(0,0,0,0.15);
+
+  // Dark Mod Uyumu
+  .dashboard-wrapper[data-dashboard-theme="dark"] & {
+    background-color: #222831;
+    border-color: #444;
+    color: #eee;
+  }
+
+  // 🔥 DEĞİŞİKLİK 2: &::after (Görünmez Köprü) tamamen silindi. 
+  // Çünkü artık hover yapmıyoruz, tıklayınca sabitleniyor.
+}
+
+// Renk Seçici Kutusu (Aynı Kalıyor)
+.color-picker-wrapper {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+
+  input[type="color"] {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+}
 
 // Tablo Ayarları
 table {
