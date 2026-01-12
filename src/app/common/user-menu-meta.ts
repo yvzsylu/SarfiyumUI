@@ -29,6 +29,12 @@ export const MENU: MenuItem[] = [
     label: 'Çarpan Ayarları',
     link: '/user/multiplier-settings',
   },
+  {
+    key: 'category-settings',
+    icon: 'solar:list-check-minimalistic-outline',
+    label: 'Kategori Ayarları',
+    link: '/user/category-settings',
+  },
   
   {
     key: 'users',

@@ -27,7 +27,6 @@
             {{ currentTime | date:'HH:mm' }}<span class="fs-4 text-muted ms-1 opacity-75">{{ currentTime | date:'ss'
               }}</span>
           </div>
-
         </div>
 
         <div class="mx-2 bg-secondary opacity-25 rounded" style="width: 1px; height: 40px;"></div>
@@ -42,12 +41,8 @@
             <i *ngIf="currentTheme === 'financial'" class="bx bx-bar-chart-alt-2 fs-22 align-middle"></i>
           </button>
           
-          <div class="d-flex align-items-center justify-content-end gap-2 pt-1">
-             </div>
-
           <div ngbDropdownMenu aria-labelledby="themeDropdown" class="dropdown-menu-end">
             <h6 class="dropdown-header">Tema Görünümü</h6>
-            
             <button ngbDropdownItem (click)="setTheme('light'); themeDrop.close()" [class.active]="currentTheme === 'light'">
               <span><i class="bx bx-sun me-2"></i> Aydınlık</span>
             </button>
@@ -76,8 +71,8 @@
                     <label class="small mb-0 me-2 text-muted" style="font-size: 0.75rem;">{{ color.label }}</label>
                     <div class="color-picker-wrapper">
                        <input type="color" [value]="color.value" 
-                              (input)="updateCustomColor(color.var, $event)"
-                              (click)="$event.stopPropagation()">
+                             (input)="updateCustomColor(color.var, $event)"
+                             (click)="$event.stopPropagation()">
                     </div>
                   </div>
                 </div>
@@ -86,7 +81,6 @@
                 </button>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -123,7 +117,7 @@
           <div class="card-header soft-gold-header ">
             <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
               <span class="icon-box"><i class="bx bx-diamond"></i></span>
-              SARRAFİYE
+              {{ getCategoryName(1, 'SARRAFİYE') }}
             </h4>
           </div>
           <div class="card-body p-0 table-responsive" [style.--item-count]="madenList.length || 1">
@@ -137,16 +131,13 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of madenList; trackBy: trackBySymbol">
-                  <td class="ps-4 fw-semibold base-text item-description" style="font-size: 4.5rem !important;">{{ item.description || item.symbol
-                    }}</td>
-                  <td class="text-end font-financial base-text" style="  padding-left: 0rem !important;font-size: 4.2rem !important;"
-                    [ngClass]="item.flashCss">
+                  <td class="ps-4 fw-semibold base-text item-description" >{{ item.description || item.symbol }}</td>
+                  <td class="text-end font-financial base-text" style="padding-left: 0rem !important;" [ngClass]="item.flashCss">
                     {{ item.bid | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                     <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                   </td>
-                  <td class="text-end font-financial base-text pe-4" style="  padding-left: 0rem !important;font-size: 4.2rem !important;"
-                    [ngClass]="item.flashCss">
+                  <td class="text-end font-financial base-text pe-4" style="padding-left: 0rem !important;" [ngClass]="item.flashCss">
                     {{ item.ask | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                     <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
@@ -170,8 +161,7 @@
               <div class="d-flex flex-column" style="padding: 0.6rem !important;">
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h3 class="fw-bold mb-0 base-text fs-1 text-uppercase">{{ (item.description ||
-                    item.symbol).replace('/', '-') }}</h3>
+                  <h3 class="fw-bold mb-0 base-text fs-1 text-uppercase">{{ (item.description || item.symbol).replace('/', '-') }}</h3>
                   <span class="badge badge-soft base-text border">
                     <i *ngIf="item.symbol === 'Dolar/TRY'" class="bx bx-dollar fs-4" style="color: green;"></i>
                     <i *ngIf="item.symbol === 'Euro/TRY'" class="bx bx-euro fs-4" style="color: rgb(0, 110, 255);"></i>
@@ -181,27 +171,21 @@
                 <div class="row g-0 align-items-center">
                   <div class="col-6 border-end ">
                     <small class="text-muted fw-bold fs-4 ">ALIŞ:</small>
-
                     <div class="d-flex align-items-center justify-content-between">
                       <span class="display-6 font-financial base-text" [ngClass]="item.flashCss">
                         {{ item.bid | number:'1.4-4' }}
-                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"
-                          style="font-size: 2.4rem;"></i>
-                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"
-                          style="font-size: 2.4rem;"></i>
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success" style="font-size: 2.4rem;"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger" style="font-size: 2.4rem;"></i>
                       </span>
                     </div>
                   </div>
                   <div class="col-6 ps-2">
                     <small class="text-muted fw-bold fs-4 ">SATIŞ:</small>
-
                     <div class="d-flex align-items-center justify-content-between">
                       <span class="display-6 font-financial base-text" [ngClass]="item.flashCss">
                         {{ item.ask | number:'1.4-4' }}
-                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"
-                          style="font-size: 2.4rem;"></i>
-                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"
-                          style="font-size: 2.4rem;"></i>
+                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success" style="font-size: 2.4rem;"></i>
+                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger" style="font-size: 2.4rem;"></i>
                       </span>
                     </div>
                   </div>
@@ -216,8 +200,9 @@
 
           <div class="card shadow-sm border-0 d-flex flex-column " style="flex: 1; min-height: 0; overflow: hidden;">
             <div class="card-header soft-gold-header  flex-shrink-0">
-              <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
-                <span class="icon-box"><i class="bx bx-doughnut-chart"></i></span> BİLEZİK
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
+                <span class="icon-box"><i class="bx bx-doughnut-chart"></i></span> 
+                {{ getCategoryName(3, 'BİLEZİK') }}
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="bilezikList.length || 1">
@@ -231,16 +216,13 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of bilezikList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description" style="font-size: 3.3rem !important;">{{
-                      item.description }}</td>
-                    <td class="text-end font-financial base-text" style="font-size: 3.6rem !important;"
-                      [ngClass]="item.flashCss">
+                    <td class="ps-3 fw-semibold base-text item-description" >{{ item.description }}</td>
+                    <td class="text-end font-financial base-text" [ngClass]="item.flashCss">
                       {{ item.bid | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     </td>
-                    <td class="text-end pe-3 font-financial base-text" style="font-size: 3.6rem !important;"
-                      [ngClass]="item.flashCss">
+                    <td class="text-end pe-3 font-financial base-text" [ngClass]="item.flashCss">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
@@ -256,9 +238,9 @@
 
           <div class="card shadow-sm border-0 d-flex flex-column" style="flex: 1; min-height: 0; overflow: hidden; ;">
             <div class="card-header soft-gold-header flex-shrink-0">
-              <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text"
-                style="font-size: 2.5rem; padding-left: 0rem !important;">
-                <span class="icon-box"><i class="bx bx-medal"></i></span> ATA & REŞAT
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem; padding-left: 0rem !important;">
+                <span class="icon-box"><i class="bx bx-medal"></i></span> 
+                {{ getCategoryName(4, 'ATA & REŞAT') }}
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="ataResatList.length || 1">
@@ -272,17 +254,14 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of ataResatList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description" style="font-size: 3.1rem !important;">{{
-                      item.description }}</td>
-                    <td class="text-end font-financial base-text" style="font-size: 3.1rem !important;"
-                      [ngClass]="item.flashCss">{{
-                      item.bid | number:'1.2-2' }}
+                    <td class="ps-3 fw-semibold base-text item-description">{{ item.description }}</td>
+                    <td class="text-end font-financial base-text" [ngClass]="item.flashCss">
+                      {{ item.bid | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     </td>
-                    <td class="text-end pe-3 font-financial base-text"
-                      style=" padding-left: 0rem !important;font-size: 3.1rem !important;" [ngClass]="item.flashCss">{{
-                      item.ask | number:'1.2-2' }}
+                    <td class="text-end pe-3 font-financial base-text" style=" padding-left: 0rem !important;" [ngClass]="item.flashCss">
+                      {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     </td>
@@ -295,11 +274,11 @@
             </div>
           </div>
 
-          <div class="card shadow-sm border-0 d-flex flex-column"
-            style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0rem !important;">
+          <div class="card shadow-sm border-0 d-flex flex-column" style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0rem !important;">
             <div class="card-header soft-gold-header flex-shrink-0">
-              <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem; ">
-                <span class="icon-box"><i class="bx bx-credit-card-front"></i></span> KREDİ KARTI FİYATLARI
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem; ">
+                <span class="icon-box"><i class="bx bx-credit-card-front"></i></span> 
+                {{ getCategoryName(5, 'KREDİ KARTI FİYATLARI') }}
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="krediList.length || 1">
@@ -312,10 +291,8 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of krediList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description" style="font-size: 3.8rem !important;">{{
-                      item.description }}</td>
-                    <td class="text-end pe-3 font-financial base-text "
-                      style="padding-left: 0rem !important; font-size: 3.8rem !important;" [ngClass]="item.flashCss">
+                    <td class="ps-3 fw-semibold base-text item-description" >{{ item.description }}</td>
+                    <td class="text-end pe-3 font-financial base-text " style="padding-left: 0rem !important; " [ngClass]="item.flashCss">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>

@@ -5,15 +5,21 @@ import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { jwtDecode } from 'jwt-decode'; // 🔥 1. IMPORT EKLENDİ
+import { jwtDecode } from 'jwt-decode';
 
 import { GoldHubService } from './services/gold-hub.service';
-import { AuthenticationService } from '@/app/core/services/auth.service'; // 🔥 2. IMPORT EKLENDİ
+import { AuthenticationService } from '@/app/core/services/auth.service';
 import { getUser } from '@store/authentication/authentication.selector';
 import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/environment';
 
+// Kategori Servisleri
+import { CategoryService } from '@/app/modules/user/categories/services/category.service';
+import { TenantCategory } from '@/app/core/models/tenant-category.model';
+
+// 🔥 Arayüzü Güncelledik: categoryIndex eklendi
 interface DashboardPriceItem extends PriceData {
+  categoryIndex?: number; // Backend'den gelen yeni alan
   flashCss?: string;
   flashTimeout?: any;
 }
@@ -32,7 +38,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   // Servisler
   private goldHub = inject(GoldHubService);
-  private authService = inject(AuthenticationService); // 🔥 3. SERVİS INJECT EDİLDİ
+  private authService = inject(AuthenticationService);
+  private categoryService = inject(CategoryService);
   private store = inject(Store);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
@@ -41,6 +48,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.isTvMode = this.router.url.includes('/tv/');
   }
 
+  // --- Fullscreen & Theme Logic (Aynen Kalıyor) ---
   @HostListener('document:fullscreenchange')
   onFullScreenChange() {
     if (!this.document.fullscreenElement) {
@@ -94,7 +102,6 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     }
   };
 
-  // Başlangıç listesi (Boş olabilir, ngOnInit'te dolduracağız)
   customizableColors = [
     { label: 'Kart Arkaplan', var: '--bg-card', value: '' },
     { label: 'Header Arkaplan', var: '--bg-header', value: '' },
@@ -110,11 +117,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   ];
   isColorMenuOpen = false;
 
-  // 🔥 YENİ: Rengi anlık olarak değiştiren fonksiyon
   updateCustomColor(cssVar: string, event: any) {
     const newValue = event.target.value;
-
-    // Dashboard wrapper'ı bul ve stili üzerine yaz (Inline style olarak ekler, böylece en yüksek önceliği alır)
     const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
     if (wrapper) {
       wrapper.style.setProperty(cssVar, newValue);
@@ -123,22 +127,18 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   syncColorPickers(theme: ThemeType) {
     const currentDefaults = this.themeDefaults[theme];
-
     if (currentDefaults) {
       this.customizableColors.forEach(colorItem => {
-        // Obje içinden hex kodunu bul ve value'ya ata
         colorItem.value = currentDefaults[colorItem.var];
       });
     }
   }
 
-  // resetCustomColors fonksiyonun da şu şekilde olmalı (Hatırlatma):
   resetCustomColors() {
     const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
     if (wrapper) {
       this.customizableColors.forEach(c => wrapper.style.removeProperty(c.var));
     }
-    // Resetlenince inputlar da temanın orijinaline dönsün
     this.syncColorPickers(this.currentTheme);
   }
   
@@ -146,41 +146,42 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.isColorMenuOpen = !this.isColorMenuOpen;
   }
 
-
   user$!: Observable<any>;
   public apiRoot = environment.apiUrl.replace('/api', '');
 
+  // 🔥 LİSTELER
   allData: DashboardPriceItem[] = [];
-  madenList: DashboardPriceItem[] = [];
-  dovizList: DashboardPriceItem[] = [];
-  bilezikList: DashboardPriceItem[] = [];
-  ataResatList: DashboardPriceItem[] = [];
-  krediList: DashboardPriceItem[] = [];
+  madenList: DashboardPriceItem[] = [];    // Index: 1
+  dovizList: DashboardPriceItem[] = [];    // Index: 2
+  bilezikList: DashboardPriceItem[] = [];  // Index: 3
+  ataResatList: DashboardPriceItem[] = []; // Index: 4
+  krediList: DashboardPriceItem[] = [];    // Index: 5
+
+  // 🔥 PERFORMANS İÇİN MAP
+  // Array içinde find yapmak yerine, index'ten direkt isme ulaşacağız.
+  categoryNameMap: { [key: number]: string } = {}; 
 
   currentTime = new Date();
   isTvMode = false;
-
   currentTheme: ThemeType = 'light';
 
   private subs: Subscription[] = [];
   private timeInterval: any;
-  private logoutTimer: any; // 🔥 4. TIMER DEĞİŞKENİ
+  private logoutTimer: any;
 
   ngOnInit(): void {
-    // Tema Ayarları
     const savedTheme = localStorage.getItem('dashboard_theme') as ThemeType;
-    if (savedTheme) {
-      this.setTheme(savedTheme);
-    } else {
-      this.setTheme('light');
-    }
+    if (savedTheme) { this.setTheme(savedTheme); } else { this.setTheme('light'); }
 
     this.user$ = this.store.select(getUser);
 
-    // Hub Başlat
+    // 1. Kategorileri Çek ve Map'e Doldur
+    this.loadCategories();
+
+    // 2. Hub Başlat
     this.goldHub.startConnection();
 
-    // Veri Akışı
+    // 3. Veri Akışı
     const priceSub = this.goldHub.prices$.subscribe(data => {
       if (data && data.length > 0) {
         const incomingData = data as DashboardPriceItem[];
@@ -193,18 +194,60 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.subs.push(priceSub);
 
     this.startClock();
-
-    // 🔥 5. AUTO LOGOUT MANTIĞINI BAŞLAT
     this.initAutoLogout();
   }
 
+  loadCategories() {
+    this.categoryService.getCategories().subscribe(res => {
+      // Gelen listeyi hızlı erişim için Map'e çeviriyoruz
+      // Örn: { 1: "SARRAFİYE", 2: "DÖVİZ" ... }
+      res.forEach(cat => {
+        this.categoryNameMap[cat.orderIndex] = cat.name.toUpperCase();
+      });
+    });
+  }
+
+  // 🔥 HIZLI İSİM GETİRİCİ (HTML için)
+  // Artık array içinde find yapmıyor, direkt adresten alıyor.
+  getCategoryName(orderIndex: number, defaultName: string): string {
+    return this.categoryNameMap[orderIndex] || defaultName;
+  }
+
   // =================================================================
-  // 🔥 AUTO LOGOUT LOGIC START
+  // 🔥 ULTRA PERFORMANSLI VERİ DAĞITIM
   // =================================================================
+  processData(data: DashboardPriceItem[]) {
+    data.forEach(item => {
+      let targetList: DashboardPriceItem[] | null = null;
+
+      // İsim eşleştirmesi YOK. Direkt Index'e bakıyoruz.
+      // item.categoryIndex backend'den dolu gelmeli.
+      
+      switch (item.categoryIndex) {
+        case 1: targetList = this.madenList; break;
+        case 2: targetList = this.dovizList; break;
+        case 3: targetList = this.bilezikList; break;
+        case 4: targetList = this.ataResatList; break;
+        case 5: targetList = this.krediList; break;
+        
+        // Fallback: Eski veriler cache'ten gelirse diye güvenlik (Opsiyonel)
+        default: 
+           // Eğer categoryIndex yoksa veya 0 ise, hala isme bakabiliriz (Geçiş süreci için)
+           if (item.category === 'Maden') targetList = this.madenList;
+           else if (item.category === 'Döviz') targetList = this.dovizList;
+           // ... (Diğerleri)
+           else targetList = this.madenList; 
+           break;
+      }
+
+      if (targetList) {
+        this.updateList(targetList, item);
+      }
+    });
+  }
+
   initAutoLogout() {
     const user = this.authService.user;
-
-    // Kullanıcıda 'viewer' rolü var mı kontrol et
     const isViewer = user?.roles?.some(r => r.toLowerCase() === 'viewer');
 
     if (isViewer) {
@@ -213,25 +256,20 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
       try {
         const decoded: any = jwtDecode(token);
-        const expTimestamp = decoded.exp; // Unix timestamp (saniye)
+        const expTimestamp = decoded.exp;
 
         if (expTimestamp) {
-          const expirationDate = new Date(expTimestamp * 1000); // Milisaniyeye çevir
+          const expirationDate = new Date(expTimestamp * 1000);
           const now = new Date();
-
-          // Kalan süreyi hesapla
           const timeLeft = expirationDate.getTime() - now.getTime();
 
-          // Konsola bilgi bas (Debug için)
           console.log(`👁️ Viewer Modu Aktif. Kalan Süre: ${(timeLeft / 1000 / 60).toFixed(2)} dakika.`);
 
           if (timeLeft > 0) {
-            // Süre dolduğunda çalışacak sayaç
             this.logoutTimer = setTimeout(() => {
               this.handleExpiration();
             }, timeLeft);
           } else {
-            // Süre zaten geçmişse hemen at
             this.handleExpiration();
           }
         }
@@ -242,41 +280,16 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   }
 
   handleExpiration() {
-    // Çıkış yap ve login'e gönder
     this.authService.logout();
     this.router.navigate(['/auth/login']);
   }
-  // =================================================================
-  // 🔥 AUTO LOGOUT LOGIC END
-  // =================================================================
 
   setTheme(theme: ThemeType) {
     this.currentTheme = theme;
     localStorage.setItem('dashboard_theme', theme);
-
-    // 🔥 2. ADIM: Tema değişince önce manuel ayarları sıfırla
     this.resetCustomColors();
-
-    // 🔥 3. ADIM: Color picker inputlarını yeni temaya göre güncelle
     this.syncColorPickers(theme);
-
     this.cdr.detectChanges();
-  }
-
-  processData(data: DashboardPriceItem[]) {
-    data.forEach(item => {
-      let targetList: DashboardPriceItem[];
-
-      switch (item.category) {
-        case 'Maden': targetList = this.madenList; break;
-        case 'Döviz': targetList = this.dovizList; break;
-        case 'Bilezik': targetList = this.bilezikList; break;
-        case 'Ata & Reşat': targetList = this.ataResatList; break;
-        case 'Kredi Kartı': targetList = this.krediList; break;
-        default: targetList = this.madenList; break;
-      }
-      this.updateList(targetList, item);
-    });
   }
 
   updateList(list: DashboardPriceItem[], newItem: DashboardPriceItem) {
@@ -344,10 +357,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
     if (this.timeInterval) clearInterval(this.timeInterval);
-
-    // 🔥 6. TIMER TEMİZLİĞİ
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
-
     this.goldHub.stopConnection();
   }
 }

@@ -6,6 +6,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { MultiplierSettingsComponent } from './multiplier-settings/multiplier-settings.component';
 import { TodoComponent } from './apps/todo/todo.component';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
+import { CategorySettingsComponent } from './categories/category-settings/category-settings.component';
 
 
 export const USER_ROUTES: Routes = [
@@ -74,6 +75,16 @@ export const USER_ROUTES: Routes = [
     loadChildren: () =>
       import('../user/viewers/viewer.route').then(m => m.VIEWER_ROUTES)
   },
+  {
+    path: 'category-settings',
+    component: CategorySettingsComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Kategori Ayarları',
+      roles: ['user']
+    }
+  },
+
 
   // 6. Todo / İş Listesi (Genelde yönetimseldir, sadece User'a bıraktım)
   // {
