@@ -8,9 +8,14 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-primary" (click)="openModal(addProductModal)">
-                        <i class="bx bx-plus me-1"></i> Yeni Ürün Ekle
+                    <button class="btn btn-primary" (click)="openCatalogModal(catalogModal)">
+                        <i class="bx bx-list-plus me-1"></i> Katalogdan Ekle
                     </button>
+
+                    <button class="btn btn-outline-primary" (click)="openModal(addProductModal)">
+                        <i class="bx bx-plus me-1"></i> Özel Ürün Ekle
+                    </button>
+
                     <button class="btn btn-success text-white" (click)="saveAll()" [disabled]="isLoading">
                         <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
                         <i class="bx bx-save me-1"></i> Tümünü Kaydet
@@ -44,6 +49,7 @@
                                         <th *ngIf="group.category !== 'Kredi Kartı'">Alış Çarpanı</th>
                                         <th>Satış Çarpanı</th>
                                         <th>Sabit Makas (TL)</th>
+                                        <th style="width: 10%" class="text-center">Platform</th>
                                         <th style="width: 10%" class="text-center">İşlem</th>
                                     </tr>
                                 </thead>
@@ -94,6 +100,26 @@
                                                 <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="item.addonAmount"
                                                     appDecimalComma [disabled]="!item.isActive">
                                                 <span class="input-group-text text-muted bg-light-subtle">₺</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button class="btn btn-sm btn-icon" 
+                                                        [ngClass]="item.showOnWeb ? 'btn-soft-info' : 'btn-soft-secondary opacity-50'"
+                                                        (click)="togglePlatform(item, 'web')"
+                                                        [disabled]="!item.isActive"
+                                                        title="Web'de Göster/Gizle">
+                                                    <i class="bx bx-globe fs-5"></i>
+                                                </button>
+
+                                                <button class="btn btn-sm btn-icon" 
+                                                        [ngClass]="item.showOnMobile ? 'btn-soft-warning' : 'btn-soft-secondary opacity-50'"
+                                                        (click)="togglePlatform(item, 'mobile')"
+                                                        [disabled]="!item.isActive"
+                                                        title="Mobilde Göster/Gizle">
+                                                    <i class="bx bx-mobile-alt fs-5"></i>
+                                                </button>
                                             </div>
                                         </td>
 
@@ -163,6 +189,22 @@
                     <input type="text" class="form-control bg-transparent text-body" [(ngModel)]="newProduct.addonAmount" name="addon" appDecimalComma>
                 </div>
             </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-6">
+                    <div class="form-check form-switch bg-light-subtle p-2 rounded border">
+                        <input class="form-check-input ms-0" type="checkbox" role="switch" [(ngModel)]="newProduct.showOnWeb" name="addWeb">
+                        <label class="form-check-label fw-semibold ms-2"><i class="bx bx-globe me-1"></i> Web'de Göster</label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-check form-switch bg-light-subtle p-2 rounded border">
+                        <input class="form-check-input ms-0" type="checkbox" role="switch" [(ngModel)]="newProduct.showOnMobile" name="addMobile">
+                        <label class="form-check-label fw-semibold ms-2"><i class="bx bx-mobile me-1"></i> Mobilde Göster</label>
+                    </div>
+                </div>
+            </div>
+
         </form>
     </div>
     <div class="modal-footer bg-light-subtle">
@@ -223,14 +265,89 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4 form-check form-switch bg-light-subtle p-3 rounded border d-flex align-items-center gap-3">
-                <input class="form-check-input ms-0" type="checkbox" role="switch" id="editActive" [(ngModel)]="editingProduct.isActive" name="editActive" style="transform: scale(1.3);">
-                <label class="form-check-label fw-bold cursor-pointer" for="editActive">Ürün Yayında (Aktif)</label>
+
+            <div class="row g-3 mt-4">
+                <div class="col-12">
+                    <div class="form-check form-switch bg-light-subtle p-3 rounded border d-flex align-items-center gap-3">
+                        <input class="form-check-input ms-0" type="checkbox" role="switch" id="editActive" [(ngModel)]="editingProduct.isActive" name="editActive" style="transform: scale(1.3);">
+                        <label class="form-check-label fw-bold cursor-pointer" for="editActive">Ürün Yayında (Aktif)</label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-check form-switch bg-white p-2 rounded border">
+                        <input class="form-check-input ms-0" type="checkbox" role="switch" [(ngModel)]="editingProduct.showOnWeb" name="editWeb">
+                        <label class="form-check-label fw-semibold ms-2 small"><i class="bx bx-globe me-1"></i> Web</label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-check form-switch bg-white p-2 rounded border">
+                        <input class="form-check-input ms-0" type="checkbox" role="switch" [(ngModel)]="editingProduct.showOnMobile" name="editMobile">
+                        <label class="form-check-label fw-semibold ms-2 small"><i class="bx bx-mobile me-1"></i> Mobil</label>
+                    </div>
+                </div>
             </div>
+
         </form>
     </div>
     <div class="modal-footer bg-light-subtle">
         <button type="button" class="btn btn-secondary px-4" (click)="modal.dismiss()">Vazgeç</button>
         <button type="button" class="btn btn-primary px-4" (click)="saveEditedProduct()">Güncelle</button>
+    </div>
+</ng-template>
+
+<ng-template #catalogModal let-modal>
+    <div class="modal-header bg-light-subtle">
+        <h5 class="modal-title fw-bold text-primary">
+            <i class="bx bx-world me-2"></i>Piyasa Kataloğundan Ekle
+        </h5>
+        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body p-0">
+        <div class="p-3 border-bottom bg-light-subtle sticky-top">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-muted">Hedef Kategori</label>
+                    <select class="form-select border-primary-subtle" [(ngModel)]="selectedCatalogCategory">
+                        <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-muted">Ürün Ara ({{ filteredCatalogItems.length }})</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bx bx-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Örn: Dolar, Çeyrek..." [value]="catalogSearchText" (input)="filterCatalog($event)">
+                        <button *ngIf="catalogSearchText" class="btn btn-white border-start-0 border" type="button" (click)="catalogSearchText=''; filteredCatalogItems=allCatalogItems"><i class="bx bx-x"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="select2-list-container">
+            <div *ngIf="isLoadingCatalog" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted small">Piyasa verileri yükleniyor...</p>
+            </div>
+            <ng-container *ngFor="let item of filteredCatalogItems">
+                <div class="select2-item d-flex align-items-center justify-content-between p-3 border-bottom" (click)="addCatalogItem(item)">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title rounded-circle bg-primary-subtle text-primary fw-bold fs-5">{{ item.name.charAt(0) }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark">{{ item.name }}</h6>
+                            <small class="text-muted font-monospace bg-light border px-2 py-0 rounded">{{ item.sourceKey }}</small>
+                        </div>
+                    </div>
+                    <div class="text-primary"><i class="bx bx-plus-circle fs-3"></i></div>
+                </div>
+            </ng-container>
+            <div *ngIf="!isLoadingCatalog && filteredCatalogItems.length === 0" class="text-center py-5 text-muted">
+                <i class="bx bx-search fs-1 mb-2 opacity-50"></i>
+                <p>Aradığınız kriterde ürün bulunamadı.</p>
+                <button class="btn btn-link btn-sm" (click)="catalogSearchText=''; filteredCatalogItems=allCatalogItems">Tüm listeyi göster</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light-subtle">
+        <button type="button" class="btn btn-secondary px-4" (click)="modal.dismiss()">Kapat</button>
     </div>
 </ng-template>

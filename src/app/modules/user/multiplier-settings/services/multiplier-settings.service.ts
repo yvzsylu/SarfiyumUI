@@ -1,6 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { BaseApiService } from '@/app/core/services/base-api.service';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+
+
+export interface SystemCatalogDto {
+  sourceKey: string;
+  name: string;
+}
+
 
 export interface TenantProductDto {
   id: string;
@@ -12,6 +19,9 @@ export interface TenantProductDto {
   sellMultiplier: number;
   addonAmount: number;
   isActive: boolean;
+  showOnWeb: boolean;
+  showOnMobile: boolean;
+
 }
 
 export interface UpdateTenantProductDto {
@@ -23,6 +33,8 @@ export interface UpdateTenantProductDto {
   sellMultiplier: number;
   addonAmount: number;
   isActive: boolean;
+  showOnWeb: boolean;
+  showOnMobile: boolean;
 }
 
 export interface CreateTenantProductDto {
@@ -33,6 +45,8 @@ export interface CreateTenantProductDto {
   sellMultiplier: number;
   addonAmount: number;
   orderIndex: number;
+  showOnWeb: boolean;
+  showOnMobile: boolean;
 }
 
 export interface CategoryDto {
@@ -42,8 +56,8 @@ export interface CategoryDto {
 }
 
 export interface UpdateProductOrderDto {
-    productId: string;
-    newIndex: number;
+  productId: string;
+  newIndex: number;
 }
 
 
@@ -52,7 +66,7 @@ export interface UpdateProductOrderDto {
 })
 export class SettingsService {
   private api = inject(BaseApiService);
-  private endpoint = 'customer/product'; 
+  private endpoint = 'customer/product';
 
   getProducts(): Observable<TenantProductDto[]> {
     return this.api.get<TenantProductDto[]>(this.endpoint + '/list');
@@ -80,5 +94,19 @@ export class SettingsService {
 
   updateProductOrder(orderList: UpdateProductOrderDto[]) {
     return this.api.patch(`${this.endpoint}/reorder`, orderList);
-    }
+  }
+
+  // 🔥 YENİ METOD: Katalog Listesini Çek
+  getSystemCatalog(): Observable<SystemCatalogDto[]> {
+    return this.api.get<any>(`${this.endpoint}/catalog-list`).pipe(map(res => res || [])
+    );
+  }
+  // 🔥 YENİ: Platform Toggle Metodları
+  toggleWeb(id: string) {
+    return this.api.patch(`${this.endpoint}/toggle-web/${id}`, {});
+  }
+
+  toggleMobile(id: string) {
+    return this.api.patch(`${this.endpoint}/toggle-mobile/${id}`, {});
+  }
 }

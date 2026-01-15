@@ -1,0 +1,78 @@
+<div class="container-fluid p-0 min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  
+  <div class="row w-100 justify-content-center">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+      
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        
+        <div class="card-header border-0 py-5 text-center position-relative" style="background: linear-gradient(135deg, #161A30 0%, #2c3e50 100%);">
+          <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" 
+               style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+          
+          <div class="position-relative z-index-1">
+            <div class="avatar-lg mx-auto mb-4 bg-white rounded-circle p-1 shadow">
+              <div class="w-100 h-100 rounded-circle d-flex align-items-center justify-content-center bg-light">
+                <i class="bx bx-support fs-1 text-primary"></i>
+              </div>
+            </div>
+            <h3 class="text-white fw-bold mb-1">İletişim & Destek</h3>
+            <p class="text-white-50 mb-0">Sizlere nasıl yardımcı olabiliriz?</p>
+          </div>
+        </div>
+
+        <div class="card-body p-5 text-center">
+          
+          <div *ngIf="isLoading" class="py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2 text-muted small">İletişim bilgileri yükleniyor...</p>
+          </div>
+
+          <div *ngIf="!isLoading">
+            
+            <div *ngIf="whatsappNumber; else noContact">
+              <h5 class="fw-bold text-dark mb-3">WhatsApp Destek Hattı</h5>
+              <p class="text-muted mb-4">
+                Siparişleriniz, fiyat bilgisi veya teknik destek için 
+                aşağıdaki butona tıklayarak bize doğrudan ulaşabilirsiniz.
+              </p>
+
+              <div class="d-inline-block bg-light rounded-pill px-4 py-2 mb-4 border">
+                <i class="bx bx-phone text-success me-2 align-middle"></i>
+                <span class="fw-bold text-dark fs-16 align-middle">{{ formattedNumber || whatsappNumber }}</span>
+              </div>
+
+              <button (click)="openWhatsApp()" 
+                      class="btn btn-success w-100 btn-lg rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2 py-3 hover-scale">
+                <i class="bx bxl-whatsapp fs-2"></i>
+                <span class="fw-bold fs-16">WHATSAPP İLE BAĞLAN</span>
+              </button>
+
+              <div class="mt-4 text-muted small">
+                <i class="bx bx-time-five me-1"></i>
+                Yanıt süresi genellikle birkaç dakikadır.
+              </div>
+            </div>
+
+            <ng-template #noContact>
+              <div class="py-3">
+                <i class="bx bx-info-circle fs-1 text-warning mb-3"></i>
+                <h5 class="text-muted">İletişim Bilgisi Bulunamadı</h5>
+                <p class="small text-muted">Firma henüz bir iletişim numarası tanımlamamış.</p>
+              </div>
+            </ng-template>
+
+          </div>
+
+        </div>
+        
+        <div class="card-footer bg-light border-0 py-3 text-center">
+          <small class="text-muted">© 2026 Sarfiyum Panel</small>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

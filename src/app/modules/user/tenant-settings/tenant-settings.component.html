@@ -1,0 +1,84 @@
+<div class="container-fluid p-4">
+  
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="fw-bold text-uppercase" style="color: #161A30;">Firma Ayarları</h4>
+      <p class="text-muted small">Mobil uygulamanızda görünecek iletişim bilgilerini buradan yönetebilirsiniz.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-lg-5">
+      
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-bottom-0">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bx bxl-whatsapp-square fs-3 text-success"></i>
+            <h5 class="mb-0 fw-bold">WhatsApp İletişim Hattı</h5>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div *ngIf="isLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading">
+            <div class="mb-3">
+              <label for="waNumber" class="form-label fw-semibold text-secondary">Telefon Numarası</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">
+                  <i class="bx bx-phone"></i>
+                </span>
+                
+                <input 
+                  type="text" 
+                  id="waNumber" 
+                  class="form-control border-start-0 ps-0" 
+                  [(ngModel)]="whatsAppNumber" 
+                  
+                  mask="(000) 000 00 00" 
+                  prefix="90 " 
+                  [showMaskTyped]="true"
+                  [dropSpecialCharacters]="true"
+                  
+                  placeholder="(5XX) XXX XX XX"
+                  [disabled]="isSaving">
+              </div>
+              <div class="form-text small mt-2">
+                <i class="bx bx-info-circle me-1"></i>
+                Numara otomatik olarak <strong>90 (5XX) ...</strong> formatında kaydedilecektir.
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button 
+                class="btn btn-primary px-4 py-2 d-flex align-items-center gap-2" 
+                (click)="saveSettings()"
+                [disabled]="isSaving">
+                
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <i *ngIf="!isSaving" class="bx bx-save"></i>
+                {{ isSaving ? 'Kaydediliyor...' : 'Kaydet' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="col-md-6 col-lg-7 d-none d-md-block">
+      <div class="alert alert-light border shadow-sm" role="alert">
+        <h6 class="alert-heading fw-bold"><i class="bx bx-mobile-alt me-2"></i>Mobil Uygulamada Nasıl Görünür?</h6>
+        <p class="mb-0 text-muted">
+          Buraya girdiğiniz numara, "Viewer" (İzleyici) rolündeki kullanıcılarınızın sol menüdeki 
+          <strong>"İletişim"</strong> butonuna tıkladığında yönlendirileceği numaradır.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>

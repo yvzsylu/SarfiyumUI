@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { basePath } from '@common/constants';
-import { MENU, type MenuItem } from '@common/user-menu-meta';
+import { MENU, type MenuItem } from '@common/user-menu-meta'; // MENU dosyanızın burada olduğunu varsayıyorum
 import { UserLogoBoxComponent } from '@component/user-logo-box.component';
 import {
   NgbCollapseModule,
@@ -15,7 +15,6 @@ import { getSidebarsize } from '@store/layout/layout-selector';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { getUser } from '@/app/store/authentication/authentication.selector';
 import { take } from 'rxjs';
-
 
 @Component({
   selector: 'app-user-sidebar',
@@ -61,30 +60,38 @@ export class UserSidebarComponent {
     this.initMenu();
   }
 
+  // 🔥 GÜNCELLENEN MENU MANTIĞI
   initMenu(): void {
-    // Store'dan kullanıcıyı dinliyoruz
     this.store.select(getUser).pipe(take(1)).subscribe((user) => {
-      
-      // Kullanıcı veya roller yoksa varsayılan olarak boş dizi veya tüm menü dönebilirsin
-      // Güvenlik için: User yoksa menü de yok diyebiliriz ama genelde full menü defaulttur
       if (!user) {
         this.menuItems = MENU;
         return;
       }
 
-      // Küçük harf duyarlılığı ile 'viewer' kontrolü
+      // Rol kontrolü
       const isViewer = user.roles?.some((r: string) => r.toLowerCase() === 'viewer');
 
       if (isViewer) {
-        // Viewer için yasaklı alanlar
-        const restrictedKeys = ['settings', 'profile', 'users', 'viewer'];
+        // --- SENARYO 1: VIEWER ---
+        // Sadece 'dashboard' ve 'contact' (iletişim) sayfalarını görsün.
+        // Eğer Yardım ve SSS de görsün istiyorsan listeye 'faqs', 'help-center' ekle.
+        const allowedKeys = ['dashboards', 'contact'];
 
         this.menuItems = MENU.filter((item) => {
-          return !restrictedKeys.includes(item.key || '');
+          // Başlıkları (isTitle) gizlemek istersen bu satırı kaldırabilirsin, 
+          // ama genelde menü bütünlüğü için başlıklar kalabilir veya onları da filtreleyebilirsin.
+          if (item.isTitle) return false; 
+
+          return allowedKeys.includes(item.key || '');
         });
+
       } else {
-        // Admin veya User ise her şeyi görsün
-        this.menuItems = MENU;
+        // --- SENARYO 2: USER / ADMIN ---
+        // 'contact' (iletişim) hariç her şeyi görsün.
+        // Çünkü User zaten ayarlar sayfasından numarayı yönetiyor, kendisine mesaj atmasına gerek yok.
+        this.menuItems = MENU.filter((item) => {
+          return item.key !== 'contact';
+        });
       }
     });
   }
@@ -182,19 +189,10 @@ export class UserSidebarComponent {
     }
   }
 
-  /**
-   * Returns true or false if given menu item has child or not
-   * @param item menuItem
-   */
   hasSubmenu(menu: MenuItem): boolean {
     return menu.subMenu ? true : false;
   }
 
-  /**
-   * toggles open menu
-   * @param menuItem clicked menuitem
-   * @param collapse collpase instance
-   */
   toggleMenuItem(menuItem: MenuItem, collapse: NgbCollapse): void {
     collapse.toggle();
     let openMenuItems: string[];

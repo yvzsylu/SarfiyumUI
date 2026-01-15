@@ -4,10 +4,10 @@ import { FaqsComponent } from './faqs/faqs.component';
 import { HelpCenterComponent } from './help-center/help-center.component';
 import { ProfileComponent } from './profile/profile.component';
 import { MultiplierSettingsComponent } from './multiplier-settings/multiplier-settings.component';
-import { TodoComponent } from './apps/todo/todo.component';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 import { CategorySettingsComponent } from './categories/category-settings/category-settings.component';
-
+import { TenantSettingsComponent } from './tenant-settings/tenant-settings.component';
+import { ContactComponent } from './contact/contact.component';
 
 export const USER_ROUTES: Routes = [
   {
@@ -16,84 +16,60 @@ export const USER_ROUTES: Routes = [
     pathMatch: 'full'
   },
 
-  // 1. Piyasa Ekranı (Hem User hem Viewer Erişebilir)
+  // 1. DASHBOARD (Ortak Alan)
   {
     path: 'dashboard',
     component: UserDashboardComponent,
     canActivate: [AuthGuard],
     data: {
       title: 'Piyasa Ekranı',
-      roles: ['user', 'viewer']
+      roles: ['user', 'viewer'] // Hem User hem Viewer girebilir
     }
   },
 
-  // 2. Çarpan Ayarları (SADECE User Erişebilir - Viewer GİREMEZ)
+  // 2. USER ÖZEL ALANLARI (Sadece 'user' girebilir)
   {
     path: 'multiplier-settings',
     component: MultiplierSettingsComponent,
     canActivate: [AuthGuard],
-    data: {
-      title: 'Çarpan Ayarları',
-      roles: ['user']
-    }
+    data: { title: 'Çarpan Ayarları', roles: ['user'] }
   },
-
-  // 3. Profil Ayarları (Herkes Erişebilir)
   {
-    path: 'profile',
-    component: ProfileComponent,
+    path: 'tenant-settings',
+    component: TenantSettingsComponent,
     canActivate: [AuthGuard],
-    data: {
-      title: 'Profilim',
-      roles: ['user']
-    }
-  },
-
-  // 4. Sıkça Sorulan Sorular
-  {
-    path: 'faqs',
-    component: FaqsComponent,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'S.S.S',
-      roles: ['user', 'viewer']
-    }
-  },
-
-  // 5. Yardım Merkezi
-  {
-    path: 'help-center',
-    component: HelpCenterComponent,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Yardım Merkezi',
-      roles: ['user', 'viewer']
-    }
-  },
-  {
-    path: 'viewers',
-    loadChildren: () =>
-      import('../user/viewers/viewer.route').then(m => m.VIEWER_ROUTES)
+    data: { title: 'Genel Ayarlar', roles: ['user'] }
   },
   {
     path: 'category-settings',
     component: CategorySettingsComponent,
     canActivate: [AuthGuard],
-    data: {
-      title: 'Kategori Ayarları',
-      roles: ['user']
-    }
+    data: { title: 'Kategori Ayarları', roles: ['user'] }
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AuthGuard],
+    data: { title: 'Profilim', roles: ['user'] }
   },
 
-
-  // 6. Todo / İş Listesi (Genelde yönetimseldir, sadece User'a bıraktım)
-  // {
-  //   path: 'apps/todo',
-  //   component: TodoComponent,
-  //   canActivate: [AuthGuard],
-  //   data: { 
-  //     title: 'Yapılacaklar Listesi', 
-  //     roles: ['user'] 
-  //   }
-  // }
+  // 3. ORTAK YARDIM ALANLARI
+  {
+    path: 'faqs',
+    component: FaqsComponent,
+    canActivate: [AuthGuard],
+    data: { title: 'S.S.S', roles: ['user'] }
+  },
+  {
+    path: 'help-center',
+    component: HelpCenterComponent,
+    canActivate: [AuthGuard],
+    data: { title: 'Yardım Merkezi', roles: ['user'] }
+  }, 
+  {
+    path: 'contact',
+    component: ContactComponent,
+    canActivate: [AuthGuard],
+    data: { title: 'İletişim', roles: ['viewer'] }
+  }
 ];

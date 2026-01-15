@@ -26,16 +26,24 @@ export const MENU: MenuItem[] = [
   {
     key: 'settings',
     icon: 'solar:maximize-broken',
-    label: 'Çarpan Ayarları',
+    label: 'Ürün & Çarpan',
     link: '/user/multiplier-settings',
   },
+ 
+  
+   
   {
     key: 'category-settings',
     icon: 'solar:list-check-minimalistic-outline',
-    label: 'Kategori Ayarları',
+    label: 'Kategoriler',
     link: '/user/category-settings',
   },
-  
+  {
+    key: 'tenant-settings',
+    icon: 'solar:settings-bold',
+    label: 'Genel Ayarlar',
+    link: '/user/tenant-settings',
+  },
   {
     key: 'users',
     label: 'Kullanıcı Ayarları',
@@ -94,5 +102,11 @@ export const MENU: MenuItem[] = [
     icon: 'solar:question-circle-bold-duotone',
     label: 'SSS',
     link: '/user/faqs',
+  },
+    {
+    key: 'contact',
+    icon: 'solar:call-chat-bold',
+    label: 'İletişim',
+    link: '/user/contact',
   }
 ]
