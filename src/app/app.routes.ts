@@ -64,6 +64,11 @@ export const routes: Routes = [
     loadChildren: () => 
       import('./modules/shared/privacy-policy/privacy-policy.route').then(m => m.PRIVACY_POLICY_ROUTES)
   },
+   {
+    path: 'contact',
+    loadChildren: () => 
+      import('./modules/shared/contact/contact.route').then(m => m.CONTACT_ROUTES)
+  },
   // ----------------------------------
 
   // Wildcard her zaman EN SONDA olmalı (Doğru yapmışsın)
