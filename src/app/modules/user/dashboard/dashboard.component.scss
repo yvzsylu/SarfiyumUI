@@ -547,7 +547,7 @@ table {
       // 22vh = Sağdaki bir kartın yaklaşık yüksekliği.
       // Bunu ürün sayısına bölüyoruz ve 0.5 ile çarpıp (yarısı kadar) font yapıyoruz.
       // clamp(minimum, hesaplanan, maksimum)
-      font-size: clamp(1rem, calc( (30vh / var(--item-count)) * 0.5 ), 3.2rem) !important;
+      font-size: clamp(1rem, calc( (30vh / var(--item-count)) * 0.5 ), 5rem) !important;
       
       // Dikeyde tam ortala
       vertical-align: middle !important;

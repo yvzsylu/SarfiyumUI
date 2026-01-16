@@ -7,16 +7,16 @@ export const VIEWER_ROUTES: Route[] = [
   {
     path: 'list',
     component: ViewerListComponent,
-    data: { title: 'Kullanıcı Listesi' },
+    data: { title: 'Kullanıcı Listesi' , roles: ['user']},
   },
    {
     path: 'add',
     component: ViewerAddComponent,
-    data: { title: 'Kullanıcı Ekle' },
+    data: { title: 'Kullanıcı Ekle' , roles: ['user']},
   },
   {
     path: 'edit/:id',
     component: ViewerEditComponent,
-    data: { title: 'Kullanıcı Düzenle' },
+    data: { title: 'Kullanıcı Düzenle', roles: ['user'] },
   },
 ]

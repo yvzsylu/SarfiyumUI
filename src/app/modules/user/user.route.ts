@@ -52,7 +52,11 @@ export const USER_ROUTES: Routes = [
     canActivate: [AuthGuard],
     data: { title: 'Profilim', roles: ['user'] }
   },
-
+  {
+    path: 'viewers',
+    loadChildren: () => 
+      import('../user/viewers/viewer.route').then(m => m.VIEWER_ROUTES)
+  },
   // 3. ORTAK YARDIM ALANLARI
   {
     path: 'faqs',
