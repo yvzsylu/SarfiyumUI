@@ -4,11 +4,12 @@
 // Bu sayede global <html> etiketindeki data-theme değişse bile burası kendi içinde kalır.
 
 .dashboard-wrapper {
-
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif !important;
+  // Türkçe karakter desteği için fontları güncelledim
+  font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   
+  // VARSAYILAN (RENKLİ LIGHT - ESKİ STANDART)
   --bg-body: #F7F7F7;
   --bg-card: #EEEDED;
   --bg-header: #EEEDED;
@@ -18,17 +19,22 @@
   --text-title: #F9F8F6;
   --text-th: #666666;
   --border-color: #d6d6d6;
-  --border-subtle: rgba(0, 0, 0, 0.1);
+  --border-subtle: #d6d6d6; // RGBA yerine solid hex veriyoruz (picker uyumu için)
   --card-header-bg: #313647;
   --card-header-border: #313647;
   --icon-bg: #c2c2c2;
   --icon-border: #c2c2c2;
-  --item-description-bg: #f1cc27f1  ;
+  // 🔥 GÜNCELLEME: Tek değişken yerine iki değişken tanımlandı
+  --item-description-bg-odd: #f1cc27f1;
+  --item-description-bg-even: #f1cc27f1;
+  
   --table-head-row-bg: #313647;
   --table-head-row-text: #F9F8F6;
+  --bg-doviz-card: #EEEDED;
+  --border-doviz-card: #d6d6d6;
 
 
-  // 2. DARK MODE (KARANLIK)
+  // 2. RENKLİ DARK MODE (ESKİ)
   &[data-dashboard-theme="dark"] {
     --bg-body: #121212; 
     --bg-card: #222831;
@@ -44,12 +50,15 @@
     --card-header-border: #5d543b ;
     --icon-bg: #393E46;
     --icon-border: #393E46;
-    --item-description-bg: #393E46;
+    --item-description-bg-odd: #393E46;
+    --item-description-bg-even: #393E46;
     --table-head-row-bg: #5d543b;
     --table-head-row-text: #EEEEEE;
+    --bg-doviz-card: #222831;
+    --border-doviz-card: #333333;
   }
 
-  // 3. FİNANSAL (MAVİ) TEMA
+  // 3. RENKLİ FİNANSAL (ESKİ)
   &[data-dashboard-theme="financial"] {
     --bg-body: #0b1a33;
     --bg-card: #132240;
@@ -65,12 +74,110 @@
     --card-header-border: #4988C4;
     --icon-bg: #0F2854;
     --icon-border: #0F2854;
-    --item-description-bg: #374f79;
+    --item-description-bg-odd: #374f79;
+    --item-description-bg-even: #374f79;
     --table-head-row-bg: #4988C4;
     --table-head-row-text: #F9F5EB;
+    --bg-doviz-card: #132240;
+    --border-doviz-card: #1e3a6e;
+  }
 
+  // --- YENİ EKLENEN VE ARTIK STANDART OLAN DÜZ (FLAT) TEMALAR ---
 
+  // 4. DÜZ AYDINLIK (FLAT LIGHT)
+  &[data-dashboard-theme="flat-light"] {
+    --bg-body: #ffffff;
+    --bg-card: #f7f8f7;
+    --bg-header: #ffffff;
+    --bg-ticker: #f8f9fa;
+    --text-main: #000000;
+    --text-muted: #666666;
+    --text-title: #212529; /* Başlıklar belirgin siyah */
+    --text-th: #212529; 
+    --border-color: #e9ecef;
+    --border-subtle: #e9ecef;
+    --card-header-bg: #e9ecef; /* Kategori başlığı arkaplanı (Contrast) */
+    --card-header-border: #e9ecef;
+    --icon-bg: #f8f9fa;
+    --icon-border: #dee2e6;
+    --item-description-bg-odd: #f7f8f7;
+    --item-description-bg-even: #f7f8f7;
+    --table-head-row-bg: #e9ecef; /* Tablo başlık arkaplanı (Contrast) */
+    --table-head-row-text: #212529;
+    --bg-doviz-card: #f7f8f7;
+    --border-doviz-card: #e9ecef;
+  }
 
+  // 5. DÜZ KARANLIK (FLAT DARK)
+  &[data-dashboard-theme="flat-dark"] {
+    --bg-body: #000000; 
+    --bg-card: #0a0a0a;
+    --bg-header: #000000;
+    --bg-ticker: #111111;
+    --text-main: #e0e0e0;
+    --text-muted: #888888;
+    --text-title: #ffffff;
+    --text-th: #b0b0b0;
+    --border-color: #333333;
+    --border-subtle: #333333;
+    --card-header-bg: #1a1a1a; /* Kategori başlığı arkaplanı (Contrast) */
+    --card-header-border: #333333;
+    --icon-bg: #222222;
+    --icon-border: #333333;
+    --item-description-bg-odd: #0a0a0a;
+    --item-description-bg-even: #0a0a0a;
+    --table-head-row-bg: #1a1a1a; /* Tablo başlık arkaplanı (Contrast) */
+    --table-head-row-text: #e0e0e0;
+    --bg-doviz-card: #0a0a0a; // Hafif açık
+    --border-doviz-card: #333333;
+  }
+
+  // 6. DÜZ FİNANSAL (FLAT FINANCIAL)
+  &[data-dashboard-theme="flat-financial"] {
+    --bg-body: #060d17;
+    --bg-card: #101d30;
+    --bg-header: #060d17;
+    --bg-ticker: #0b1a33;
+    --text-main: #ffffff;
+    --text-muted: #8fa6d1;
+    --text-title: #ffffff;
+    --text-th: #ffffff;
+    --border-color: #1e3a6e;
+    --border-subtle: #1e3a6e;
+    --card-header-bg: #0f2242; /* Kategori başlığı arkaplanı (Contrast) */
+    --card-header-border: #1e3a6e;
+    --icon-bg: #0f2242;
+    --icon-border: #1e3a6e;
+    --item-description-bg-odd: #101d30;
+    --item-description-bg-even: #101d30;
+    --table-head-row-bg: #0f2242; /* Tablo başlık arkaplanı (Contrast) */
+    --table-head-row-text: #ffffff;
+    --bg-doviz-card: #101d30; // Hafif açık
+    --border-doviz-card: #1e3a6e;
+  }
+
+  // 7. CUSTOM TEMA (YENİ)
+  &[data-dashboard-theme="custom"] {
+    --bg-body: #ffffff;
+    --bg-card: #ffffff;
+    --bg-header: #ffffff;
+    --bg-ticker: #f8f9fa;
+    --text-main: #000000;
+    --text-muted: #666666;
+    --text-title: #212529; 
+    --text-th: #212529; 
+    --border-color: #e9ecef;
+    --border-subtle: #e9ecef;
+    --card-header-bg: #e9ecef; 
+    --card-header-border: #e9ecef;
+    --icon-bg: #f8f9fa;
+    --icon-border: #dee2e6;
+    --item-description-bg-odd: #ffffff;
+    --item-description-bg-even: #ffffff;
+    --table-head-row-bg: #e9ecef; 
+    --table-head-row-text: #212529;
+    --bg-doviz-card: #ffffff;
+    --border-doviz-card: #e9ecef;
   }
 }
 
@@ -103,17 +210,27 @@
   background-color: var(--table-head-row-bg) !important;
   color: var(--table-head-row-text) !important;
 }
-.item-description {
-//  background-color: var(--item-description-bg);
 
- background: linear-gradient(
+// 🔥 GÜNCELLEME: Item Description için Zebra Striping
+// Tek ve Çift satırlar için ayrı değişkenler kullanılıyor.
+tr:nth-child(odd) .item-description {
+  background: linear-gradient(
     to right, 
-    var(--item-description-bg) 0%,    /* Başlangıç rengi (Mavi) */
-    var(--item-description-bg) 99.50%,   /* %70'e kadar Mavi kal (Yazı net okunsun) */
-    var(--bg-card) 100%   /* En sonda yandaki hücrenin rengine (#121212) dönüş */
+    var(--item-description-bg-odd) 0%, 
+    var(--item-description-bg-odd) 99.50%, 
+    var(--bg-card) 100% 
   );
-
 }
+
+tr:nth-child(even) .item-description {
+  background: linear-gradient(
+    to right, 
+    var(--item-description-bg-even) 0%, 
+    var(--item-description-bg-even) 99.50%, 
+    var(--bg-card) 100% 
+  );
+}
+
 .card-body {
   height: 100%;       // Kapsayıcı %100 yükseklikte olmalı
   overflow: hidden;   // Asla scroll çıkmasın
@@ -123,7 +240,6 @@
 .display-6 {
   font-size: 3.5rem;
 } 
-
 
 
 
@@ -138,7 +254,7 @@
 }
 
 .font-financial {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -176,8 +292,10 @@
   // padding-right: 0rem !important;
   max-width: 100% !important;
 }
+
+// 🔥 GÜNCELLEME: Logo artık em cinsinden yükseklik alıyor
 .tenant-logo {
-  height: 50px;
+  height: 1em !important; 
   width: auto;
   object-fit: contain;
 }
@@ -201,6 +319,7 @@
 }
 
 // --- TICKER ---
+// 🔥 TICKER GÜNCELLEMESİ: Position Relative Eklendi ve font-size em yapıldı
 .ticker-wrap {
   flex: 0 0 auto;
   width: 100%;
@@ -210,6 +329,7 @@
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
+  position: relative; // Butonların sabitlenmesi için gerekli
 
   .ticker {
     display: flex;
@@ -222,13 +342,16 @@
       align-items: center;
       padding: 0 1.5rem;
       font-family: "Segoe UI", sans-serif;
-      font-weight: 500;
-      font-size: 2.3rem;
+      font-weight: 500 inherit;;
+      
+      // 🔥 CRITICAL FIX: rem yerine em kullanıldı
+      // font-size: 2.3rem; -> İPTAL
+      font-size: 3em; // Parent boyutunu korusun
 
       .ticker-symbol {
         color: var(--text-main);
         margin-right: 8px;
-        font-weight: 600;
+        font-weight: 600 inherit;;
       }
     }
   }
@@ -255,7 +378,7 @@
 }
 
 .card {
-  border-radius: 6px;
+  border-radius: 6px !important;
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
 
@@ -271,11 +394,12 @@
         color: var(--text-title) !important;
       }
 
+      // Icon Box Stil override (Header içinde)
       .icon-box {
-        color: var(--text-title) !important;
-        background: var(--icon-bg) !important;
-        border-color: var(--icon-border) !important;
-
+          // İkon kutusu header içinde olduğu için rengi buradan alır
+          color: var(--text-title) !important;
+          background: var(--icon-bg) !important;
+          border-color: var(--icon-border) !important;
       }
     }
   }
@@ -336,6 +460,12 @@
   color: var(--text-title);
 }
 
+// 🔥 GÜNCELLEME: Doviz Kart için özel renk değişkeni kullanımı
+.doviz-card {
+    background-color: var(--bg-doviz-card) !important;
+    border: 1px solid var(--border-doviz-card) !important;
+}
+
 .dropdown-item {
   cursor: pointer;
 
@@ -350,20 +480,22 @@
   }
 }
 
-// --- ICON BOX ---
+// --- ICON BOX GÜNCELLEMESİ ---
+// 🔥 Sabit piksel yerine em kullanarak resize edilebilir yaptık
 .icon-box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 35px;
-  min-width: 35px;
-  min-height: 35px;
-  border-radius: 12px;
+  width: 1.5em;  // px yerine em
+  height: 1.5em; // px yerine em
+  border-radius: 3px;
   flex-shrink: 0;
+  
+  // 🔥🔥🔥 DÜZELTME BURADA: font-size: 1rem; kaldırıldı! 🔥🔥🔥
+  font-size: inherit; // Parent wrapper'ın font-size'ını alacak
 
   i {
-    font-size: 1.5rem;
+    font-size: 1.3em; // Kutuya oranla ikon boyutu
     line-height: 0;
     display: block;
     margin: 0;
@@ -397,6 +529,24 @@
   }
 }
 
+// --- DÜZ (FLAT) MODLAR İÇİN ICON BOX ---
+// İkon kutularını da sadeleştiriyoruz
+.dashboard-wrapper[data-dashboard-theme="flat-light"] .icon-box,
+.dashboard-wrapper[data-dashboard-theme="flat-dark"] .icon-box,
+.dashboard-wrapper[data-dashboard-theme="flat-financial"] .icon-box,
+.dashboard-wrapper[data-dashboard-theme="custom"] .icon-box {
+    background: var(--icon-bg);
+    border: 1px solid var(--icon-border);
+    color: var(--text-main);
+    box-shadow: none;
+    i { filter: none; }
+}
+// Düz Finansal modda ikon beyaz kalsın
+.dashboard-wrapper[data-dashboard-theme="flat-financial"] .icon-box {
+    color: #ffffff;
+}
+
+
 .live-blink {
   animation: blinker 1.5s infinite ease-in-out;
 }
@@ -404,7 +554,9 @@
 // --- CUSTOM THEME SUBMENU (ÖZELLEŞTİRME) ---
 
 .custom-theme-item {
-  position: relative; 
+  position: relative; // Varsayılan static olabilir ama menü içindeyken relative kalsın, submenu absolute olacak.
+  // FAKAT: Submenu'yu en üste yapıştırmak için 'static' yapmak, absolute çocuğun grandparent'a (main dropdown) bakmasını sağlar.
+  position: static; 
 
   // 🔥 DEĞİŞİKLİK 1: :hover seçicisini sildik.
   // Artık sadece 'menu-open' sınıfı varsa (yani tıklanmışsa) görünür.
@@ -419,14 +571,16 @@
   display: none; // Varsayılan gizli
   position: absolute;
   
-  // Konum Ayarları
-  top: -5px;      
+  // Konum Ayarları (Main Dropdown'a göre hizalama)
+  top: 0;      
   right: 100%;    
   margin-right: 0; 
+  margin-top: -1px; // Hafif border düzeltmesi
   
   // Görsel Ayarlar
   width: 300px;
-  max-height: 600px;
+  max-height: 80vh; // YENİ: Ekranın %80'i kadar yükseklik
+  overflow-y: auto; // YENİ: Taşan içerik için scroll
   z-index: 1050;
   
   background-color: #fff;
@@ -440,9 +594,6 @@
     border-color: #444;
     color: #eee;
   }
-
-  // 🔥 DEĞİŞİKLİK 2: &::after (Görünmez Köprü) tamamen silindi. 
-  // Çünkü artık hover yapmıyoruz, tıklayınca sabitleniyor.
 }
 
 // Renk Seçici Kutusu (Aynı Kalıyor)
@@ -503,7 +654,7 @@ table {
       // clamp(MinimumBoyut, HesaplananDeğer, MaksimumBoyut)
       
       // Büyük listeler için (Sol taraf - Sarrafiye gibi):
-      font-size: clamp(1rem, calc( (90vh / var(--item-count)) * 0.74 ), 5rem);
+      font-size: clamp(1rem, calc( (90vh / var(--item-count)) * 0.68 ), 10rem);
       
       // Küçük listeler için (Sağ taraf - Bilezik, Ata vb. gibi):
       // font-size: clamp(0.8rem, calc( (25vh / var(--item-count)) * 0.5 ), 3rem);
@@ -547,7 +698,7 @@ table {
       // 22vh = Sağdaki bir kartın yaklaşık yüksekliği.
       // Bunu ürün sayısına bölüyoruz ve 0.5 ile çarpıp (yarısı kadar) font yapıyoruz.
       // clamp(minimum, hesaplanan, maksimum)
-      font-size: clamp(1rem, calc( (30vh / var(--item-count)) * 0.5 ), 5rem) !important;
+      font-size: clamp(1rem, calc( (30vh / var(--item-count)) * 0.40 ), 10rem) !important;
       
       // Dikeyde tam ortala
       vertical-align: middle !important;
@@ -590,4 +741,89 @@ table {
 
 .flash-border-down {
   animation: borderFlashRed 1s ease-out;
+}
+
+
+/* --- SOL KART RADIUS FIX --- */
+.market-card {
+  /* 1. Radius'u kesin olarak tanımla */
+  border-radius: 6px !important;
+  
+  /* 2. İçeriğin taşmasını kesin olarak engelle */
+  overflow: hidden !important;
+
+  /* 3. SİHİRLİ KOD: Tarayıcıyı "Maskeleme" yapmaya zorlar (GPU Layer Hack) */
+  /* Bu kod, tablonun radius'u delip geçmesini engeller */
+  transform: translateZ(0); 
+  
+  /* Alternatif Maskeleme (Bazı tarayıcılar için) */
+  mask-image: -webkit-radial-gradient(white, black);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+
+  table {
+    /* 4. Tablo kenarlarının birleşip radiusu bozmasını engeller */
+    border-collapse: separate !important; 
+    border-spacing: 0;
+    width: 100%;
+  }
+  
+  /* Eğer header köşeleri de sorunluysa */
+  .card-header {
+      border-radius: 6px 6px 0 0 !important;
+      padding-bottom: 0px !important;
+  }
+}
+
+
+/* 🔥🔥🔥 FONT RESIZE BUTONLARI (GÜNCEL) 🔥🔥🔥 */
+
+.resizable-wrapper {
+  position: relative !important; /* Butonları buna göre konumlandıracağız */
+  
+  &:hover .resize-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.resize-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 1px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-bottom-left-radius: 4px;
+  padding: 1px;
+  opacity: 0; /* Varsayılan gizli */
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 999;
+
+  button {
+    width: auto; // Esnek genişlik
+    min-width: 14px;
+    padding: 0 4px;
+    height: 14px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 10px;
+    line-height: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+  }
+  
+  /* BOLD BUTON STİLİ */
+  .btn-bold {
+    font-weight: 800;
+    color: #ffd700; /* Gold renk */
+  }
 }

@@ -1,21 +1,43 @@
-<div class="dashboard-wrapper" [class.tv-mode-layout]="isTvMode" [attr.data-dashboard-theme]="currentTheme">
+<div class="dashboard-wrapper" lang="tr" [class.tv-mode-layout]="isTvMode" [attr.data-dashboard-theme]="currentTheme">
 
   <div class="header-section shadow-sm">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center gap-3">
         <ng-container *ngIf="user$ | async as user">
-          <img *ngIf="user.tenantLogoUrl" class="rounded-3 tenant-logo" [src]="apiRoot + user.tenantLogoUrl"
-            onerror="this.onerror=null; this.src='assets/images/users/user-dummy-img.jpg'">
+          
+          <div class="resizable-wrapper d-flex align-items-center justify-content-center me-2" 
+               [attr.data-key]="'global-logo'" 
+               [style]="getWrapperStyle('global-logo', 50)">
+               
+             <img *ngIf="user.tenantLogoUrl" class="rounded-3 tenant-logo" [src]="apiRoot + user.tenantLogoUrl"
+              onerror="this.onerror=null; this.src='assets/images/users/user-dummy-img.jpg'">
 
-          <div *ngIf="!user.tenantLogoUrl"
-            class="rounded-3 bg-light d-flex align-items-center justify-content-center base-text border"
-            style="width: 48px; height: 48px;">
-            <span class="fw-bold fs-4">{{ user.fullName?.charAt(0).toUpperCase() }}</span>
+            <div *ngIf="!user.tenantLogoUrl"
+              class="rounded-3 bg-light d-flex align-items-center justify-content-center base-text border"
+              style="width: 1em; height: 1em;">
+              <span class="fw-bold" style="font-size: 0.5em;">{{ user.fullName?.charAt(0).toLocaleUpperCase('tr-TR') }}</span>
+            </div>
+            
+            <div class="resize-actions">
+              <button (click)="adjustFontWeight($event, 50)" class="btn-bold">B+</button>
+              <button (click)="adjustFontWeight($event, -50)" class="btn-bold">B-</button>
+              <button (click)="adjustFontSize($event, 1)">+</button>
+              <button (click)="adjustFontSize($event, -1)">-</button>
+            </div>
           </div>
 
           <div class="d-flex flex-column">
-            <h2 class="mb-0 fw-bold base-text ls-1 tenant-name" style="font-size: 5rem; line-height: 1;">
+            <h2 class="mb-0 fw-bold base-text ls-1 tenant-name resizable-wrapper" 
+                [attr.data-key]="'global-tenant-name'"
+                [style]="getWrapperStyle('global-tenant-name')"
+                style="font-size: 1rem; line-height: 1;">
               {{ (user.tenantName || 'SARFİYUM').toLocaleUpperCase('tr-TR') }}
+              <div class="resize-actions">
+                <button (click)="adjustFontWeight($event, 50)" class="btn-bold">B+</button>
+                <button (click)="adjustFontWeight($event, -50)" class="btn-bold">B-</button>
+                <button (click)="adjustFontSize($event, 1)">+</button>
+                <button (click)="adjustFontSize($event, -1)">-</button>
+              </div>
             </h2>
           </div>
         </ng-container>
@@ -23,69 +45,120 @@
 
       <div class="d-flex align-items-center gap-3">
         <div class="text-end lh-1">
-          <div class="fw-bold font-financial base-text" style="font-size: 6rem;">
+          <div class="fw-bold font-financial base-text resizable-wrapper" 
+               [attr.data-key]="'global-clock'"
+               [style]="getWrapperStyle('global-clock')"
+               style="font-size: 6rem;">
             {{ currentTime | date:'HH:mm' }}<span class="fs-4 text-muted ms-1 opacity-75">{{ currentTime | date:'ss'
               }}</span>
+            <div class="resize-actions">
+              <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+              <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+              <button (click)="adjustFontSize($event, 1)">+</button>
+              <button (click)="adjustFontSize($event, -1)">-</button>
+            </div>
           </div>
         </div>
 
         <div class="mx-2 bg-secondary opacity-25 rounded" style="width: 1px; height: 40px;"></div>
 
-        <div ngbDropdown class="d-inline-block" display="dynamic" placement="bottom-end" 
-             [autoClose]="'outside'" #themeDrop="ngbDropdown">
-             
+        <div ngbDropdown class="d-inline-block" display="dynamic" placement="bottom-end" [autoClose]="'outside'"
+          #themeDrop="ngbDropdown">
+
           <button class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle shadow-none" type="button"
             id="themeDropdown" ngbDropdownToggle>
-            <i *ngIf="currentTheme === 'light'" class="bx bx-sun fs-22 align-middle"></i>
-            <i *ngIf="currentTheme === 'dark'" class="bx bx-moon fs-22 align-middle"></i>
-            <i *ngIf="currentTheme === 'financial'" class="bx bx-bar-chart-alt-2 fs-22 align-middle"></i>
+            <i *ngIf="currentTheme.includes('light')" class="bx bx-sun fs-22 align-middle"></i>
+            <i *ngIf="currentTheme.includes('dark')" class="bx bx-moon fs-22 align-middle"></i>
+            <i *ngIf="currentTheme.includes('financial')" class="bx bx-bar-chart-alt-2 fs-22 align-middle"></i>
+            <i *ngIf="currentTheme === 'custom'" class="bx bx-palette fs-22 align-middle"></i>
           </button>
-          
+
           <div ngbDropdownMenu aria-labelledby="themeDropdown" class="dropdown-menu-end">
-            <h6 class="dropdown-header">Tema Görünümü</h6>
-            <button ngbDropdownItem (click)="setTheme('light'); themeDrop.close()" [class.active]="currentTheme === 'light'">
-              <span><i class="bx bx-sun me-2"></i> Aydınlık</span>
-            </button>
-            <button ngbDropdownItem (click)="setTheme('dark'); themeDrop.close()" [class.active]="currentTheme === 'dark'">
-              <span><i class="bx bx-moon me-2"></i> Karanlık</span>
-            </button>
-            <button ngbDropdownItem (click)="setTheme('financial'); themeDrop.close()" [class.active]="currentTheme === 'financial'">
-              <span><i class="bx bx-bar-chart-alt-2 me-2"></i> Finansal (Mavi)</span>
-            </button>
 
-            <div class="dropdown-divider"></div>
-
-            <div class="custom-theme-item position-relative" [class.menu-open]="isColorMenuOpen">
-              <button type="button" 
-                      class="dropdown-item d-flex justify-content-between align-items-center"
-                      (click)="toggleColorMenu()">
-                <span><i class="bx bx-palette me-2"></i> Özel Renk</span>
+            <div class="custom-theme-item" [class.menu-open]="isColorMenuOpen">
+              <button type="button" class="dropdown-item d-flex justify-content-between align-items-center"
+                (click)="toggleColorMenu()">
+                <span><i class="bx bx-slider-alt me-2"></i> Renkleri Düzenle</span>
                 <i class="bx" [ngClass]="isColorMenuOpen ? 'bx-chevron-down' : 'bx-chevron-left'"></i>
               </button>
 
               <div class="custom-theme-submenu shadow-lg rounded p-3 bg-white border">
-                <h6 class="dropdown-header px-0 mb-2">Renkleri Düzenle</h6>
+                <h6 class="dropdown-header px-0 mb-2">Gelişmiş Renk Ayarları</h6>
+
                 <div class="color-grid">
-                  <div class="color-item d-flex align-items-center justify-content-between mb-2" 
-                       *ngFor="let color of customizableColors">
+                  <div class="color-item d-flex align-items-center justify-content-between mb-2"
+                    *ngFor="let color of customizableColors">
                     <label class="small mb-0 me-2 text-muted" style="font-size: 0.75rem;">{{ color.label }}</label>
                     <div class="color-picker-wrapper">
-                       <input type="color" [value]="color.value" 
-                             (input)="updateCustomColor(color.var, $event)"
-                             (click)="$event.stopPropagation()">
+                      <input type="color" [value]="color.value" (input)="updateCustomColor(color.var, $event)"
+                        (click)="$event.stopPropagation()">
                     </div>
                   </div>
                 </div>
-                <button class="btn btn-xs btn-light w-100 mt-2 border" (click)="resetCustomColors()">
-                  Varsayılana Dön
-                </button>
+
+                <div class="dropdown-divider my-2"></div>
+
+                <div class="d-flex gap-2 mt-2">
+                  <button class="btn btn-xs btn-primary flex-grow-1" (click)="saveCustomTheme()">
+                    <i class="bx bx-save me-1"></i> Kaydet
+                  </button>
+                  <button class="btn btn-xs btn-light border flex-grow-1" (click)="resetCustomColors()">
+                    Sıfırla
+                  </button>
+                </div>
+
+                <div *ngIf="showSaveSuccess" class="text-center text-success small mt-2 fw-bold live-blink">
+                  <i class="bx bx-check-circle me-1"></i> Temanız kaydedilmiştir
+                </div>
+
               </div>
             </div>
+
+            <div class="dropdown-divider"></div>
+
+            <h6 class="dropdown-header">Kişisel</h6>
+            <button ngbDropdownItem (click)="setTheme('custom'); themeDrop.close()"
+              [class.active]="currentTheme === 'custom'">
+              <span><i class="bx bx-palette me-2"></i> Özel Temam</span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+
+            <h6 class="dropdown-header">Standart Temalar</h6>
+            <button ngbDropdownItem (click)="setTheme('flat-light'); themeDrop.close()"
+              [class.active]="currentTheme === 'flat-light'">
+              <span><i class="bx bx-sun me-2"></i> Aydınlık</span>
+            </button>
+            <button ngbDropdownItem (click)="setTheme('flat-dark'); themeDrop.close()"
+              [class.active]="currentTheme === 'flat-dark'">
+              <span><i class="bx bx-moon me-2"></i> Karanlık</span>
+            </button>
+            <button ngbDropdownItem (click)="setTheme('flat-financial'); themeDrop.close()"
+              [class.active]="currentTheme === 'flat-financial'">
+              <span><i class="bx bx-bar-chart-alt-2 me-2"></i> Finansal</span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+
+            <h6 class="dropdown-header">Renkli Temalar</h6>
+            <button ngbDropdownItem (click)="setTheme('light'); themeDrop.close()"
+              [class.active]="currentTheme === 'light'">
+              <span><i class="bx bx-sun me-2"></i> Aydınlık (Renkli)</span>
+            </button>
+            <button ngbDropdownItem (click)="setTheme('dark'); themeDrop.close()"
+              [class.active]="currentTheme === 'dark'">
+              <span><i class="bx bx-moon me-2"></i> Karanlık (Renkli)</span>
+            </button>
+            <button ngbDropdownItem (click)="setTheme('financial'); themeDrop.close()"
+              [class.active]="currentTheme === 'financial'">
+              <span><i class="bx bx-bar-chart-alt-2 me-2"></i> Finansal (Renkli)</span>
+            </button>
+
           </div>
         </div>
 
         <button *ngIf="!isTvMode"
-          class="btn btn-subtle-primary btn-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-bold"
+          class="btn btn-subtle-primary btn-sm d-flex align-items-center gap-2  py-2 rounded-pill fw-bold"
           (click)="toggleTvMode()">
           <i class="bx bx-fullscreen"></i>
           <span class="d-none d-md-inline">TAM EKRAN</span>
@@ -94,11 +167,13 @@
     </div>
   </div>
 
-  <div class="ticker-wrap ">
-    <div class="ticker">
+  <div class="ticker-wrap resizable-wrapper" 
+       [attr.data-key]="'global-ticker'"
+       [style]="getWrapperStyle('global-ticker', 36)"> 
+    <div class="ticker" >
       <ng-container *ngFor="let i of [1,2]">
-        <div class="ticker-item" *ngFor="let item of allData">
-          <span class="ticker-symbol">{{ item.symbol }}</span>
+        <div class="ticker-item" *ngFor="let item of allData" >
+          <span class="ticker-symbol" >{{ item.symbol }}</span>
           <span class="base-text font-financial ms-1" [ngClass]="item.flashCss">
             {{ item.ask | number:'1.2-2' }}
             <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
@@ -107,40 +182,125 @@
         </div>
       </ng-container>
     </div>
+    <div class="resize-actions" style="right: 0; height: 100%; display: flex; flex-direction: column; justify-content: center; z-index: 1000;">
+      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+      <button (click)="adjustFontSize($event, 1)">+</button>
+      <button (click)="adjustFontSize($event, -1)">-</button>
+    </div>
   </div>
 
-  <div class="dashboard-content-area container-fluid px-3 py-2 flex-grow-1">
+  <div class="dashboard-content-area container-fluid py-2 flex-grow-1">
     <div class="row g-3 full-height-grid">
 
       <div class=" h-100" style="width: 55%;">
         <div class="card h-100 shadow-sm border-0 market-card">
           <div class="card-header soft-gold-header ">
-            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
-              <span class="icon-box"><i class="bx bx-diamond"></i></span>
+            <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text resizable-wrapper" 
+                [attr.data-key]="'header-sarrafiye-title'"
+                [style]="getWrapperStyle('header-sarrafiye-title')"
+                style="font-size: 2rem;">
+              
+              <div class="resizable-wrapper d-inline-flex" 
+                   [attr.data-key]="'header-sarrafiye-icon'"
+                   [style]="getWrapperStyle('header-sarrafiye-icon')"
+                   style="font-size: 0.6em;">
+                <span class="icon-box"><i class="bx bx-diamond"></i></span>
+                <div class="resize-actions">
+                  <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                  <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                  <button (click)="adjustFontSize($event, 1)">+</button>
+                  <button (click)="adjustFontSize($event, -1)">-</button>
+                </div>
+              </div>
               {{ getCategoryName(1, 'SARRAFİYE') }}
+              <div class="resize-actions">
+                <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                <button (click)="adjustFontSize($event, 1)">+</button>
+                <button (click)="adjustFontSize($event, -1)">-</button>
+              </div>
             </h4>
           </div>
           <div class="card-body p-0 table-responsive" [style.--item-count]="madenList.length || 1">
             <table class="table table-sm table-hover align-middle mb-0">
               <thead>
                 <tr class="table-head-row">
-                  <th class="ps-3 fs-4 table-head-row-color" style="width: 40%;">Ürün</th>
-                  <th class="text-end fs-4 table-head-row-color">Alış</th>
-                  <th class="text-end pe-3 fs-4 table-head-row-color">Satış</th>
+                  <th class="ps-3 table-head-row-color resizable-wrapper" style="width: 40%;"
+                      [attr.data-key]="'th-sarrafiye-product'"
+                      [style]="getWrapperStyle('th-sarrafiye-product')">
+                    ÜRÜN
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </th>
+                  <th class="text-end table-head-row-color resizable-wrapper"
+                      [attr.data-key]="'th-sarrafiye-bid'"
+                      [style]="getWrapperStyle('th-sarrafiye-bid')">
+                    ALIŞ
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </th>
+                  <th class="text-end pe-3 table-head-row-color resizable-wrapper"
+                      [attr.data-key]="'th-sarrafiye-ask'"
+                      [style]="getWrapperStyle('th-sarrafiye-ask')">
+                    SATIŞ
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let item of madenList; trackBy: trackBySymbol">
-                  <td class="ps-4 fw-semibold base-text item-description" >{{ item.description || item.symbol }}</td>
-                  <td class="text-end font-financial base-text" style="padding-left: 0rem !important;" [ngClass]="item.flashCss">
+                  <td class="ps-4 fw-semibold base-text item-description resizable-wrapper"
+                      [attr.data-key]="'item-maden-' + item.symbol + '-desc'"
+                      [style]="getWrapperStyle('item-maden-' + item.symbol + '-desc')">
+                    {{ item.description || item.symbol }}
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </td>
+                  <td class="text-end font-financial base-text resizable-wrapper" style="padding-left: 0rem !important;"
+                    [attr.data-key]="'item-maden-' + item.symbol + '-bid'"
+                    [style]="getWrapperStyle('item-maden-' + item.symbol + '-bid')"
+                    [ngClass]="item.flashCss">
                     {{ item.bid | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                     <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
                   </td>
-                  <td class="text-end font-financial base-text pe-4" style="padding-left: 0rem !important;" [ngClass]="item.flashCss">
+                  <td class="text-end font-financial base-text pe-4 resizable-wrapper" style="padding-left: 0rem !important;"
+                    [attr.data-key]="'item-maden-' + item.symbol + '-ask'"
+                    [style]="getWrapperStyle('item-maden-' + item.symbol + '-ask')"
+                    [ngClass]="item.flashCss">
                     {{ item.ask | number:'1.2-2' }}
                     <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                     <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="madenList.length === 0">
@@ -152,43 +312,81 @@
         </div>
       </div>
 
-      <div class=" d-flex flex-column h-100 overflow-hidden" style="width: 45%;">
+      <div class=" d-flex flex-column h-100 overflow-hidden " style="width: 45%;">
 
         <div class="row flex-shrink-0 ">
-          <div class="col-md-6" *ngFor="let item of dovizList; trackBy: trackBySymbol">
-            <div class="card border-0 shadow-sm doviz-card"
+          <div class="col-12" *ngFor="let item of dovizList; trackBy: trackBySymbol">
+            <div class="card border-0 shadow-sm doviz-card" style="margin-bottom: 0.5rem !important;"
               [ngClass]="{'flash-border-up': item.direction === 'up', 'flash-border-down': item.direction === 'down'}">
-              <div class="d-flex flex-column" style="padding: 0.6rem !important;">
 
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h3 class="fw-bold mb-0 base-text fs-1 text-uppercase">{{ (item.description || item.symbol).replace('/', '-') }}</h3>
-                  <span class="badge badge-soft base-text border">
-                    <i *ngIf="item.symbol === 'Dolar/TRY'" class="bx bx-dollar fs-4" style="color: green;"></i>
-                    <i *ngIf="item.symbol === 'Euro/TRY'" class="bx bx-euro fs-4" style="color: rgb(0, 110, 255);"></i>
+              <div class="d-flex align-items-center justify-content py-1 px-1">
+
+                <div class="d-flex align-items-center gap-3" style="width: 30%;">
+                  <span class="badge badge-soft base-text border p-2 resizable-wrapper" 
+                        [attr.data-key]="'doviz-' + item.symbol + '-icon'"
+                        [style]="getWrapperStyle('doviz-' + item.symbol + '-icon', 24)"
+                        style="font-size: 1.5rem;">
+                    <i *ngIf="item.symbol === 'Dolar/TRY'" class="bx bx-dollar" style="color: green;"></i>
+                    <i *ngIf="item.symbol === 'Euro/TRY'" class="bx bx-euro" style="color: rgb(0, 110, 255);"></i>
+                    <i *ngIf="item.symbol !== 'Dolar/TRY' && item.symbol !== 'Euro/TRY'" class="bx bx-money"></i>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </span>
+                  
+                  <h3 class="fw-bold mb-0 base-text resizable-wrapper" 
+                      [attr.data-key]="'doviz-' + item.symbol + '-name'"
+                      [style]="getWrapperStyle('doviz-' + item.symbol + '-name')"
+                      style="font-size: 2rem;">
+                    {{ (item.description || item.symbol).replace('/', '-').toLocaleUpperCase('tr-TR') }}
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                  </h3>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-end gap-2" style="width: 35%;">
+                  <small class="text-muted fw-bold mb-0" style="font-size: 0.9rem; white-space: nowrap;">ALIŞ:</small>
+                  <span class="display-6 font-financial base-text lh-1 mb-0 resizable-wrapper" 
+                        [attr.data-key]="'doviz-' + item.symbol + '-bid'"
+                        [style]="getWrapperStyle('doviz-' + item.symbol + '-bid')"
+                        [ngClass]="item.flashCss"
+                        style="font-size: 3rem;">
+                    {{ item.bid | number:'1.3-3' }}
+                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
                   </span>
                 </div>
 
-                <div class="row g-0 align-items-center">
-                  <div class="col-6 border-end ">
-                    <small class="text-muted fw-bold fs-4 ">ALIŞ:</small>
-                    <div class="d-flex align-items-center justify-content-between">
-                      <span class="display-6 font-financial base-text" [ngClass]="item.flashCss">
-                        {{ item.bid | number:'1.4-4' }}
-                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success" ></i>
-                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger" ></i>
-                      </span>
+                <div class="d-flex align-items-center justify-content-end gap-2" style="width: 35%;">
+                  <small class="text-muted fw-bold mb-0" style="font-size: 0.9rem; white-space: nowrap;">SATIŞ:</small>
+                  <span class="display-6 font-financial base-text lh-1 mb-0 resizable-wrapper" 
+                        [attr.data-key]="'doviz-' + item.symbol + '-ask'"
+                        [style]="getWrapperStyle('doviz-' + item.symbol + '-ask')"
+                        [ngClass]="item.flashCss"
+                        style="font-size: 3rem;">
+                    {{ item.ask | number:'1.3-3' }}
+                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
                     </div>
-                  </div>
-                  <div class="col-6 ps-2">
-                    <small class="text-muted fw-bold fs-4 ">SATIŞ:</small>
-                    <div class="d-flex align-items-center justify-content-between">
-                      <span class="display-6 font-financial base-text" [ngClass]="item.flashCss">
-                        {{ item.ask | number:'1.4-4' }}
-                        <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success" ></i>
-                        <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger" ></i>
-                      </span>
-                    </div>
-                  </div>
+                  </span>
                 </div>
 
               </div>
@@ -198,34 +396,110 @@
 
         <div class="d-flex flex-column flex-grow-1 " style="min-height: 0; overflow: hidden;">
 
-          <div class="card shadow-sm border-0 d-flex flex-column " style="flex: 1; min-height: 0; overflow: hidden;">
-            <div class="card-header soft-gold-header  flex-shrink-0">
-               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem;">
-                <span class="icon-box"><i class="bx bx-doughnut-chart"></i></span> 
+          <div class="card shadow-sm border-0 d-flex flex-column h-100 " style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0.6rem !important;">
+            <div class="card-header soft-gold-header flex-shrink-0">
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text resizable-wrapper" 
+                  [attr.data-key]="'header-bilezik-title'"
+                  [style]="getWrapperStyle('header-bilezik-title')"
+                  style="font-size: 1.7rem;">
+                <div class="resizable-wrapper d-inline-flex" 
+                     [attr.data-key]="'header-bilezik-icon'"
+                     [style]="getWrapperStyle('header-bilezik-icon')"
+                     style="font-size: 0.6em;">
+                    <span class="icon-box"><i class="bx bx-doughnut-chart"></i></span>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                </div>
                 {{ getCategoryName(3, 'BİLEZİK') }}
+                <div class="resize-actions">
+                  <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                  <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                  <button (click)="adjustFontSize($event, 1)">+</button>
+                  <button (click)="adjustFontSize($event, -1)">-</button>
+                </div>
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="bilezikList.length || 1">
               <table class="table table-sm table-hover align-middle mb-0 h-100">
                 <thead>
                   <tr class="table-head-row">
-                    <th class="ps-3 fs-4 table-head-row-color" style="width: 43%;">Ürün</th>
-                    <th class="text-end fs-4 table-head-row-color">Alış</th>
-                    <th class="text-end pe-3 fs-4 table-head-row-color">Satış</th>
+                    <th class="ps-3 table-head-row-color resizable-wrapper" style="width: 43%;"
+                        [attr.data-key]="'th-bilezik-product'"
+                        [style]="getWrapperStyle('th-bilezik-product')">
+                        ÜRÜN
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
+                    <th class="text-end table-head-row-color resizable-wrapper"
+                        [attr.data-key]="'th-bilezik-bid'"
+                        [style]="getWrapperStyle('th-bilezik-bid')">
+                        ALIŞ
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
+                    <th class="text-end pe-3 table-head-row-color resizable-wrapper"
+                        [attr.data-key]="'th-bilezik-ask'"
+                        [style]="getWrapperStyle('th-bilezik-ask')">
+                        SATIŞ
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of bilezikList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description" >{{ item.description }}</td>
-                    <td class="text-end font-financial base-text" [ngClass]="item.flashCss">
+                    <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
+                        [attr.data-key]="'item-bilezik-' + item.symbol + '-desc'"
+                        [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-desc')">
+                        {{ item.description }}
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </td>
+                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                        [attr.data-key]="'item-bilezik-' + item.symbol + '-bid'"
+                        [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-bid')">
                       {{ item.bid | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <div class="resize-actions">
+                        <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                        <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                        <button (click)="adjustFontSize($event, 1)">+</button>
+                        <button (click)="adjustFontSize($event, -1)">-</button>
+                      </div>
                     </td>
-                    <td class="text-end pe-3 font-financial base-text" [ngClass]="item.flashCss">
+                    <td class="text-end pe-3 font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                        [attr.data-key]="'item-bilezik-' + item.symbol + '-ask'"
+                        [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-ask')">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <div class="resize-actions">
+                        <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                        <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                        <button (click)="adjustFontSize($event, 1)">+</button>
+                        <button (click)="adjustFontSize($event, -1)">-</button>
+                      </div>
                     </td>
                   </tr>
                   <tr *ngIf="bilezikList.length === 0">
@@ -236,34 +510,113 @@
             </div>
           </div>
 
-          <div class="card shadow-sm border-0 d-flex flex-column" style="flex: 1; min-height: 0; overflow: hidden; ;">
+          <div class="card shadow-sm border-0 d-flex flex-column h-100" style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0.6rem !important;">
             <div class="card-header soft-gold-header flex-shrink-0">
-               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem; padding-left: 0rem !important;">
-                <span class="icon-box"><i class="bx bx-medal"></i></span> 
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text resizable-wrapper"
+                  [attr.data-key]="'header-ata-title'"
+                  [style]="getWrapperStyle('header-ata-title')"
+                  style="font-size: 1.7rem; padding-left: 0rem !important;">
+                <div class="resizable-wrapper d-inline-flex" 
+                     [attr.data-key]="'header-ata-icon'"
+                     [style]="getWrapperStyle('header-ata-icon')"
+                     style="font-size: 0.6em;">
+                    <span class="icon-box"><i class="bx bx-medal"></i></span>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                </div>
                 {{ getCategoryName(4, 'ATA & REŞAT') }}
+                <div class="resize-actions">
+                  <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                  <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                  <button (click)="adjustFontSize($event, 1)">+</button>
+                  <button (click)="adjustFontSize($event, -1)">-</button>
+                </div>
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="ataResatList.length || 1">
               <table class="table table-sm table-hover align-middle mb-0 h-100">
                 <thead>
                   <tr class="table-head-row">
-                    <th class="ps-3 fs-4 table-head-row-color" style="width: 43%;">Ürün</th>
-                    <th class="text-end fs-4 table-head-row-color">Alış</th>
-                    <th class="text-end pe-3 fs-4 table-head-row-color">Satış</th>
+                    <th class="ps-3 table-head-row-color resizable-wrapper" style="width: 43%;"
+                        [attr.data-key]="'th-ata-product'"
+                        [style]="getWrapperStyle('th-ata-product')">
+                        ÜRÜN
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
+                    <th class="text-end table-head-row-color resizable-wrapper"
+                        [attr.data-key]="'th-ata-bid'"
+                        [style]="getWrapperStyle('th-ata-bid')">
+                        ALIŞ
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
+                    <th class="text-end pe-3 table-head-row-color resizable-wrapper"
+                        [attr.data-key]="'th-ata-ask'"
+                        [style]="getWrapperStyle('th-ata-ask')">
+                        SATIŞ
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of ataResatList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description">{{ item.description }}</td>
-                    <td class="text-end font-financial base-text" [ngClass]="item.flashCss">
+
+                    <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
+                        [attr.data-key]="'item-ata-' + item.symbol + '-desc'"
+                        [style]="getWrapperStyle('item-ata-' + item.symbol + '-desc')">
+                        {{ item.description }}
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </td>
+
+                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                        [attr.data-key]="'item-ata-' + item.symbol + '-bid'"
+                        [style]="getWrapperStyle('item-ata-' + item.symbol + '-bid')">
                       {{ item.bid | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <div class="resize-actions">
+                        <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                        <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                        <button (click)="adjustFontSize($event, 1)">+</button>
+                        <button (click)="adjustFontSize($event, -1)">-</button>
+                      </div>
                     </td>
-                    <td class="text-end pe-3 font-financial base-text" style=" padding-left: 0rem !important;" [ngClass]="item.flashCss">
+                    <td class="text-end pe-3 font-financial base-text resizable-wrapper" style=" padding-left: 0rem !important;"
+                      [ngClass]="item.flashCss"
+                      [attr.data-key]="'item-ata-' + item.symbol + '-ask'"
+                      [style]="getWrapperStyle('item-ata-' + item.symbol + '-ask')">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <div class="resize-actions">
+                        <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                        <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                        <button (click)="adjustFontSize($event, 1)">+</button>
+                        <button (click)="adjustFontSize($event, -1)">-</button>
+                      </div>
                     </td>
                   </tr>
                   <tr *ngIf="ataResatList.length === 0">
@@ -274,28 +627,87 @@
             </div>
           </div>
 
-          <div class="card shadow-sm border-0 d-flex flex-column" style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0rem !important;">
+          <div class="card shadow-sm border-0 d-flex flex-column h-100" style="flex: 1; min-height: 0; overflow: hidden; margin-bottom: 0rem !important;">
             <div class="card-header soft-gold-header flex-shrink-0">
-               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text" style="font-size: 2.5rem; ">
-                <span class="icon-box"><i class="bx bx-credit-card-front"></i></span> 
+               <h4 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 base-text resizable-wrapper" 
+                  [attr.data-key]="'header-kredi-title'"
+                  [style]="getWrapperStyle('header-kredi-title')"
+                  style="font-size: 1.7rem; ">
+                <div class="resizable-wrapper d-inline-flex" 
+                     [attr.data-key]="'header-kredi-icon'"
+                     [style]="getWrapperStyle('header-kredi-icon')"
+                     style="font-size: 0.6em;">
+                    <span class="icon-box"><i class="bx bx-credit-card-front"></i></span>
+                    <div class="resize-actions">
+                      <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                      <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                      <button (click)="adjustFontSize($event, 1)">+</button>
+                      <button (click)="adjustFontSize($event, -1)">-</button>
+                    </div>
+                </div>
                 {{ getCategoryName(5, 'KREDİ KARTI FİYATLARI') }}
+                <div class="resize-actions">
+                  <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                  <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                  <button (click)="adjustFontSize($event, 1)">+</button>
+                  <button (click)="adjustFontSize($event, -1)">-</button>
+                </div>
               </h4>
             </div>
             <div class="card-body p-0 table-responsive h-100" [style.--item-count]="krediList.length || 1">
               <table class="table table-sm table-hover align-middle mb-0 h-100">
                 <thead>
                   <tr class="table-head-row">
-                    <th class="ps-3 fs-4 table-head-row-color" style="width: 43%;">Ürün</th>
-                    <th class="text-end pe-3 fs-4 table-head-row-color">Satış</th>
+                    <th class="ps-3 table-head-row-color resizable-wrapper" style="width: 43%;"
+                        [attr.data-key]="'th-kredi-product'"
+                        [style]="getWrapperStyle('th-kredi-product')">
+                        ÜRÜN
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
+                    <th class="text-end pe-3 table-head-row-color resizable-wrapper"
+                        [attr.data-key]="'th-kredi-ask'"
+                        [style]="getWrapperStyle('th-kredi-ask')">
+                        SATIŞ
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of krediList; trackBy: trackBySymbol">
-                    <td class="ps-3 fw-semibold base-text item-description" >{{ item.description }}</td>
-                    <td class="text-end pe-3 font-financial base-text " style="padding-left: 0rem !important; " [ngClass]="item.flashCss">
+                    <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
+                        [attr.data-key]="'item-kredi-' + item.symbol + '-desc'"
+                        [style]="getWrapperStyle('item-kredi-' + item.symbol + '-desc')">
+                        {{ item.description }}
+                        <div class="resize-actions">
+                          <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                          <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                          <button (click)="adjustFontSize($event, 1)">+</button>
+                          <button (click)="adjustFontSize($event, -1)">-</button>
+                        </div>
+                    </td>
+                    <td class="text-end pe-3 font-financial base-text resizable-wrapper" style="padding-left: 0rem !important; "
+                      [attr.data-key]="'item-kredi-' + item.symbol + '-ask'"
+                      [style]="getWrapperStyle('item-kredi-' + item.symbol + '-ask')"
+                      [ngClass]="item.flashCss">
                       {{ item.ask | number:'1.2-2' }}
                       <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
                       <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <div class="resize-actions">
+                        <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
+                        <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
+                        <button (click)="adjustFontSize($event, 1)">+</button>
+                        <button (click)="adjustFontSize($event, -1)">-</button>
+                      </div>
                     </td>
                   </tr>
                   <tr *ngIf="krediList.length === 0">
