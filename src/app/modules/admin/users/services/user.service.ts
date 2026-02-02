@@ -2,6 +2,24 @@ import { Injectable, inject } from '@angular/core';
 import { BaseApiService } from '@/app/core/services/base-api.service';
 import { Observable } from 'rxjs';
 
+
+export interface VisitorProductSettingDto {
+  visitorId: string;
+  tenantProductId: string;
+  specialBuyMultiplier?: number | null;
+  specialSellMultiplier?: number | null;
+  specialAddonAmount?: number | null;
+}
+
+export interface VisitorProductSettingResponse {
+  tenantProductId: string;
+  specialBuyMultiplier?: number;
+  specialSellMultiplier?: number;
+  specialAddonAmount?: number;
+  isActive: boolean;
+}
+
+
 // 1. LİSTELEME DTO'su
 export interface UserListDto {
   id: string;

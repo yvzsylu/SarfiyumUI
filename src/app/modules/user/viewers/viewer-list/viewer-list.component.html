@@ -54,10 +54,16 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex gap-2 justify-content-end">
-                                        <a [routerLink]="['/user/viewers/edit', item.id]" class="btn btn-soft-primary btn-sm">
+                                        
+                                        <button (click)="openPricingModal(item)" class="btn btn-soft-success btn-sm" title="Özel Fiyatlar">
+                                            <i class="bx bx-dollar-circle fs-5 align-middle"></i>
+                                        </button>
+
+                                        <a [routerLink]="['/user/viewers/edit', item.id]" class="btn btn-soft-primary btn-sm" title="Düzenle">
                                             <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
                                         </a>
-                                        <button (click)="deleteViewer(item.id)" class="btn btn-soft-danger btn-sm">
+
+                                        <button (click)="deleteViewer(item.id)" class="btn btn-soft-danger btn-sm" title="Sil">
                                             <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
                                         </button>
                                     </div>

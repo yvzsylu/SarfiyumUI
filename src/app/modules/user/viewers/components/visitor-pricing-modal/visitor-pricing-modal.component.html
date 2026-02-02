@@ -1,0 +1,104 @@
+<div class="modal-header bg-light-subtle">
+    <div>
+        <h5 class="modal-title fw-bold text-primary">
+            <i class="bx bx-purchase-tag-alt me-2"></i>Özel Fiyatlandırma
+        </h5>
+        <p class="mb-0 text-muted small">
+            Kullanıcı: <span class="fw-bold text-dark">{{ visitorName }}</span>
+        </p>
+    </div>
+    <button type="button" class="btn-close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body p-0">
+    <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Ayarlar yükleniyor...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-fixed-header">
+        <div *ngFor="let group of groupedProducts" class="mb-0">
+            <div class="bg-light px-3 py-2 border-bottom border-top sticky-top fw-bold text-uppercase small text-muted">
+                {{ group.category }}
+            </div>
+            
+            <table class="table table-hover align-middle mb-0 border-0">
+                <thead class="bg-white">
+                    <tr class="text-muted small">
+                        <th style="width: 30%;">Ürün Adı</th>
+                        <th style="width: 20%;" class="text-center">Alış Çarpanı</th>
+                        <th style="width: 20%;" class="text-center">Satış Çarpanı</th>
+                        <th style="width: 20%;" class="text-center">Ek Makas</th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of group.items" [ngClass]="{'bg-special': item.hasSpecialSetting}">
+                        <td>
+                            <div class="fw-semibold text-dark">{{ item.name }}</div>
+                            <small class="text-muted" *ngIf="!item.hasSpecialSetting">Varsayılan kullanılıyor</small>
+                            <small class="text-success fw-bold" *ngIf="item.hasSpecialSetting">Özel Fiyat Aktif</small>
+                        </td>
+
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control text-center" 
+                                    [placeholder]="item.buyMultiplier"
+                                    [(ngModel)]="item.specialBuyMultiplier"
+                                    (ngModelChange)="onValueChange(item)"
+                                    appDecimalComma>
+                            </div>
+                            <div class="text-center" *ngIf="item.hasSpecialSetting">
+                                <small class="text-muted" style="font-size: 10px;">(Genel: {{item.buyMultiplier}})</small>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control text-center" 
+                                    [placeholder]="item.sellMultiplier"
+                                    [(ngModel)]="item.specialSellMultiplier"
+                                    (ngModelChange)="onValueChange(item)"
+                                    appDecimalComma>
+                            </div>
+                            <div class="text-center" *ngIf="item.hasSpecialSetting">
+                                <small class="text-muted" style="font-size: 10px;">(Genel: {{item.sellMultiplier}})</small>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control text-center" 
+                                    [placeholder]="item.addonAmount"
+                                    [(ngModel)]="item.specialAddonAmount"
+                                    (ngModelChange)="onValueChange(item)"
+                                    appDecimalComma>
+                                <span class="input-group-text text-muted">₺</span>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <button *ngIf="item.hasSpecialSetting" 
+                                class="btn btn-sm btn-icon btn-ghost-danger" 
+                                (click)="resetToDefault(item)"
+                                title="Varsayılana Dön">
+                                <i class="bx bx-refresh fs-5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer bg-light-subtle">
+    <div class="d-flex align-items-center me-auto text-muted small">
+        <i class="bx bx-info-circle me-1"></i>
+        <span>Boş bırakılan alanlar mağaza varsayılanını kullanır.</span>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Vazgeç</button>
+    <button type="button" class="btn btn-primary" (click)="saveAll()">
+        <i class="bx bx-save me-1"></i> Değişiklikleri Kaydet
+    </button>
+</div>
