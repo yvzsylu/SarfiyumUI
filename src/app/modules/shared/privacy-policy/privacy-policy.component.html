@@ -15,7 +15,7 @@
                                     <i class="bx bx-search-alt"></i>
                                 </span>
                                 <input type="text" class="form-control rounded-pill bg-white border-0 ps-5" readonly
-                                    value="Son Güncelleme: 08.01.2026">
+                                    value="Son Güncelleme: 08.02.2026">
                             </div>
                         </div>
                     </div>
@@ -38,9 +38,9 @@
                 </div>
 
                 <p class="mb-0 text-muted" style="line-height: 1.6;">
-                    Sarfiyum ("biz", "bizim" veya "bize") olarak, kullanıcılarımızın ("siz") gizliliğine büyük önem
+                    <strong>{{ appName }}</strong> ("biz", "bizim" veya "bize") olarak, kullanıcılarımızın ("siz") gizliliğine büyük önem
                     veriyoruz.
-                    Bu Gizlilik Politikası, <strong>Sarfiyum</strong> mobil uygulamasını ve web hizmetlerini
+                    Bu Gizlilik Politikası, <strong>{{ appName }}</strong> mobil uygulamasını ve web hizmetlerini
                     kullandığınızda kişisel verilerinizin nasıl toplandığını,
                     kullanıldığını ve korunduğunu açıklar. Uygulamamızı kullanarak, bu politikada belirtilen veri
                     uygulamalarını kabul etmiş olursunuz.
@@ -110,8 +110,8 @@
                     Bu Gizlilik Politikası hakkında sorularınız veya verilerinizle ilgili talepleriniz için bizimle
                     iletişime geçebilirsiniz.
                 </p>
-                <a href="mailto:info&#64;sarfiyum.com" class="btn btn-primary px-4 rounded-pill">
-                    <i class="bx bx-envelope me-2"></i> info&#64;sarfiyum.com
+                <a [href]="'mailto:' + appEmail" class="btn btn-primary px-4 rounded-pill">
+                    <i class="bx bx-envelope me-2"></i> {{ appEmail }}
                 </a>
             </div>
         </div>
