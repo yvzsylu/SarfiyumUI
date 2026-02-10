@@ -15,6 +15,7 @@ import { NgProgressbar, NgProgressRef } from 'ngx-progressbar';
 import { Store } from '@ngrx/store';
 import { AuthenticationService } from '@/app/core/services/auth.service';
 import { loginSuccess } from '@/app/store/authentication/authentication.actions';
+import { BrandingService } from '@core/services/branding-service';
 
 @Component({
   selector: 'app-root',
@@ -24,15 +25,16 @@ import { loginSuccess } from '@/app/store/authentication/authentication.actions'
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  
+
   @ViewChild(NgProgressRef) progressBar!: NgProgressRef;
 
   private titleService = inject(TitleService);
   private router = inject(Router);
-  
+
   // --- YENİ ENJEKSİYONLAR ---
   private store = inject(Store);
   private authService = inject(AuthenticationService);
+  private brandingService = inject(BrandingService);
 
   constructor() {
     this.router.events.subscribe((event: Event) => {
@@ -47,13 +49,19 @@ export class AppComponent implements OnInit {
     // 2. --- YENİ EKLENEN: OTURUM KURTARMA ---
     // Sayfa yenilendiğinde (F5) cookie'den kullanıcıyı geri yükle
     const user = this.authService.getUserFromCookie();
-    
+
     if (user) {
       // Token geçerli ise Store'u güncelle
       // this.store.dispatch(loginSuccess({ user }));
       this.store.dispatch(loginSuccess({ user, redirect: false }));
-      
+
     }
+
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.classList.add('remove');
+    }
+    
   }
 
   checkRouteChange(routerEvent: Event) {
