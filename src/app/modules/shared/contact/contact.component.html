@@ -28,7 +28,7 @@
                 </div>
 
                 <p class="mb-0 text-muted" style="line-height: 1.6;">
-                    Sarfiyum mobil uygulaması veya web paneli ile ilgili yaşadığınız sorunları, 
+                    <strong>{{ contactInfo.appName }}</strong> mobil uygulaması veya web paneli ile ilgili yaşadığınız sorunları, 
                     üyelik işlemlerinizi veya çözüm önerilerinizi aşağıdaki kanallardan bize iletebilirsiniz. 
                     Destek ekibimiz en kısa sürede size geri dönüş yapacaktır.
                 </p>
@@ -55,8 +55,9 @@
                             <div class="flex-grow-1">
                                 <h5 class="font-size-16 mb-1">Telefon / WhatsApp</h5>
                                 <p class="text-muted mb-2">Hafta içi 09:00 - 18:00</p>
-                                <a href="tel:+905399212391" class="text-primary fw-bold font-size-15">
-                                    +90 539 921 23 91
+                                
+                                <a [href]="'tel:' + contactInfo.phoneLink" class="text-primary fw-bold font-size-15">
+                                    {{ contactInfo.phoneDisplay }}
                                 </a>
                             </div>
                         </div>
@@ -72,8 +73,9 @@
                             <div class="flex-grow-1">
                                 <h5 class="font-size-16 mb-1">E-Posta</h5>
                                 <p class="text-muted mb-2">7/24 Mail atabilirsiniz</p>
-                                <a href="mailto:info&#64;sarfiyum.com" class="text-primary fw-bold font-size-15">
-                                    info&#64;sarfiyum.com
+                                
+                                <a [href]="'mailto:' + contactInfo.email" class="text-primary fw-bold font-size-15">
+                                    {{ contactInfo.email }}
                                 </a>
                             </div>
                         </div>
@@ -88,7 +90,8 @@
                 <p class="card-text text-muted">
                     Uygulama içerisindeki "Hesabım" bölümünden de destek talebi oluşturabilirsiniz.
                 </p>
-                <a href="mailto:info&#64;sarfiyum.com" class="btn btn-primary px-4 rounded-pill mt-2">
+                
+                <a [href]="'mailto:' + contactInfo.email" class="btn btn-primary px-4 rounded-pill mt-2">
                     <i class="bx bx-paper-plane me-2"></i> Mail Gönder
                 </a>
             </div>
