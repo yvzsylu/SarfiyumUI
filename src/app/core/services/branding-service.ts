@@ -3,12 +3,13 @@ import { Title } from '@angular/platform-browser';
 
 export interface BrandConfig {
     name: string;
-    logoDarkPath?: string;
-    logoSmPath?: string;
-    logoLightPath?: string;
+    email: string;
+    website: string;
+    logoDarkPath: string;
+    logoLightPath: string;
+    logoSmPath: string;
     faviconPath: string;
-    cssClass: string; // İleride renkleri CSS ile değiştirmek istersen
-
+    cssClass: string;
 }
 
 @Injectable({
@@ -30,6 +31,8 @@ export class BrandingService {
         if (hostname.includes('cilcilaltin')) {
             return {
                 name: 'Çilçil Altın',
+                email: 'info@cilcilaltin.com',      
+                website: 'portal.cilcilaltin.com',   
                 faviconPath: 'assets/images/branding/cilcilaltin/favicon.ico',
                 logoDarkPath: 'assets/images/branding/cilcilaltin/logo-dark.png',
                 logoLightPath: 'assets/images/branding/cilcilaltin/logo-light.png',
@@ -41,10 +44,12 @@ export class BrandingService {
         // Varsayılan (Sarfiyum)
         return {
             name: 'Sarfiyum',
+            email: 'info@sarfiyum.com',          
+            website: 'sarfiyum.com',             
             logoDarkPath: 'assets/images/branding/sarfiyum/logo-dark.png',
             logoLightPath: 'assets/images/branding/sarfiyum/logo-light.png',
-            faviconPath: 'assets/images/branding/sarfiyum/favicon.ico',
             logoSmPath: 'assets/images/branding/sarfiyum/logo-sm.png',
+            faviconPath: 'assets/images/branding/sarfiyum/favicon.ico',
             cssClass: 'theme-sarfiyum'
         };
     }
