@@ -38,9 +38,9 @@
                 </div>
 
                 <p class="mb-0 text-muted" style="line-height: 1.6;">
-                    <strong>{{ appName }}</strong> ("biz", "bizim" veya "bize") olarak, kullanıcılarımızın ("siz") gizliliğine büyük önem
+                    <strong>{{ brandingService.brand.name }}</strong> ("biz", "bizim" veya "bize") olarak, kullanıcılarımızın ("siz") gizliliğine büyük önem
                     veriyoruz.
-                    Bu Gizlilik Politikası, <strong>{{ appName }}</strong> mobil uygulamasını ve web hizmetlerini ({{ appDomain }})
+                    Bu Gizlilik Politikası, <strong>{{ brandingService.brand.name }}</strong> mobil uygulamasını ve web hizmetlerini ({{ brandingService.brand.website }})
                     kullandığınızda kişisel verilerinizin nasıl toplandığını,
                     kullanıldığını ve korunduğunu açıklar. Uygulamamızı kullanarak, bu politikada belirtilen veri
                     uygulamalarını kabul etmiş olursunuz.
@@ -110,8 +110,8 @@
                     Bu Gizlilik Politikası hakkında sorularınız veya verilerinizle ilgili talepleriniz için bizimle
                     iletişime geçebilirsiniz.
                 </p>
-                <a [href]="'mailto:' + appEmail" class="btn btn-primary px-4 rounded-pill">
-                    <i class="bx bx-envelope me-2"></i> {{ appEmail }}
+                <a [href]="'mailto:' + brandingService.brand.email" class="btn btn-primary px-4 rounded-pill">
+                    <i class="bx bx-envelope me-2"></i> {{ brandingService.brand.email }}
                 </a>
             </div>
         </div>

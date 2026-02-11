@@ -28,7 +28,7 @@
                 </div>
 
                 <p class="mb-0 text-muted" style="line-height: 1.6;">
-                    <strong>{{ contactInfo.appName }}</strong> mobil uygulaması veya web paneli ile ilgili yaşadığınız sorunları, 
+                    <strong>{{ brandingService.brand.name }}</strong> mobil uygulaması veya web paneli ile ilgili yaşadığınız sorunları, 
                     üyelik işlemlerinizi veya çözüm önerilerinizi aşağıdaki kanallardan bize iletebilirsiniz. 
                     Destek ekibimiz en kısa sürede size geri dönüş yapacaktır.
                 </p>
@@ -56,8 +56,8 @@
                                 <h5 class="font-size-16 mb-1">Telefon / WhatsApp</h5>
                                 <p class="text-muted mb-2">Hafta içi 09:00 - 18:00</p>
                                 
-                                <a [href]="'tel:' + contactInfo.phoneLink" class="text-primary fw-bold font-size-15">
-                                    {{ contactInfo.phoneDisplay }}
+                                <a [href]="'tel:' + brandingService.brand.phoneLink" class="text-primary fw-bold font-size-15">
+                                    {{ brandingService.brand.phoneDisplay }}
                                 </a>
                             </div>
                         </div>
@@ -74,8 +74,8 @@
                                 <h5 class="font-size-16 mb-1">E-Posta</h5>
                                 <p class="text-muted mb-2">7/24 Mail atabilirsiniz</p>
                                 
-                                <a [href]="'mailto:' + contactInfo.email" class="text-primary fw-bold font-size-15">
-                                    {{ contactInfo.email }}
+                                <a [href]="'mailto:' + brandingService.brand.email" class="text-primary fw-bold font-size-15">
+                                    {{ brandingService.brand.email }}
                                 </a>
                             </div>
                         </div>
@@ -91,8 +91,8 @@
                     Uygulama içerisindeki "Hesabım" bölümünden de destek talebi oluşturabilirsiniz.
                 </p>
                 
-                <a [href]="'mailto:' + contactInfo.email" class="btn btn-primary px-4 rounded-pill mt-2">
-                    <i class="bx bx-paper-plane me-2"></i> Mail Gönder
+                <a [href]="'mailto:' + brandingService.brand.email" class="btn btn-primary px-4 rounded-pill mt-2">
+                    <i class="bx bx-envelope me-2"></i> Mail Gönder
                 </a>
             </div>
         </div>
