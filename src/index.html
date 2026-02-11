@@ -9,7 +9,7 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Play:wght@400;700&display=swap" rel="stylesheet">
   
-  <link rel="icon" type="image/x-icon" href="assets/branding/sarfiyum/favicon.ico" id="appIcon">
+  <link rel="icon" type="image/x-icon" href="/assets/branding/sarfiyum/favicon.ico" id="appIcon">
   
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE"></script>
   
@@ -26,12 +26,12 @@
       justify-content: center;
       z-index: 9999;
       opacity: 1;
-      transition: opacity 0.7s ease-in-out; /* Geçiş süresi düzeltildi */
+      transition: opacity 0.7s ease-in-out;
     }
 
     #splash-screen.remove {
       opacity: 0;
-      pointer-events: none; /* Tıklamayı engelle */
+      pointer-events: none;
       z-index: -1;
     }
   </style>
@@ -41,7 +41,7 @@
   <app-root></app-root>
   
   <div id="splash-screen">
-    <img id="splash-logo" alt="Logo" class="light" src="assets/branding/sarfiyum/logo-dark.png" style="height: 60px;" />
+    <img id="splash-logo" alt="Logo" class="light" src="/assets/branding/sarfiyum/logo-dark.png" style="height: 60px;" />
   </div>
 
   <script>
@@ -54,13 +54,12 @@
 
          // EĞER DOMAIN CİLCİL ALTIN İSE
          if (hostname.includes('cilcilaltin')) {
-           // 1. Splash Logosu (DÜZELTME 2: logo-dark.png yapıldı)
-           if (splashImg) splashImg.src = 'assets/branding/cilcilaltin/logo-dark.png';
            
-           // 2. Favicon
-           if (favLink) favLink.href = 'assets/branding/cilcilaltin/favicon.ico';
+           // DÜZELTME 3: JS içindeki yolların başına da / eklendi
+           if (splashImg) splashImg.src = '/assets/branding/cilcilaltin/logo-dark.png';
            
-           // 3. Başlık
+           if (favLink) favLink.href = '/assets/branding/cilcilaltin/favicon.ico';
+           
            document.title = 'Çilçil Altın';
          }
        } catch (e) { 
@@ -69,12 +68,9 @@
     })();
 
     // --- 2. SPLASH SCREEN KALDIRMA ---
-    // NOT: En ideali bunu AppComponent ngOnInit içinde yapmaktır.
-    // Ancak orada yapmadıysan, buradaki kod Angular yüklenmesini bekler.
     window.addEventListener('load', function() {
         const splashScreen = document.getElementById('splash-screen');
         if (splashScreen) {
-            // Biraz gecikme verelim ki Angular tam otursun (opsiyonel)
             setTimeout(function() {
                 splashScreen.classList.add('remove');
             }, 1000); 
