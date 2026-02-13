@@ -6,13 +6,15 @@
   <title>Sarfiyum</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Play:wght@400;700&display=swap" rel="stylesheet">
-  
-  <link rel="icon" type="image/x-icon" href="/assets/branding/sarfiyum/favicon.ico" id="appIcon">
-  
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Play:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/branding/sarfiyum/favicon.ico" id="appIcon">
+
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE"></script>
-  
+
   <style>
     #splash-screen {
       position: fixed;
@@ -35,49 +37,83 @@
       z-index: -1;
     }
   </style>
+
+  <script>
+    (function () {
+      // --- AYARLAR ---
+      // Buraya yeni müşteri geldikçe sadece domain ve klasör adını eklemen yeterli.
+      // branding.service.ts'deki mantığın aynısıdır.
+      var brands = [
+        { domain: 'cilcilaltin', folder: 'cilcilaltin', title: 'Çilçil Altın' }
+        // { domain: 'baskamusteri', folder: 'baskamusteri', title: 'Başka Müşteri' }
+      ];
+
+      // Varsayılan Ayarlar (Sarfiyum)
+      var currentConfig = {
+        folder: 'sarfiyum',
+        title: 'Sarfiyum'
+      };
+
+      // Domain Kontrolü
+      var hostname = window.location.hostname;
+      for (var i = 0; i < brands.length; i++) {
+        if (hostname.includes(brands[i].domain)) {
+          currentConfig = brands[i];
+          break;
+        }
+      }
+
+      // --- DEĞİŞKENLERİ OLUŞTUR ---
+      // Path yapısını burada birleştiriyoruz: assets/images/branding/[KLASÖR]/...
+      var basePath = '/assets/images/branding/' + currentConfig.folder + '/';
+
+      // 1. Tarayıcı Başlığını Değiştir
+      document.title = currentConfig.title;
+
+      // 2. Favicon'u Değiştir
+      var favLink = document.getElementById('appIcon');
+      if (favLink) {
+        favLink.href = basePath + 'favicon.ico';
+      }
+
+      // 3. Splash Logoyu Değiştir (DOM Yüklendiğinde)
+      // Bu script head içinde olduğu için body henüz oluşmadı,
+      // bu yüzden DOMContentLoaded bekliyoruz.
+      document.addEventListener("DOMContentLoaded", function () {
+        var splashImg = document.getElementById('splash-logo');
+        if (splashImg) {
+          // İsteğine göre burayı 'logo-sm.png' veya 'logo-dark.png' yapabilirsin.
+          // Genelde splash için büyük logo (dark) kullanılır.
+          splashImg.src = basePath + 'logo-dark.png';
+
+          // Hata olursa konsola bas
+          splashImg.onerror = function () { console.error('Logo bulunamadı:', splashImg.src); };
+        }
+      });
+
+    })();
+  </script>
 </head>
 
 <body>
   <app-root></app-root>
-  
+
   <div id="splash-screen">
-    <img id="splash-logo" alt="Logo" class="light" src="/assets/branding/sarfiyum/logo-dark.png" style="height: 60px;" />
+    <img id="splash-logo" alt="Logo" src="/assets/images/branding/sarfiyum/logo-dark.png" style="height: 60px;" />
   </div>
 
   <script>
-    // --- 1. WHITE LABEL ÖN YÜKLEME ---
-    (function() {
-       try {
-         var hostname = window.location.hostname;
-         var splashImg = document.getElementById('splash-logo');
-         var favLink = document.getElementById('appIcon');
-
-         // EĞER DOMAIN CİLCİL ALTIN İSE
-         if (hostname.includes('cilcilaltin')) {
-           
-           // DÜZELTME 3: JS içindeki yolların başına da / eklendi
-           if (splashImg) splashImg.src = '/assets/branding/cilcilaltin/logo-dark.png';
-           
-           if (favLink) favLink.href = '/assets/branding/cilcilaltin/favicon.ico';
-           
-           document.title = 'Çilçil Altın';
-         }
-       } catch (e) { 
-           console.error('Branding pre-loader error:', e); 
-       }
-    })();
-
-    // --- 2. SPLASH SCREEN KALDIRMA ---
-    window.addEventListener('load', function() {
-        const splashScreen = document.getElementById('splash-screen');
-        if (splashScreen) {
-            setTimeout(function() {
-                splashScreen.classList.add('remove');
-            }, 1000); 
-        }
+    // --- SPLASH SCREEN KALDIRMA ---
+    window.addEventListener('load', function () {
+      const splashScreen = document.getElementById('splash-screen');
+      if (splashScreen) {
+        setTimeout(function () {
+          splashScreen.classList.add('remove');
+        }, 1000);
+      }
     });
   </script>
-  
+
   <noscript>You need to enable JavaScript to run this app.</noscript>
 </body>
 
