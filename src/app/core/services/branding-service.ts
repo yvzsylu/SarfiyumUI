@@ -44,6 +44,21 @@ export class BrandingService {
       };
     }
 
+    if (hostname.includes('altinkosenadirkuyumculuk')) {
+      return {
+        name: 'Altınköşe Nadir Kuyumculuk',
+        email: 'info@altinkosenadirkuyumculuk.com',
+        website: 'portal.altinkosenadirkuyumculuk.com',
+        phoneDisplay: '+90 551 277 10 34',
+        phoneLink: '+905512771034',
+        faviconPath: 'assets/images/branding/altinkosenadirkuyumculuk/favicon.ico',
+        logoDarkPath: 'assets/images/branding/altinkosenadirkuyumculuk/logo-dark.png',
+        logoLightPath: 'assets/images/branding/altinkosenadirkuyumculuk/logo-light.png',
+        logoSmPath: 'assets/images/branding/altinkosenadirkuyumculuk/logo-sm.png',
+        cssClass: 'theme-altinkosenadirkuyumculuk'
+      };
+    }
+
     return {
       name: 'Sarfiyum',
       email: 'info@sarfiyum.com',
