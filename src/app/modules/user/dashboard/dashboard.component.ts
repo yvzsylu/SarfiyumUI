@@ -17,6 +17,9 @@ import { environment } from '@environment/environment';
 import { CategoryService } from '@/app/modules/user/categories/services/category.service';
 import { SettingsService } from '../multiplier-settings/services/multiplier-settings.service';
 
+// 🔥 EKLENEN API SERVİSİ (Yolunu projene göre düzenle)
+import { ThemeSettingsService } from './services/theme-settings.service';
+
 interface DashboardPriceItem extends PriceData {
   categoryIndex?: number;
   flashCss?: string;
@@ -26,13 +29,17 @@ interface DashboardPriceItem extends PriceData {
 // UI Ayarlarını tutacak arayüz
 interface UiSetting {
   fontSize?: number;
-  fontWeight?: number; // YENİ: Boolean isBold yerine sayısal ağırlık
+  fontWeight?: number; 
+}
+
+// 🔥 EKLENEN DTO ARAYÜZLERİ
+export interface ThemeSettingsDto {
+  dashboardTheme?: string;
+  uiSettingsJson?: string;
+  customColorsJson?: string;
 }
 
 type ThemeType = 'custom' | 'light' | 'dark' | 'financial' | 'flat-light' | 'flat-dark' | 'flat-financial';
-
-const CUSTOM_COLORS_STORAGE_KEY = 'dashboard_custom_colors_config';
-const UI_SETTINGS_STORAGE_KEY = 'dashboard_ui_settings';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -48,11 +55,14 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   private authService = inject(AuthenticationService);
   private categoryService = inject(CategoryService);
   private settingsService = inject(SettingsService);
+  private themeSettingsApi = inject(ThemeSettingsService); // 🔥 API Inject Edildi
   private store = inject(Store);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
   private sanitizer = inject(DomSanitizer);
+
+  private saveTimeout: any; // 🔥 API İstek Limitleyici (Debounce)
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.isTvMode = this.router.url.includes('/tv/');
@@ -163,198 +173,6 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   // --- UI AYARLARI (FONT SIZE & WEIGHT) ---
   uiSettings: { [key: string]: UiSetting } = {};
 
-  updateCustomColor(cssVar: string, event: any) {
-    const newValue = event.target.value;
-    const colorItem = this.customizableColors.find(c => c.var === cssVar);
-    if (colorItem) colorItem.value = newValue;
-
-    const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
-    if (wrapper) wrapper.style.setProperty(cssVar, newValue);
-  }
-
-  saveCustomTheme() {
-      localStorage.setItem(CUSTOM_COLORS_STORAGE_KEY, JSON.stringify(this.customizableColors));
-      this.currentTheme = 'custom';
-      localStorage.setItem('dashboard_theme', 'custom');
-
-      this.loadAndApplyCustomColors();
-
-      this.showSaveSuccess = true;
-      setTimeout(() => {
-          this.showSaveSuccess = false;
-          this.cdr.detectChanges();
-      }, 3000);
-  }
-
-  loadAndApplyCustomColors() {
-      const saved = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
-      if (saved) {
-          try {
-              const savedColors: any[] = JSON.parse(saved);
-              const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
-              
-              if (savedColors && Array.isArray(savedColors)) {
-                  savedColors.forEach(savedItem => {
-                      const currentItem = this.customizableColors.find(c => c.var === savedItem.var);
-                      if (currentItem) {
-                          currentItem.value = savedItem.value;
-                      }
-                  });
-
-                  if (this.currentTheme === 'custom' && wrapper) {
-                      this.customizableColors.forEach(c => {
-                          if (c.value) {
-                              wrapper.style.setProperty(c.var, c.value);
-                          }
-                      });
-                  }
-              }
-          } catch (e) {
-              console.error('Renk ayarları yüklenirken hata:', e);
-          }
-      }
-  }
-
-  setTheme(theme: ThemeType, resetColors = true) {
-    if (theme === 'custom') {
-        this.currentTheme = 'custom';
-        this.loadAndApplyCustomColors();
-        localStorage.setItem('dashboard_theme', 'custom');
-    } else {
-        this.currentTheme = theme;
-        localStorage.setItem('dashboard_theme', theme);
-        
-        const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
-        if (wrapper) {
-            this.customizableColors.forEach(c => wrapper.style.removeProperty(c.var));
-        }
-        
-        const currentDefaults = this.themeDefaults[theme];
-        if (currentDefaults) {
-            this.customizableColors.forEach(colorItem => {
-                if(currentDefaults[colorItem.var]) {
-                    colorItem.value = currentDefaults[colorItem.var];
-                }
-            });
-        }
-    }
-    
-    this.cdr.detectChanges();
-  }
-
-  resetCustomColors() {
-    localStorage.removeItem(CUSTOM_COLORS_STORAGE_KEY);
-    this.setTheme('flat-light');
-  }
-  
-  toggleColorMenu() { this.isColorMenuOpen = !this.isColorMenuOpen; }
-
-  // --- UI PERSISTENCE LOGIC (LOCAL STORAGE) ---
-
-  loadUiSettings() {
-    const stored = localStorage.getItem(UI_SETTINGS_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        
-        // MIGRATION: Eğer eski versiyondan kalma 'isBold' (boolean) varsa, number'a çevir
-        Object.keys(parsed).forEach(key => {
-            if (typeof parsed[key].isBold === 'boolean') {
-                parsed[key].fontWeight = parsed[key].isBold ? 700 : 400;
-                delete parsed[key].isBold;
-            }
-        });
-        
-        this.uiSettings = parsed;
-      } catch (e) {
-        console.error('UI Ayarları yüklenirken hata', e);
-      }
-    }
-  }
-
-  saveUiSettings() {
-    localStorage.setItem(UI_SETTINGS_STORAGE_KEY, JSON.stringify(this.uiSettings));
-  }
-
-  // HTML tarafında [style] binding için kullanılır. 
-  getWrapperStyle(key: string, defaultSize?: number): SafeStyle {
-    const setting = this.uiSettings[key];
-    let styleStr = '';
-
-    if (setting && setting.fontSize) {
-      styleStr += `font-size: ${setting.fontSize}px !important;`;
-    }
-
-    if (setting && setting.fontWeight) {
-      styleStr += `font-weight: ${setting.fontWeight} !important;`;
-    }
-
-    return this.sanitizer.bypassSecurityTrustStyle(styleStr);
-  }
-
-  // --- FONT RESIZE ACTION ---
-  adjustFontSize(event: MouseEvent, step: number) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    const wrapper = (event.target as HTMLElement).closest('.resizable-wrapper') as HTMLElement;
-    
-    if (wrapper) {
-      const key = wrapper.getAttribute('data-key');
-      if (!key) return; 
-
-      const style = window.getComputedStyle(wrapper);
-      const currentSize = parseFloat(style.fontSize);
-      const newSize = Math.max(6, currentSize + step);
-
-      if (!this.uiSettings[key]) this.uiSettings[key] = {};
-      this.uiSettings[key].fontSize = newSize;
-
-      this.saveUiSettings();
-      wrapper.style.setProperty('font-size', `${newSize}px`, 'important');
-    }
-  }
-
-  // --- FONT WEIGHT ADJUST ACTION (YENİ) ---
-  adjustFontWeight(event: MouseEvent, step: number) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    const wrapper = (event.target as HTMLElement).closest('.resizable-wrapper') as HTMLElement;
-
-    if (wrapper) {
-      const key = wrapper.getAttribute('data-key');
-      if (!key) return;
-
-      const style = window.getComputedStyle(wrapper);
-      let currentWeightStr = style.fontWeight;
-      
-      // String değerleri sayıya çevir
-      let currentWeight = 400; // Varsayılan normal
-      
-      if (currentWeightStr === 'bold') currentWeight = 700;
-      else if (currentWeightStr === 'normal') currentWeight = 400;
-      else if (currentWeightStr === 'lighter') currentWeight = 100;
-      else if (currentWeightStr === 'bolder') currentWeight = 900;
-      else {
-          const parsed = parseInt(currentWeightStr, 10);
-          if (!isNaN(parsed)) currentWeight = parsed;
-      }
-
-      // Yeni değeri hesapla (100 ile 900 arasında sınırla)
-      let newWeight = currentWeight + step;
-      if (newWeight < 100) newWeight = 100;
-      if (newWeight > 900) newWeight = 900;
-
-      if (!this.uiSettings[key]) this.uiSettings[key] = {};
-      this.uiSettings[key].fontWeight = newWeight;
-
-      this.saveUiSettings();
-      
-      wrapper.style.setProperty('font-weight', newWeight.toString(), 'important');
-    }
-  }
-
   user$!: Observable<any>;
   public apiRoot = environment.apiUrl.replace('/api', '');
 
@@ -379,28 +197,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   private logoutTimer: any;
 
   ngOnInit(): void {
-    this.loadUiSettings(); 
-
-    const savedTheme = localStorage.getItem('dashboard_theme') as ThemeType;
-    const savedColors = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
-    
-    if(savedColors) {
-        try {
-            const parsedColors = JSON.parse(savedColors);
-            parsedColors.forEach((savedItem: any) => {
-                const currentItem = this.customizableColors.find(c => c.var === savedItem.var);
-                if (currentItem) {
-                    currentItem.value = savedItem.value;
-                }
-            });
-        } catch(e) {}
-    }
-
-    if (savedTheme) { 
-        this.setTheme(savedTheme, false); 
-    } else { 
-        this.setTheme('flat-light', false); 
-    }
+    // 🔥 Local Storage yerini API aldı
+    this.loadSettingsFromDb();
 
     this.user$ = this.store.select(getUser);
 
@@ -426,9 +224,230 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   ngAfterViewInit(): void {
       if (this.currentTheme === 'custom') {
           setTimeout(() => {
-              this.loadAndApplyCustomColors();
+              this.applyCustomColorsToDom();
           }, 100);
       }
+  }
+
+  // 🔥 DB'DEN AYARLARI ÇEKME
+  loadSettingsFromDb() {
+    this.themeSettingsApi.getThemeSettings().subscribe({
+      next: (res: any) => {
+        if (res.isSuccess && res.data) {
+          
+          // UI Font Ayarları
+          if (res.data.uiSettingsJson) {
+            try {
+              const parsed = JSON.parse(res.data.uiSettingsJson);
+              // Migration check
+              Object.keys(parsed).forEach(key => {
+                  if (typeof parsed[key].isBold === 'boolean') {
+                      parsed[key].fontWeight = parsed[key].isBold ? 700 : 400;
+                      delete parsed[key].isBold;
+                  }
+              });
+              this.uiSettings = parsed;
+            } catch (e) {
+              console.error('UI Ayarları parse hatası', e);
+            }
+          }
+
+          // Custom Renk Ayarları
+          if (res.data.customColorsJson) {
+            try {
+              const savedColors: any[] = JSON.parse(res.data.customColorsJson);
+              if (savedColors && Array.isArray(savedColors)) {
+                  savedColors.forEach(savedItem => {
+                      const currentItem = this.customizableColors.find(c => c.var === savedItem.var);
+                      if (currentItem) {
+                          currentItem.value = savedItem.value;
+                      }
+                  });
+              }
+            } catch (e) {
+              console.error('Renk ayarları parse hatası', e);
+            }
+          }
+
+          // Temayı Set Et
+          const dbTheme = res.data.dashboardTheme || 'flat-light';
+          this.setTheme(dbTheme as ThemeType, false, false); // triggerSave = false
+          
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Ayarlar alınamadı', err)
+    });
+  }
+
+  // 🔥 DB'YE AYARLARI KAYDETME
+  syncSettingsToDb() {
+    const user = this.authService.user;
+    const isViewer = user?.roles?.some(r => r.toLowerCase() === 'viewer');
+    
+    // Viewer rolü kayıt atamaz
+    if (isViewer) return;
+
+    const payload: ThemeSettingsDto = {
+      dashboardTheme: this.currentTheme,
+      uiSettingsJson: JSON.stringify(this.uiSettings),
+      customColorsJson: JSON.stringify(this.customizableColors)
+    };
+
+    this.themeSettingsApi.updateThemeSettings(payload).subscribe({
+      error: (err) => console.error('Dashboard ayarları kaydedilemedi', err)
+    });
+  }
+
+  updateCustomColor(cssVar: string, event: any) {
+    const newValue = event.target.value;
+    const colorItem = this.customizableColors.find(c => c.var === cssVar);
+    if (colorItem) colorItem.value = newValue;
+
+    const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
+    if (wrapper) wrapper.style.setProperty(cssVar, newValue);
+  }
+
+  saveCustomTheme() {
+      this.currentTheme = 'custom';
+      this.applyCustomColorsToDom();
+      
+      this.syncSettingsToDb(); // 🔥 API Çağrısı
+
+      this.showSaveSuccess = true;
+      setTimeout(() => {
+          this.showSaveSuccess = false;
+          this.cdr.detectChanges();
+      }, 3000);
+  }
+
+  // Eski loadAndApplyCustomColors metodu sadeleştirildi
+  applyCustomColorsToDom() {
+    const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
+    if (this.currentTheme === 'custom' && wrapper) {
+        this.customizableColors.forEach(c => {
+            if (c.value) {
+                wrapper.style.setProperty(c.var, c.value);
+            }
+        });
+    }
+  }
+
+  setTheme(theme: ThemeType, resetColors = true, triggerSave = true) {
+    this.currentTheme = theme;
+    
+    if (theme === 'custom') {
+        this.applyCustomColorsToDom();
+    } else {
+        const wrapper = document.querySelector('.dashboard-wrapper') as HTMLElement;
+        if (wrapper) {
+            this.customizableColors.forEach(c => wrapper.style.removeProperty(c.var));
+        }
+        
+        const currentDefaults = this.themeDefaults[theme];
+        if (currentDefaults) {
+            this.customizableColors.forEach(colorItem => {
+                if(currentDefaults[colorItem.var]) {
+                    colorItem.value = currentDefaults[colorItem.var];
+                }
+            });
+        }
+    }
+    
+    if (triggerSave) {
+        this.syncSettingsToDb(); // 🔥 API Çağrısı
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  resetCustomColors() {
+    this.setTheme('flat-light');
+  }
+  
+  toggleColorMenu() { this.isColorMenuOpen = !this.isColorMenuOpen; }
+
+  // 🔥 YENİ: Debounce mekanizması ile API isteği atılır
+  saveUiSettings() {
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => {
+      this.syncSettingsToDb();
+    }, 1500);
+  }
+
+  // HTML tarafında [style] binding için kullanılır. 
+  getWrapperStyle(key: string, defaultSize?: number): SafeStyle {
+    const setting = this.uiSettings[key];
+    let styleStr = '';
+
+    if (setting && setting.fontSize) {
+      styleStr += `font-size: ${setting.fontSize}px !important;`;
+    }
+
+    if (setting && setting.fontWeight) {
+      styleStr += `font-weight: ${setting.fontWeight} !important;`;
+    }
+
+    return this.sanitizer.bypassSecurityTrustStyle(styleStr);
+  }
+
+  adjustFontSize(event: MouseEvent, step: number) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const wrapper = (event.target as HTMLElement).closest('.resizable-wrapper') as HTMLElement;
+    
+    if (wrapper) {
+      const key = wrapper.getAttribute('data-key');
+      if (!key) return; 
+
+      const style = window.getComputedStyle(wrapper);
+      const currentSize = parseFloat(style.fontSize);
+      const newSize = Math.max(6, currentSize + step);
+
+      if (!this.uiSettings[key]) this.uiSettings[key] = {};
+      this.uiSettings[key].fontSize = newSize;
+
+      this.saveUiSettings();
+      wrapper.style.setProperty('font-size', `${newSize}px`, 'important');
+    }
+  }
+
+  adjustFontWeight(event: MouseEvent, step: number) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const wrapper = (event.target as HTMLElement).closest('.resizable-wrapper') as HTMLElement;
+
+    if (wrapper) {
+      const key = wrapper.getAttribute('data-key');
+      if (!key) return;
+
+      const style = window.getComputedStyle(wrapper);
+      let currentWeightStr = style.fontWeight;
+      
+      let currentWeight = 400; 
+      
+      if (currentWeightStr === 'bold') currentWeight = 700;
+      else if (currentWeightStr === 'normal') currentWeight = 400;
+      else if (currentWeightStr === 'lighter') currentWeight = 100;
+      else if (currentWeightStr === 'bolder') currentWeight = 900;
+      else {
+          const parsed = parseInt(currentWeightStr, 10);
+          if (!isNaN(parsed)) currentWeight = parsed;
+      }
+
+      let newWeight = currentWeight + step;
+      if (newWeight < 100) newWeight = 100;
+      if (newWeight > 900) newWeight = 900;
+
+      if (!this.uiSettings[key]) this.uiSettings[key] = {};
+      this.uiSettings[key].fontWeight = newWeight;
+
+      this.saveUiSettings();
+      
+      wrapper.style.setProperty('font-weight', newWeight.toString(), 'important');
+    }
   }
 
   private generateUniqueKey(category: string, name: string): string {
@@ -459,8 +478,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
           for (let i = list.length - 1; i >= 0; i--) {
               const key = this.generateUniqueKey(list[i].category, list[i].symbol);
               const isVisible = this.productVisibilityMap.has(key) 
-                                                ? this.productVisibilityMap.get(key) 
-                                                : true; 
+                                              ? this.productVisibilityMap.get(key) 
+                                              : true; 
 
               if (isVisible === false) {
                   list.splice(i, 1);
