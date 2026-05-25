@@ -34,6 +34,19 @@ export class LandingPageComponent implements OnInit {
   ngOnInit(): void {
     // Sayfa DOM'a yüklendiğinde Niotech scriptlerini sırayla çalıştırır
     this.scriptLoader.loadScriptsSequentially(this.niotechScripts)
+    .then(() => {
+        // Tarayıcı bloğunu aşmak için küçük bir tetikleme
+        setTimeout(() => {
+            const video = document.querySelector('video') as HTMLVideoElement;
+            if (video) {
+                video.play().catch(error => {
+                    console.log("Tarayıcı autoplay'i engelledi, video manuel tetiklendi.");
+                });
+            }
+        }, 500);
+    });
+    
+    this.scriptLoader.loadScriptsSequentially(this.niotechScripts)
       .then(() => {
         console.log('Sarfiyum Landing Page modülleri başarıyla tetiklendi.');
       })
