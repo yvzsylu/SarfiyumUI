@@ -1,0 +1,29 @@
+// landing-page.component.scss
+
+// Niotech CSS dosyalarını sadece bu component'e izole ederek yüklüyoruz.
+// Projenizdeki assets klasör derinliğine göre yolları kontrol edebilirsiniz.
+@import '../../../../assets/niotech/css/bootstrap.min.css';
+@import '../../../../assets/niotech/css/all.min.css';
+@import '../../../../assets/niotech/css/animate.css';
+@import '../../../../assets/niotech/css/magnific-popup.css';
+@import '../../../../assets/niotech/css/meanmenu.css';
+@import '../../../../assets/niotech/css/swiper-bundle.min.css';
+@import '../../../../assets/niotech/css/nice-select.css';
+@import '../../../../assets/niotech/css/main.css';
+
+// Sarfiyum için ekstra ufak düzeltmeler ve pürüz gidermeler
+app-landing-page {
+    display: block;
+    background-color: #ffffff;
+    
+    // Meanmenu veya mobil menülerin üst üste binmesini önlemek için koruma
+    .mean-container {
+        position: relative;
+        z-index: 999;
+    }
+    
+    // Header yapışkan hale geldiğinde panel stilleriyle çakışmaması için z-index ayarı
+    #header-sticky.sticky {
+        z-index: 10000;
+    }
+}

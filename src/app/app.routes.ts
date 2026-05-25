@@ -6,8 +6,16 @@ import { AdminLayoutComponent } from '../app/layouts/admin-layouts/admin-layout/
 import { UserLayoutComponent } from '../app/layouts/user-layouts/user-layout/user-layout.component';
 import { EmptyLayoutComponent } from '@layouts/empty-layout/empty-layout.component';
 
+// YENİ EKLENEN: Landing Page Bileşeni
+import { LandingPageComponent } from './modules/shared/landing-page/landing-page.component';
+
 export const routes: Routes = [
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  // Ana sayfa (sarfiyum.com yazıldığında URL değişmeden Landing Page açılır)
+  { path: '', component: LandingPageComponent, pathMatch: 'full' },
+  
+  // /login adresi girildiğinde mevcut auth yapısına yönlendirir
+  { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
+
   // {
   //   path: '',
   //   component: LayoutComponent,
