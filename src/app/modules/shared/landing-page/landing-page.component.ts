@@ -29,23 +29,40 @@ export class LandingPageComponent implements OnInit {
     'assets/niotech/js/main.js'
   ];
 
-  constructor(private scriptLoader: ScriptLoaderService) {}
+  constructor(private scriptLoader: ScriptLoaderService) { }
 
   ngOnInit(): void {
     // Sayfa DOM'a yüklendiğinde Niotech scriptlerini sırayla çalıştırır
     this.scriptLoader.loadScriptsSequentially(this.niotechScripts)
-    .then(() => {
+      .then(() => {
         // Tarayıcı bloğunu aşmak için küçük bir tetikleme
         setTimeout(() => {
-            const video = document.querySelector('video') as HTMLVideoElement;
-            if (video) {
-                video.play().catch(error => {
-                    console.log("Tarayıcı autoplay'i engelledi, video manuel tetiklendi.");
-                });
+          const video = document.querySelector('video') as HTMLVideoElement;
+          if (video) {
+            // Tarayıcının autoplay engelini aşmak için ZORUNLU parametreler:
+            video.muted = true;
+            video.defaultMuted = true;
+            video.playsInline = true;
+
+            const playPromise = video.play();
+
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                // Video sorunsuz oynatılmaya başladı
+                console.log("Video oynatılıyor.");
+              }).catch(error => {
+                console.error("Autoplay DOM engeline takıldı: ", error);
+                // Eğer hala engelliyorsa, kullanıcı sayfada herhangi bir yere tıkladığında videoyu başlat
+                document.body.addEventListener('click', function () {
+                  video.muted = true;
+                  video.play();
+                }, { once: true });
+              });
             }
-        }, 500);
-    });
-    
+          }
+        }, 800); // Gecikmeyi 800ms'ye çıkardık ki Angular DOM'u tam çizmiş olsun
+      });
+
     this.scriptLoader.loadScriptsSequentially(this.niotechScripts)
       .then(() => {
         console.log('Sarfiyum Landing Page modülleri başarıyla tetiklendi.');
