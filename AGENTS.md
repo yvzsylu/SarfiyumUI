@@ -254,9 +254,11 @@ TV'nin kendiliğinden doğru sayfayı açmasını da sağlar.
 
 ## 9.2 "İLK GİRİŞTE VERİ GELMİYOR, YENİLEYİNCE GELİYOR" — KÖK NEDEN
 
-Bu şikâyet iki ayrı sebepten kaynaklanıyordu. İlki (`index.html`'in `Cache-Control`
-taşımaması, D9) sunucu tarafında düzeltildi. **İkincisi istemci tarafındaydı ve §9.1'in
-kendi içindeki bir boşluktu:**
+Bu şikâyetin **üç** ayrı sebebi vardı. İlki (`index.html`'in `Cache-Control` taşımaması,
+D9) ve üçüncüsü (sunucunun soğuk grupta hiç veri göndermemesi) `SarfiyumAPI` tarafında
+düzeltildi. **En kalıcı olanı üçüncüsüdür — aşağıdaki "Asıl sebep" başlığına bakın.**
+
+**İkincisi istemci tarafındaydı ve §9.1'in kendi içindeki bir boşluktu:**
 
 `AppVersionService` yalnızca `DashboardComponent` içinde başlatılıyor, `ngOnDestroy`'da da
 durduruluyordu. Dolayısıyla **giriş ekranında bekleyen bir sekme yeni sürümü hiç fark
@@ -293,6 +295,22 @@ ertelenir, böylece giriş formunu doldururken sayfa altından çekilmez.
 ⚠️ **Bu düzeltme geriye dönük çalışmaz.** Şu an açık olan eski sekmelerin bu kodu alması
 için **bir kez elle yenilenmesi** gerekir. Sonraki deploy'larda kendiliğinden düzelirler.
 
+### Asıl sebep — sunucu soğuk grupta hiç veri göndermiyordu
+
+Yukarıdaki iki düzeltmeden sonra da şikâyet sürdü. Gerçek sebep **bu repoda değil**,
+backend'deydi: hub'lar bağlanan istemciye tam listeyi yalnızca daha önce yayınlanmış bir
+durumdan gönderiyordu. Grup hiç yayın almamışsa **hiçbir mesaj gitmiyordu.** Grup şu
+hallerde soğuktur: piyasa sakinken (yayın döngüsü hiç dönmez), **her sunucu yeniden
+başlatmasından/deploy'dan sonra** (durum bellekte) ve **viewer'a özel fiyatı olan bir
+kullanıcının ilk bağlantısında** (tanım gereği).
+
+Bu, ürün açısından şu anlama geliyordu: **her deploy'dan sonra piyasa hareketlenene kadar
+giren herkes "Veri bekleniyor" görüyordu** ve sayfayı yenilemek de çare değildi.
+
+Backend artık grup soğuksa listeyi bağlantı anında hesaplayıp gönderiyor. Ayrıntı ve A/B
+doğrulaması: `SarfiyumAPI/AGENTS.md` değişiklik günlüğü, 2026-08-15 "soğuk grup" maddesi.
+**Bu repoda kod değişikliği gerekmedi.**
+
 ---
 
 ## 10. DEĞİŞİKLİK GÜNLÜĞÜ
@@ -303,6 +321,7 @@ için **bir kez elle yenilenmesi** gerekir. Sonraki deploy'larda kendiliğinden 
 | 2026-08-15 | **Otomatik sürüm yenileme eklendi (§9.1).** Kök neden bulundu: canlıda `index.html` **hiçbir `Cache-Control` başlığı taşımıyordu**; tarayıcılar bu durumda sezgisel önbellekleme uygulayıp dosyayı sormadan servis ediyor ve kullanıcı ESKİ bundle'ı, dolayısıyla eski uygulamayı çalıştırmaya devam ediyordu. "Giriş yapınca veri gelmiyor, yenileyince geliyor" şikâyetinin de, mağaza TV'sindeki "Veri bekleniyor" olayının da sebebi buydu. **Uygulama kodunda hata yoktu** — Playwright ile canlıda iki senaryo (giriş, çıkış→tekrar giriş) test edildi, ikisi de sorunsuz geçti; sunucu bağlantı anında snapshot gönderiyor. Sunucu tarafı düzeltme `SarfiyumAPI/AGENTS.md` §5.2 **D9**'da. İstemci tarafında ise yeni `AppVersionService`, bundle adını izleyip yeni sürüm yayınlandığında sayfayı yeniliyor. |
 | 2026-08-15 | **Canlıya alındı + fiyat gösteriminde bir düzeltme.** Web `master`'a push edildi ve API ile birlikte deploy oldu. ⚠️ **Dashboard'ı ilgilendiren düzeltme:** kuyumcu bir üründe kasıtlı olarak fiyat vermediğinde (özellikle **Kredi Kartı** kategorisi) çarpan 0 oluyor. Backend'de Adım 1'de kaldırılan "0 ise gizle" kuralı yüzünden bu ürünlerin alış hücresinde **"0,00" yazacaktı** — çünkü web `{{ item.bid | number }}` ile render ediyor ve `0` değeri basılıyor, `null` ise hücreyi boş bırakıyor. Backend artık çarpan 0 olduğunda `null` gönderiyor, yalnızca **negatif** sonuçlar görünür kalıyor (gerçek yapılandırma hatası). Bu repoda kod değişikliği gerekmedi. **Not:** piyasa kapalıyken fiyatların sabit görünmesi beklenen davranıştır — yeni veri yoksa backend yayın yapmaz. |
 | 2026-08-15 | **Adım 6 — İstemci performansı.** Dashboard `ChangeDetectionStrategy.OnPush`'a geçirildi ve veri işleme yeniden kuruldu: tek kaynak `itemsById` map'i (O(1) arama), kategori listeleri **referans** tutuyor (kopya veri yok), listeler yalnızca **ürün kümesi/sırası değiştiğinde** yeniden kuruluyor — fiyat güncellemeleri nesneleri yerinde değiştirdiği için liste kurulumunu tetiklemiyor. Flash temizleme ürün başına `setTimeout` yerine **tek** zamanlayıcı. Paket başına **tek** `markForCheck` (öncesinde ürün başına `detectChanges`). Çözülen: **W1, W2, W3, W4, W8**. ⚠️ OnPush'a geçerken template dışından state değiştiren tüm noktalar tarandı; `loadCategories` ve saat döngüsüne `markForCheck` eklendi. `ngOnDestroy` artık flash ve debounce timer'larını da temizliyor. Doğrulama: `tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
+| 2026-08-15 | **"İlk girişte veri gelmiyor" — ASIL sebep bulundu (backend, §9.2).** Web tarafındaki iki düzeltmeden sonra da şikâyet sürünce sorun sunucuda bulundu: hub'lar bağlanan istemciye tam listeyi yalnızca **daha önce yayınlanmış** bir durumdan gönderiyor, grup hiç yayın almamışsa **hiçbir mesaj göndermiyordu**. Grup; piyasa sakinken, **her deploy'dan sonra** (durum bellekte) ve **özel fiyatlı bir viewer'ın ilk bağlantısında** soğuktur. Yani her deploy sonrası piyasa hareketlenene kadar giren herkes "Veri bekleniyor" görüyordu ve yenilemek de çare değildi. Backend artık listeyi bağlantı anında hesaplıyor; A/B doğrulaması `SarfiyumAPI/AGENTS.md`'de. **Bu repoda kod değişikliği gerekmedi.** |
 | 2026-08-15 | **"İlk girişte veri gelmiyor" şikâyetinin ikinci kök nedeni bulundu ve kapatıldı (§9.2).** `AppVersionService` yalnızca dashboard'da başlatıldığı için **giriş ekranında bekleyen eski sekmeler yeni sürümü hiç fark etmiyordu**; giriş bir rota değişimi olduğundan `index.html` tekrar istenmiyor ve ESKİ kod dashboard'a taşınıyordu. Eski istemci `ReceivePrices` dinliyor, sunucu ise artık yalnızca `ReceivePriceSnapshot`/`ReceivePriceDelta` gönderiyor — WebSocket kurulduğu için hata görünmüyor, ama hiçbir işleyici tetiklenmiyor ve tüm kategoriler "Veri bekleniyor" yazıyordu. Servis `AppComponent`'e taşındı (uygulama geneli); dashboard'ın renk düzenleyici koşulu `blockWhile()` ile kaydediliyor; dolu input odaktayken yenileme erteleniyor. Canlıda Playwright ile doğrulandı: temiz tarayıcıda `oktayelbir` girişinde veri **3. saniyede** geliyor (22 satır, 0 uyarı) — güncel kodda hata yok. ⚠️ Açık duran eski sekmelerin **bir kez elle yenilenmesi** gerekir. Doğrulama: `ng build --configuration production` **başarılı**. |
 | 2026-08-15 | **Adım 5 — Yeni yayın sözleşmesi. ⚠️ KIRICI DEĞİŞİKLİK, backend ile birlikte deploy edilmeli.** `ReceivePrices` yerine **`ReceivePriceSnapshot`** (tam liste) + **`ReceivePriceDelta`** (yalnızca `{id, bid, ask}`) geldi. `GoldHubService` parçaları birleştirip tüketiciye her zaman tam listeyi veriyor, dashboard delta mantığını hiç bilmiyor. **W13 çözüldü:** `generateUniqueKey` silindi, eşleştirme `id` üzerinden. **W5 çözüldü:** görünürlük filtresi sunucuda, `productVisibilityMap` ve `refreshCurrentLists` kaldırıldı. `description` alanı sözleşmeden çıktığı için template'teki 5 kullanım `symbol`'e çevrildi (zaten ikisi aynı değerdi). **Yeni bulgu W24 aynı gün düzeltildi:** SignalR dinleyicileri `start()` **çözüldükten sonra** kaydediliyordu; sunucu ilk tam listeyi `OnConnectedAsync` içinde gönderdiği için bu mesaj kaçabiliyordu — kayıt `start()` öncesine alındı. Ayrıca `onreconnecting`/`onclose` durumunda yerel liste sıfırlanıyor (kopuklukta kaçırılan delta'lar sapma yaratmasın). Doğrulama: `npx tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
 | 2026-08-15 | **Adım 4 — Yayın performansı (backend).** Bu repoda **kod değişikliği yapılmadı**, API sözleşmesi de değişmedi. Ancak **davranışta gözle görülür bir fark var:** backend artık her Datshop paketinde değil, **sabit 1 saniyelik aralıklarla** yayın yapıyor. Dashboard'ın aldığı veri hep en güncel olan, sadece daha seyrek geliyor. Pratik sonucu: **flash efekti (400 ms) saniyede birden fazla tetiklenmiyor** ve `updateList()`'in çağrılma sıklığı düşüyor → W1'in (ürün başına `detectChanges()`) canlı etkisi kendiliğinden azaldı. W1 yine de çözülmeli, çünkü asıl maliyet tek bir yayın turu içinde ürün başına tam CD döngüsü çalıştırmak. Fiyat akışı sakinken backend hiç yayın yapmıyor, yani TV modunda boşta duran ekran artık gereksiz CD tetiklemiyor. |
