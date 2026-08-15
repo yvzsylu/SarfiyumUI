@@ -215,29 +215,36 @@ Adım 1 ve 2 **tamamlandı** ve bu repoda kod değişikliği gerektirmedi (§10)
 
 ---
 
-## 9.1 KARAR — Otomatik sayfa yenileme EKLENMEYECEK
+## 9.1 OTOMATİK SÜRÜM YENİLEME
 
-**Durum (2026-08-15):** Tel üzerindeki yayın formatını değiştiren bir deploy'dan sonra,
-o sırada AÇIK olan dashboard sekmeleri "Veri bekleniyor" yazar. Sebep basit: tarayıcıdaki
-JavaScript deploy'dan önce yüklenmiştir ve eski olay adını dinler. SignalR yeniden bağlansa
-bile aynı eski kodla bağlanır; yeni kodu almanın tek yolu **sayfanın yeniden yüklenmesidir**.
-Bu bir veri hatası değildir — sunucu doğru hesaplayıp doğru gönderir, sekmedeki eski kod anlamaz.
+**Sorun:** Angular tek sayfa uygulaması olduğu için, bir kez yüklendikten sonra tarayıcıdaki
+kod kendini güncellemez. Yayın formatını değiştiren bir deploy'dan sonra AÇIK duran sekmeler
+eski kodu çalıştırmaya devam eder; fiyat listesi **"Veri bekleniyor"** yazıp öyle kalır.
+Mağaza TV'leri günlerce yenilenmeden açık durduğu için bu, başında kimse olmayan ekranların
+saatlerce boş kalması demektir. Bu bir veri hatası değildir — sunucu doğru gönderir,
+sekmedeki eski kod anlamaz.
 
-**Önerilen ama REDDEDİLEN çözüm:** dashboard'ın periyodik olarak `index.html`'deki bundle
-adını kontrol edip değiştiğinde `location.reload()` çağırması.
+**Çözüm (`core/services/app-version.service.ts`):** Angular her derlemede
+`main-XXXXXXXX.js` gibi içeriğe göre hash'lenmiş dosya adları üretir ve bu ad `index.html`
+içinde geçer. Servis 3 dakikada bir `index.html`'i tazeleyerek indirir, içindeki bundle adını
+sayfanın yüklendiği andakiyle karşılaştırır; **farklıysa sayfayı yeniler.**
 
-**Kullanıcının kararı:** eklenmeyecek. Müşteri sayısı az, durum kritik değil ve gerektiğinde
-elle giriş yapıp sayfa yenilenebiliyor. Bakımı olmayan bir otomatizma eklemek, çözdüğü
-sorundan daha fazla risk taşıyor.
+| Konu | Davranış |
+|---|---|
+| Oturum | **Düşmez** — token cookie'de, yenileme cookie'yi silmez |
+| Renk düzenleyici açıkken | **Yenilemez** — kullanıcının düzenlemesi kaybolmasın |
+| Bundle adı okunamazsa (`ng serve`) | **Kendini devre dışı bırakır** — yanlış karşılaştırma sonsuz yenileme demek olurdu |
+| Ağ hatası | Sessizce geçer, bir sonraki kontrolde tekrar dener |
 
-> ⚠️ Ayrıca otomatik yenilemenin görünmez olması **kiosk modu** gerektirir. TV'ler bugün
-> Fullscreen API ile (`requestFullscreen`) tam ekrana geçiyor ve sayfa yenilenince tam ekran
-> düşer, adres çubuğu görünür. Kiosk modu (`chrome --kiosk --app=https://sarfiyum.com/tv/user/dashboard`)
-> bunu çözer ve elektrik kesintisi sonrası TV'nin kendiliğinden doğru sayfayı açmasını da sağlar —
-> ama bu da yapılmadı, ihtiyaç doğarsa değerlendirilecek.
+> ⚠️ **Sunucu tarafı ön koşul:** `index.html` `Cache-Control: no-cache` ile servis edilmeli
+> (`SarfiyumAPI/AGENTS.md` §5.2 **D9**). Aksi halde tarayıcı hep önbellekteki eski kopyayı
+> verir, bundle adı hiç değişmez ve kontrol asla tetiklenmez.
 
-**Not:** Bu durum yalnızca yayın formatını değiştiren deploy'larda yaşanır. Olay adları
-sabit kaldığı sürece açık sekmeler çalışmaya devam eder.
+**Tam ekran uyarısı:** Yenileme sonrası tarayıcı Fullscreen API'sinden çıkar (tarayıcılar
+bir sayfanın kendiliğinden tam ekrana geçmesine izin vermez). TV'ler **kiosk modunda**
+açılırsa (`chrome --kiosk --app=https://sarfiyum.com/tv/user/dashboard`) bu sorun olmaz;
+kiosk bir pencere modudur, Fullscreen API değildir. Ayrıca elektrik kesintisi sonrası
+TV'nin kendiliğinden doğru sayfayı açmasını da sağlar.
 
 ---
 
@@ -246,6 +253,7 @@ sabit kaldığı sürece açık sekmeler çalışmaya devam eder.
 | Tarih | Değişiklik |
 |---|---|
 | 2026-08-14 | İlk oluşturma. Proje derinlemesine incelendi; mevcut özellikler, mimari, performans ve kod kalitesi bulguları kaydedildi. Kod değişikliği yapılmadı. |
+| 2026-08-15 | **Otomatik sürüm yenileme eklendi (§9.1).** Kök neden bulundu: canlıda `index.html` **hiçbir `Cache-Control` başlığı taşımıyordu**; tarayıcılar bu durumda sezgisel önbellekleme uygulayıp dosyayı sormadan servis ediyor ve kullanıcı ESKİ bundle'ı, dolayısıyla eski uygulamayı çalıştırmaya devam ediyordu. "Giriş yapınca veri gelmiyor, yenileyince geliyor" şikâyetinin de, mağaza TV'sindeki "Veri bekleniyor" olayının da sebebi buydu. **Uygulama kodunda hata yoktu** — Playwright ile canlıda iki senaryo (giriş, çıkış→tekrar giriş) test edildi, ikisi de sorunsuz geçti; sunucu bağlantı anında snapshot gönderiyor. Sunucu tarafı düzeltme `SarfiyumAPI/AGENTS.md` §5.2 **D9**'da. İstemci tarafında ise yeni `AppVersionService`, bundle adını izleyip yeni sürüm yayınlandığında sayfayı yeniliyor. |
 | 2026-08-15 | **Canlıya alındı + fiyat gösteriminde bir düzeltme.** Web `master`'a push edildi ve API ile birlikte deploy oldu. ⚠️ **Dashboard'ı ilgilendiren düzeltme:** kuyumcu bir üründe kasıtlı olarak fiyat vermediğinde (özellikle **Kredi Kartı** kategorisi) çarpan 0 oluyor. Backend'de Adım 1'de kaldırılan "0 ise gizle" kuralı yüzünden bu ürünlerin alış hücresinde **"0,00" yazacaktı** — çünkü web `{{ item.bid | number }}` ile render ediyor ve `0` değeri basılıyor, `null` ise hücreyi boş bırakıyor. Backend artık çarpan 0 olduğunda `null` gönderiyor, yalnızca **negatif** sonuçlar görünür kalıyor (gerçek yapılandırma hatası). Bu repoda kod değişikliği gerekmedi. **Not:** piyasa kapalıyken fiyatların sabit görünmesi beklenen davranıştır — yeni veri yoksa backend yayın yapmaz. |
 | 2026-08-15 | **Adım 6 — İstemci performansı.** Dashboard `ChangeDetectionStrategy.OnPush`'a geçirildi ve veri işleme yeniden kuruldu: tek kaynak `itemsById` map'i (O(1) arama), kategori listeleri **referans** tutuyor (kopya veri yok), listeler yalnızca **ürün kümesi/sırası değiştiğinde** yeniden kuruluyor — fiyat güncellemeleri nesneleri yerinde değiştirdiği için liste kurulumunu tetiklemiyor. Flash temizleme ürün başına `setTimeout` yerine **tek** zamanlayıcı. Paket başına **tek** `markForCheck` (öncesinde ürün başına `detectChanges`). Çözülen: **W1, W2, W3, W4, W8**. ⚠️ OnPush'a geçerken template dışından state değiştiren tüm noktalar tarandı; `loadCategories` ve saat döngüsüne `markForCheck` eklendi. `ngOnDestroy` artık flash ve debounce timer'larını da temizliyor. Doğrulama: `tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
 | 2026-08-15 | **Adım 5 — Yeni yayın sözleşmesi. ⚠️ KIRICI DEĞİŞİKLİK, backend ile birlikte deploy edilmeli.** `ReceivePrices` yerine **`ReceivePriceSnapshot`** (tam liste) + **`ReceivePriceDelta`** (yalnızca `{id, bid, ask}`) geldi. `GoldHubService` parçaları birleştirip tüketiciye her zaman tam listeyi veriyor, dashboard delta mantığını hiç bilmiyor. **W13 çözüldü:** `generateUniqueKey` silindi, eşleştirme `id` üzerinden. **W5 çözüldü:** görünürlük filtresi sunucuda, `productVisibilityMap` ve `refreshCurrentLists` kaldırıldı. `description` alanı sözleşmeden çıktığı için template'teki 5 kullanım `symbol`'e çevrildi (zaten ikisi aynı değerdi). **Yeni bulgu W24 aynı gün düzeltildi:** SignalR dinleyicileri `start()` **çözüldükten sonra** kaydediliyordu; sunucu ilk tam listeyi `OnConnectedAsync` içinde gönderdiği için bu mesaj kaçabiliyordu — kayıt `start()` öncesine alındı. Ayrıca `onreconnecting`/`onclose` durumunda yerel liste sıfırlanıyor (kopuklukta kaçırılan delta'lar sapma yaratmasın). Doğrulama: `npx tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |

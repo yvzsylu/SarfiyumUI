@@ -15,6 +15,7 @@ import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/environment';
 
 import { CategoryService } from '@/app/modules/user/categories/services/category.service';
+import { AppVersionService } from '@/app/core/services/app-version.service';
 
 // 🔥 EKLENEN API SERVİSİ (Yolunu projene göre düzenle)
 import { ThemeSettingsService } from './services/theme-settings.service';
@@ -60,6 +61,7 @@ type ThemeType = 'custom' | 'light' | 'dark' | 'financial' | 'flat-light' | 'fla
 export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private goldHub = inject(GoldHubService);
+  private appVersion = inject(AppVersionService);
   private authService = inject(AuthenticationService);
   private categoryService = inject(CategoryService);
   private themeSettingsApi = inject(ThemeSettingsService); // 🔥 API Inject Edildi
@@ -228,6 +230,17 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.startClock();
     this.initAutoLogout();
+
+    // Yeni sürüm yayınlandığında sayfayı kendiliğinden yenile.
+    //
+    // Bu ekran mağaza TV'lerinde günlerce açık kalıyor; yayın formatını değiştiren bir
+    // deploy sonrası eski kod "Veri bekleniyor" yazıp öylece bekliyordu ve birinin gidip
+    // elle yenilemesi gerekiyordu.
+    //
+    // Renk düzenleyici açıkken yenilemiyoruz: kullanıcı o sırada bir şey düzenliyordur,
+    // sayfayı altından çekmek yaptığı değişikliği kaybettirir. TV'de bu menü zaten
+    // hiç açılmaz, dolayısıyla asıl hedeflenen senaryo engellenmiş olmuyor.
+    this.appVersion.start(3 * 60 * 1000, () => !this.isColorMenuOpen);
   }
 
   ngAfterViewInit(): void {
@@ -666,6 +679,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
     if (this.flashClearTimer) clearTimeout(this.flashClearTimer);
     if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.appVersion.stop();
     this.goldHub.stopConnection();
   }
 }
