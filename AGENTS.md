@@ -215,11 +215,38 @@ Adım 1 ve 2 **tamamlandı** ve bu repoda kod değişikliği gerektirmedi (§10)
 
 ---
 
+## 9.1 KARAR — Otomatik sayfa yenileme EKLENMEYECEK
+
+**Durum (2026-08-15):** Tel üzerindeki yayın formatını değiştiren bir deploy'dan sonra,
+o sırada AÇIK olan dashboard sekmeleri "Veri bekleniyor" yazar. Sebep basit: tarayıcıdaki
+JavaScript deploy'dan önce yüklenmiştir ve eski olay adını dinler. SignalR yeniden bağlansa
+bile aynı eski kodla bağlanır; yeni kodu almanın tek yolu **sayfanın yeniden yüklenmesidir**.
+Bu bir veri hatası değildir — sunucu doğru hesaplayıp doğru gönderir, sekmedeki eski kod anlamaz.
+
+**Önerilen ama REDDEDİLEN çözüm:** dashboard'ın periyodik olarak `index.html`'deki bundle
+adını kontrol edip değiştiğinde `location.reload()` çağırması.
+
+**Kullanıcının kararı:** eklenmeyecek. Müşteri sayısı az, durum kritik değil ve gerektiğinde
+elle giriş yapıp sayfa yenilenebiliyor. Bakımı olmayan bir otomatizma eklemek, çözdüğü
+sorundan daha fazla risk taşıyor.
+
+> ⚠️ Ayrıca otomatik yenilemenin görünmez olması **kiosk modu** gerektirir. TV'ler bugün
+> Fullscreen API ile (`requestFullscreen`) tam ekrana geçiyor ve sayfa yenilenince tam ekran
+> düşer, adres çubuğu görünür. Kiosk modu (`chrome --kiosk --app=https://sarfiyum.com/tv/user/dashboard`)
+> bunu çözer ve elektrik kesintisi sonrası TV'nin kendiliğinden doğru sayfayı açmasını da sağlar —
+> ama bu da yapılmadı, ihtiyaç doğarsa değerlendirilecek.
+
+**Not:** Bu durum yalnızca yayın formatını değiştiren deploy'larda yaşanır. Olay adları
+sabit kaldığı sürece açık sekmeler çalışmaya devam eder.
+
+---
+
 ## 10. DEĞİŞİKLİK GÜNLÜĞÜ
 
 | Tarih | Değişiklik |
 |---|---|
 | 2026-08-14 | İlk oluşturma. Proje derinlemesine incelendi; mevcut özellikler, mimari, performans ve kod kalitesi bulguları kaydedildi. Kod değişikliği yapılmadı. |
+| 2026-08-15 | **Canlıya alındı + fiyat gösteriminde bir düzeltme.** Web `master`'a push edildi ve API ile birlikte deploy oldu. ⚠️ **Dashboard'ı ilgilendiren düzeltme:** kuyumcu bir üründe kasıtlı olarak fiyat vermediğinde (özellikle **Kredi Kartı** kategorisi) çarpan 0 oluyor. Backend'de Adım 1'de kaldırılan "0 ise gizle" kuralı yüzünden bu ürünlerin alış hücresinde **"0,00" yazacaktı** — çünkü web `{{ item.bid | number }}` ile render ediyor ve `0` değeri basılıyor, `null` ise hücreyi boş bırakıyor. Backend artık çarpan 0 olduğunda `null` gönderiyor, yalnızca **negatif** sonuçlar görünür kalıyor (gerçek yapılandırma hatası). Bu repoda kod değişikliği gerekmedi. **Not:** piyasa kapalıyken fiyatların sabit görünmesi beklenen davranıştır — yeni veri yoksa backend yayın yapmaz. |
 | 2026-08-15 | **Adım 6 — İstemci performansı.** Dashboard `ChangeDetectionStrategy.OnPush`'a geçirildi ve veri işleme yeniden kuruldu: tek kaynak `itemsById` map'i (O(1) arama), kategori listeleri **referans** tutuyor (kopya veri yok), listeler yalnızca **ürün kümesi/sırası değiştiğinde** yeniden kuruluyor — fiyat güncellemeleri nesneleri yerinde değiştirdiği için liste kurulumunu tetiklemiyor. Flash temizleme ürün başına `setTimeout` yerine **tek** zamanlayıcı. Paket başına **tek** `markForCheck` (öncesinde ürün başına `detectChanges`). Çözülen: **W1, W2, W3, W4, W8**. ⚠️ OnPush'a geçerken template dışından state değiştiren tüm noktalar tarandı; `loadCategories` ve saat döngüsüne `markForCheck` eklendi. `ngOnDestroy` artık flash ve debounce timer'larını da temizliyor. Doğrulama: `tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
 | 2026-08-15 | **Adım 5 — Yeni yayın sözleşmesi. ⚠️ KIRICI DEĞİŞİKLİK, backend ile birlikte deploy edilmeli.** `ReceivePrices` yerine **`ReceivePriceSnapshot`** (tam liste) + **`ReceivePriceDelta`** (yalnızca `{id, bid, ask}`) geldi. `GoldHubService` parçaları birleştirip tüketiciye her zaman tam listeyi veriyor, dashboard delta mantığını hiç bilmiyor. **W13 çözüldü:** `generateUniqueKey` silindi, eşleştirme `id` üzerinden. **W5 çözüldü:** görünürlük filtresi sunucuda, `productVisibilityMap` ve `refreshCurrentLists` kaldırıldı. `description` alanı sözleşmeden çıktığı için template'teki 5 kullanım `symbol`'e çevrildi (zaten ikisi aynı değerdi). **Yeni bulgu W24 aynı gün düzeltildi:** SignalR dinleyicileri `start()` **çözüldükten sonra** kaydediliyordu; sunucu ilk tam listeyi `OnConnectedAsync` içinde gönderdiği için bu mesaj kaçabiliyordu — kayıt `start()` öncesine alındı. Ayrıca `onreconnecting`/`onclose` durumunda yerel liste sıfırlanıyor (kopuklukta kaçırılan delta'lar sapma yaratmasın). Doğrulama: `npx tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
 | 2026-08-15 | **Adım 4 — Yayın performansı (backend).** Bu repoda **kod değişikliği yapılmadı**, API sözleşmesi de değişmedi. Ancak **davranışta gözle görülür bir fark var:** backend artık her Datshop paketinde değil, **sabit 1 saniyelik aralıklarla** yayın yapıyor. Dashboard'ın aldığı veri hep en güncel olan, sadece daha seyrek geliyor. Pratik sonucu: **flash efekti (400 ms) saniyede birden fazla tetiklenmiyor** ve `updateList()`'in çağrılma sıklığı düşüyor → W1'in (ürün başına `detectChanges()`) canlı etkisi kendiliğinden azaldı. W1 yine de çözülmeli, çünkü asıl maliyet tek bir yayın turu içinde ürün başına tam CD döngüsü çalıştırmak. Fiyat akışı sakinken backend hiç yayın yapmıyor, yani TV modunda boşta duran ekran artık gereksiz CD tetiklemiyor. |
