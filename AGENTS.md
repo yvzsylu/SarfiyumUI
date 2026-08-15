@@ -229,10 +229,14 @@ sekmedeki eski kod anlamaz.
 içinde geçer. Servis 3 dakikada bir `index.html`'i tazeleyerek indirir, içindeki bundle adını
 sayfanın yüklendiği andakiyle karşılaştırır; **farklıysa sayfayı yeniler.**
 
+Servis **`AppComponent.ngOnInit` içinde, uygulama genelinde** başlatılır — belirli bir sayfada
+değil. Bunun nedeni aşağıdaki §9.2'de.
+
 | Konu | Davranış |
 |---|---|
 | Oturum | **Düşmez** — token cookie'de, yenileme cookie'yi silmez |
-| Renk düzenleyici açıkken | **Yenilemez** — kullanıcının düzenlemesi kaybolmasın |
+| Renk düzenleyici açıkken | **Yenilemez** — kullanıcının düzenlemesi kaybolmasın (dashboard `blockWhile()` ile bildirir) |
+| Dolu bir input odaktayken | **Yenilemez** — kullanıcı giriş formunu doldururken yazdığı silinmesin |
 | Bundle adı okunamazsa (`ng serve`) | **Kendini devre dışı bırakır** — yanlış karşılaştırma sonsuz yenileme demek olurdu |
 | Ağ hatası | Sessizce geçer, bir sonraki kontrolde tekrar dener |
 
@@ -248,6 +252,49 @@ TV'nin kendiliğinden doğru sayfayı açmasını da sağlar.
 
 ---
 
+## 9.2 "İLK GİRİŞTE VERİ GELMİYOR, YENİLEYİNCE GELİYOR" — KÖK NEDEN
+
+Bu şikâyet iki ayrı sebepten kaynaklanıyordu. İlki (`index.html`'in `Cache-Control`
+taşımaması, D9) sunucu tarafında düzeltildi. **İkincisi istemci tarafındaydı ve §9.1'in
+kendi içindeki bir boşluktu:**
+
+`AppVersionService` yalnızca `DashboardComponent` içinde başlatılıyor, `ngOnDestroy`'da da
+durduruluyordu. Dolayısıyla **giriş ekranında bekleyen bir sekme yeni sürümü hiç fark
+etmiyordu.** Kullanıcı o eski sekmeden giriş yaptığında Angular sayfayı yeniden yüklemez,
+yalnızca rota değiştirir — `index.html` tekrar istenmediği için **eski kod dashboard'a
+taşınır.**
+
+Eski kod neden veri göstermiyor:
+
+| | Dinlenen/gönderilen olay |
+|---|---|
+| `e005b9b` öncesi istemci | `ReceivePrices` |
+| Güncel sunucu | `ReceivePriceSnapshot`, `ReceivePriceDelta` |
+
+Sunucu `ReceivePrices` olayını **artık hiç göndermiyor**. WebSocket sorunsuz kurulduğu için
+ekranda bağlantı hatası da çıkmaz; yalnızca hiçbir fiyat işleyicisi tetiklenmez, `prices$`
+boş kalır ve **tüm kategori alanları "Veri bekleniyor" yazar.** F5 yeni `index.html`'i
+getirdiği için sorun anında düzelir — şikâyetin "yenileyince geliyor" kısmı budur.
+
+**Doğrulama (2026-08-15, canlı, Playwright):**
+
+- Temiz tarayıcıda `oktayelbir` girişi: **3. saniyede** 22 satır, "Veri bekleniyor" **0**.
+  Bağlantıda `ReceivePriceSnapshot seq=13, 24 kayıt` geliyor. Güncel kod sağlam.
+- Mağaza TV'si açıkken ikinci giriş senaryosu da denendi: yeni oturum sorunsuz veri alıyor,
+  eski oturum `ForceCheckSession` ile düşüyor (tasarlanan davranış).
+- Hiç fiyat olayı ulaşmadığında ekran birebir kullanıcının bildirdiği hale geliyor:
+  MADEN / BİLEZİK / ATA & REŞAT / KREDİ KARTI alanlarının hepsinde "Veri bekleniyor".
+
+**Düzeltme:** Servis `AppComponent`'e taşındı; hangi sayfada olunursa olunsun çalışıyor.
+Dashboard'ın "renk düzenleyici açıkken yenileme" koşulu artık `start()` parametresi değil,
+`blockWhile()` ile kaydedilen bir engel. Ayrıca dolu bir input odaktayken yenileme
+ertelenir, böylece giriş formunu doldururken sayfa altından çekilmez.
+
+⚠️ **Bu düzeltme geriye dönük çalışmaz.** Şu an açık olan eski sekmelerin bu kodu alması
+için **bir kez elle yenilenmesi** gerekir. Sonraki deploy'larda kendiliğinden düzelirler.
+
+---
+
 ## 10. DEĞİŞİKLİK GÜNLÜĞÜ
 
 | Tarih | Değişiklik |
@@ -256,6 +303,7 @@ TV'nin kendiliğinden doğru sayfayı açmasını da sağlar.
 | 2026-08-15 | **Otomatik sürüm yenileme eklendi (§9.1).** Kök neden bulundu: canlıda `index.html` **hiçbir `Cache-Control` başlığı taşımıyordu**; tarayıcılar bu durumda sezgisel önbellekleme uygulayıp dosyayı sormadan servis ediyor ve kullanıcı ESKİ bundle'ı, dolayısıyla eski uygulamayı çalıştırmaya devam ediyordu. "Giriş yapınca veri gelmiyor, yenileyince geliyor" şikâyetinin de, mağaza TV'sindeki "Veri bekleniyor" olayının da sebebi buydu. **Uygulama kodunda hata yoktu** — Playwright ile canlıda iki senaryo (giriş, çıkış→tekrar giriş) test edildi, ikisi de sorunsuz geçti; sunucu bağlantı anında snapshot gönderiyor. Sunucu tarafı düzeltme `SarfiyumAPI/AGENTS.md` §5.2 **D9**'da. İstemci tarafında ise yeni `AppVersionService`, bundle adını izleyip yeni sürüm yayınlandığında sayfayı yeniliyor. |
 | 2026-08-15 | **Canlıya alındı + fiyat gösteriminde bir düzeltme.** Web `master`'a push edildi ve API ile birlikte deploy oldu. ⚠️ **Dashboard'ı ilgilendiren düzeltme:** kuyumcu bir üründe kasıtlı olarak fiyat vermediğinde (özellikle **Kredi Kartı** kategorisi) çarpan 0 oluyor. Backend'de Adım 1'de kaldırılan "0 ise gizle" kuralı yüzünden bu ürünlerin alış hücresinde **"0,00" yazacaktı** — çünkü web `{{ item.bid | number }}` ile render ediyor ve `0` değeri basılıyor, `null` ise hücreyi boş bırakıyor. Backend artık çarpan 0 olduğunda `null` gönderiyor, yalnızca **negatif** sonuçlar görünür kalıyor (gerçek yapılandırma hatası). Bu repoda kod değişikliği gerekmedi. **Not:** piyasa kapalıyken fiyatların sabit görünmesi beklenen davranıştır — yeni veri yoksa backend yayın yapmaz. |
 | 2026-08-15 | **Adım 6 — İstemci performansı.** Dashboard `ChangeDetectionStrategy.OnPush`'a geçirildi ve veri işleme yeniden kuruldu: tek kaynak `itemsById` map'i (O(1) arama), kategori listeleri **referans** tutuyor (kopya veri yok), listeler yalnızca **ürün kümesi/sırası değiştiğinde** yeniden kuruluyor — fiyat güncellemeleri nesneleri yerinde değiştirdiği için liste kurulumunu tetiklemiyor. Flash temizleme ürün başına `setTimeout` yerine **tek** zamanlayıcı. Paket başına **tek** `markForCheck` (öncesinde ürün başına `detectChanges`). Çözülen: **W1, W2, W3, W4, W8**. ⚠️ OnPush'a geçerken template dışından state değiştiren tüm noktalar tarandı; `loadCategories` ve saat döngüsüne `markForCheck` eklendi. `ngOnDestroy` artık flash ve debounce timer'larını da temizliyor. Doğrulama: `tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
+| 2026-08-15 | **"İlk girişte veri gelmiyor" şikâyetinin ikinci kök nedeni bulundu ve kapatıldı (§9.2).** `AppVersionService` yalnızca dashboard'da başlatıldığı için **giriş ekranında bekleyen eski sekmeler yeni sürümü hiç fark etmiyordu**; giriş bir rota değişimi olduğundan `index.html` tekrar istenmiyor ve ESKİ kod dashboard'a taşınıyordu. Eski istemci `ReceivePrices` dinliyor, sunucu ise artık yalnızca `ReceivePriceSnapshot`/`ReceivePriceDelta` gönderiyor — WebSocket kurulduğu için hata görünmüyor, ama hiçbir işleyici tetiklenmiyor ve tüm kategoriler "Veri bekleniyor" yazıyordu. Servis `AppComponent`'e taşındı (uygulama geneli); dashboard'ın renk düzenleyici koşulu `blockWhile()` ile kaydediliyor; dolu input odaktayken yenileme erteleniyor. Canlıda Playwright ile doğrulandı: temiz tarayıcıda `oktayelbir` girişinde veri **3. saniyede** geliyor (22 satır, 0 uyarı) — güncel kodda hata yok. ⚠️ Açık duran eski sekmelerin **bir kez elle yenilenmesi** gerekir. Doğrulama: `ng build --configuration production` **başarılı**. |
 | 2026-08-15 | **Adım 5 — Yeni yayın sözleşmesi. ⚠️ KIRICI DEĞİŞİKLİK, backend ile birlikte deploy edilmeli.** `ReceivePrices` yerine **`ReceivePriceSnapshot`** (tam liste) + **`ReceivePriceDelta`** (yalnızca `{id, bid, ask}`) geldi. `GoldHubService` parçaları birleştirip tüketiciye her zaman tam listeyi veriyor, dashboard delta mantığını hiç bilmiyor. **W13 çözüldü:** `generateUniqueKey` silindi, eşleştirme `id` üzerinden. **W5 çözüldü:** görünürlük filtresi sunucuda, `productVisibilityMap` ve `refreshCurrentLists` kaldırıldı. `description` alanı sözleşmeden çıktığı için template'teki 5 kullanım `symbol`'e çevrildi (zaten ikisi aynı değerdi). **Yeni bulgu W24 aynı gün düzeltildi:** SignalR dinleyicileri `start()` **çözüldükten sonra** kaydediliyordu; sunucu ilk tam listeyi `OnConnectedAsync` içinde gönderdiği için bu mesaj kaçabiliyordu — kayıt `start()` öncesine alındı. Ayrıca `onreconnecting`/`onclose` durumunda yerel liste sıfırlanıyor (kopuklukta kaçırılan delta'lar sapma yaratmasın). Doğrulama: `npx tsc --noEmit` temiz, `npm run build:prod` **başarılı** (initial 2.55 MB). |
 | 2026-08-15 | **Adım 4 — Yayın performansı (backend).** Bu repoda **kod değişikliği yapılmadı**, API sözleşmesi de değişmedi. Ancak **davranışta gözle görülür bir fark var:** backend artık her Datshop paketinde değil, **sabit 1 saniyelik aralıklarla** yayın yapıyor. Dashboard'ın aldığı veri hep en güncel olan, sadece daha seyrek geliyor. Pratik sonucu: **flash efekti (400 ms) saniyede birden fazla tetiklenmiyor** ve `updateList()`'in çağrılma sıklığı düşüyor → W1'in (ürün başına `detectChanges()`) canlı etkisi kendiliğinden azaldı. W1 yine de çözülmeli, çünkü asıl maliyet tek bir yayın turu içinde ürün başına tam CD döngüsü çalıştırmak. Fiyat akışı sakinken backend hiç yayın yapmıyor, yani TV modunda boşta duran ekran artık gereksiz CD tetiklemiyor. |
 | 2026-08-15 | **Adım 3 — Oturum & hub hattı.** Bu repoda **kod değişikliği yapıldı:** `core/services/auth.service.ts` → `logout()` artık backend'de yeni açılan `POST /api/auth/logout` endpoint'ini çağırıyor (yeni bulgu **W23**, aynı gün çözüldü). Öncesinde çıkış sadece cookie silmekten ibaretti; sunucudaki oturum satırı kalıyor ve açık SignalR bağlantısı fiyat almaya devam ediyordu. `jwtInterceptor` bu endpoint'e token ekliyor (login/reset-password istisnalarına dahil değil), ayrıca istek `subscribe` anında oluşturulduğu için `Authorization` başlığı cookie silinmeden önce okunuyor. Doğrulama: `npx tsc -p tsconfig.app.json --noEmit` **temiz**. Backend tarafında ayrıca oturum doğrulaması önbelleğe alındı (API P5/P6) — bu web'de davranış değişikliği yaratmaz, yalnızca her API çağrısındaki fazladan DB gidiş-dönüşünü kaldırır. |

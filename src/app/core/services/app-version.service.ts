@@ -10,6 +10,12 @@ import { DOCUMENT } from '@angular/common';
  * "Veri bekleniyor" yazıp öyle kalır. Mağaza TV'leri günlerce yenilenmeden açık durduğu
  * için bu, başında kimse olmayan ekranların saatlerce boş kalması demektir.
  *
+ * ⚠️ **Neden uygulama genelinde çalışıyor:** Kontrol yalnızca dashboard'da başlatıldığında
+ * bir açık kapı kalıyordu. Giriş ekranında bekleyen eski bir sekmede kullanıcı giriş
+ * yaptığında Angular sayfayı yeniden yüklemez, yalnızca rota değiştirir; `index.html` hiç
+ * tekrar istenmediği için ESKİ kod dashboard'a taşınır ve ekran boş kalır. Bu yüzden servis
+ * kök bileşende, hangi sayfada olunduğundan bağımsız olarak başlatılır.
+ *
  * **Nasıl çalışıyor:** Angular her derlemede `main-XXXXXXXX.js` gibi içeriğe göre
  * hash'lenmiş dosya adları üretir ve bu ad `index.html` içinde geçer. Servis belirli
  * aralıklarla `index.html`'i tazeleyerek indirir, içindeki bundle adını sayfanın
@@ -31,14 +37,17 @@ export class AppVersionService {
   private timer: any = null;
 
   /**
-   * Sürüm takibini başlatır.
+   * "Şu an yenileme" diyen koşullar. Yeni sürüm bulunsa bile bunlardan biri `true`
+   * dönüyorsa yenileme bir sonraki kontrole ertelenir.
+   */
+  private blockers = new Set<() => boolean>();
+
+  /**
+   * Sürüm takibini başlatır. Kök bileşenden bir kez çağrılır; tekrar çağrılması etkisizdir.
    *
    * @param intervalMs Kontrol aralığı.
-   * @param canReload  Yenilemenin uygun olup olmadığını söyleyen koşul. Kullanıcı bir
-   *                   şey düzenliyorsa (örn. renk düzenleyici açıksa) sayfayı ortasında
-   *                   yenilemek veri kaybettirir; bu yüzden karar çağırana bırakıldı.
    */
-  start(intervalMs: number, canReload: () => boolean = () => true): void {
+  start(intervalMs: number): void {
     if (this.timer) return;
 
     this.loadedBundle = this.readBundleFromDom();
@@ -47,7 +56,7 @@ export class AppVersionService {
     // kal — yanlış bir karşılaştırmayla sayfayı durmadan yenilemek çok daha kötü olurdu.
     if (!this.loadedBundle) return;
 
-    this.timer = setInterval(() => this.check(canReload), intervalMs);
+    this.timer = setInterval(() => this.check(), intervalMs);
   }
 
   stop(): void {
@@ -57,8 +66,35 @@ export class AppVersionService {
     }
   }
 
-  private async check(canReload: () => boolean): Promise<void> {
-    if (!canReload()) return;
+  /**
+   * Yenilemenin ertelenmesi gereken bir durumu bildirir. Kullanıcı bir şey düzenliyorsa
+   * (örn. renk düzenleyici açıksa) sayfayı altından çekmek yaptığı değişikliği kaybettirir.
+   *
+   * @returns Koşulu geri çeken fonksiyon; bileşen yok edilirken çağrılmalıdır.
+   */
+  blockWhile(condition: () => boolean): () => void {
+    this.blockers.add(condition);
+    return () => this.blockers.delete(condition);
+  }
+
+  private canReload(): boolean {
+    for (const blocked of this.blockers) {
+      if (blocked()) return false;
+    }
+
+    // Kullanıcı bir alana yazıyorsa (tipik olarak giriş formu) sayfayı yenilemek
+    // yazdığını siler. TV'lerde odaklanmış bir giriş alanı bulunmadığı için asıl
+    // hedeflenen senaryo bundan etkilenmez.
+    const active = this.document.activeElement;
+    if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
+      if (active.value) return false;
+    }
+
+    return true;
+  }
+
+  private async check(): Promise<void> {
+    if (!this.canReload()) return;
 
     try {
       // `cache: 'no-store'` + sorgu parametresi: aradaki hiçbir katmanın bize eski

@@ -18,6 +18,7 @@ import { AuthenticationService } from '@/app/core/services/auth.service';
 import { loginSuccess } from '@/app/store/authentication/authentication.actions';
 import { BrandingService } from '@core/services/branding-service'; // Servis yolunu kontrol et
 import { TitleService } from '@core/services/title.service'; // Senin mevcut servisin
+import { AppVersionService } from '@core/services/app-version.service';
 
 @Component({
   selector: 'app-root',
@@ -39,6 +40,7 @@ export class AppComponent implements OnInit {
   private store = inject(Store);
   private authService = inject(AuthenticationService);
   private brandingService = inject(BrandingService);
+  private appVersion = inject(AppVersionService);
 
   constructor() {
     // Progress Bar için Router dinleyicisi
@@ -50,6 +52,13 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     // 1. Senin mevcut Title servisin (Varsa başlangıç ayarları için kalsın)
     this.customTitleService.init();
+
+    // 1.b YENİ SÜRÜM TAKİBİ
+    // Uygulamanın tamamı için, ilk sayfadan itibaren. Yalnızca dashboard'da başlatmak
+    // yetmiyordu: giriş ekranında bekleyen eski bir sekmede kullanıcı giriş yapınca
+    // Angular sayfayı yeniden yüklemeyip sadece rota değiştirdiği için ESKİ kod
+    // dashboard'a taşınıyor ve fiyatlar hiç gelmiyordu ("Veri bekleniyor").
+    this.appVersion.start(3 * 60 * 1000);
 
     // 2. OTURUM KURTARMA (Sayfa yenilendiğinde)
     const user = this.authService.getUserFromCookie();

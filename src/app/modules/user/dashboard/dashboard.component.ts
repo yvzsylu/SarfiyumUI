@@ -62,6 +62,9 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
 
   private goldHub = inject(GoldHubService);
   private appVersion = inject(AppVersionService);
+
+  /** Renk düzenleyici açıkken sürüm yenilemesini erteleyen kaydı geri çeker. */
+  private releaseVersionBlock?: () => void;
   private authService = inject(AuthenticationService);
   private categoryService = inject(CategoryService);
   private themeSettingsApi = inject(ThemeSettingsService); // 🔥 API Inject Edildi
@@ -233,14 +236,11 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
 
     // Yeni sürüm yayınlandığında sayfayı kendiliğinden yenile.
     //
-    // Bu ekran mağaza TV'lerinde günlerce açık kalıyor; yayın formatını değiştiren bir
-    // deploy sonrası eski kod "Veri bekleniyor" yazıp öylece bekliyordu ve birinin gidip
-    // elle yenilemesi gerekiyordu.
-    //
-    // Renk düzenleyici açıkken yenilemiyoruz: kullanıcı o sırada bir şey düzenliyordur,
-    // sayfayı altından çekmek yaptığı değişikliği kaybettirir. TV'de bu menü zaten
-    // hiç açılmaz, dolayısıyla asıl hedeflenen senaryo engellenmiş olmuyor.
-    this.appVersion.start(3 * 60 * 1000, () => !this.isColorMenuOpen);
+    // Sürüm takibi artık kök bileşende, uygulama genelinde çalışıyor. Burada yalnızca
+    // "şu an yenileme" koşulumuzu bildiriyoruz: renk düzenleyici açıkken kullanıcı bir
+    // şey düzenliyordur, sayfayı altından çekmek yaptığı değişikliği kaybettirir. TV'de
+    // bu menü zaten hiç açılmaz, dolayısıyla asıl hedeflenen senaryo engellenmiş olmuyor.
+    this.releaseVersionBlock = this.appVersion.blockWhile(() => this.isColorMenuOpen);
   }
 
   ngAfterViewInit(): void {
@@ -679,7 +679,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
     if (this.flashClearTimer) clearTimeout(this.flashClearTimer);
     if (this.saveTimeout) clearTimeout(this.saveTimeout);
-    this.appVersion.stop();
+    this.releaseVersionBlock?.();
     this.goldHub.stopConnection();
   }
 }
