@@ -140,6 +140,21 @@ export class AuthenticationService {
   }
 
   logout(): void {
+    // Sunucudaki oturumu da kapat: UserActiveSession satırı silinir ve açık SignalR
+    // bağlantıları yayın gruplarından çıkarılır. Bu çağrı olmadan kullanıcı çıkış
+    // yapsa bile sunucuda "hâlâ online" görünüyor ve açık kalan hub bağlantısı fiyat
+    // almaya devam ediyordu (API AGENTS.md G10).
+    //
+    // Yanıt beklenmiyor: ağ hatası kullanıcıyı uygulamada kilitli bırakmamalı.
+    // İstek subscribe anında oluşturulduğu için Authorization başlığı, aşağıdaki
+    // removeSession() çalışmadan önce cookie'den okunmuş olur.
+    if (this.session) {
+      this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+        next: () => { },
+        error: () => { },
+      });
+    }
+
     this.removeSession();
     this.user = null;
   }

@@ -266,7 +266,7 @@
                   <td class="ps-4 fw-semibold base-text item-description resizable-wrapper"
                       [attr.data-key]="'item-maden-' + item.symbol + '-desc'"
                       [style]="getWrapperStyle('item-maden-' + item.symbol + '-desc')">
-                    {{ item.description || item.symbol }}
+                    {{ item.symbol }}
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -341,7 +341,7 @@
                       [attr.data-key]="'doviz-' + item.symbol + '-name'"
                       [style]="getWrapperStyle('doviz-' + item.symbol + '-name')"
                       style="font-size: 2rem;">
-                    {{ (item.description || item.symbol).replace('/', '-').toLocaleUpperCase('tr-TR') }}
+                    {{ item.symbol.replace('/', '-').toLocaleUpperCase('tr-TR') }}
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -467,7 +467,7 @@
                     <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
                         [attr.data-key]="'item-bilezik-' + item.symbol + '-desc'"
                         [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-desc')">
-                        {{ item.description }}
+                        {{ item.symbol }}
                         <div class="resize-actions">
                           <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                           <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -582,7 +582,7 @@
                     <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
                         [attr.data-key]="'item-ata-' + item.symbol + '-desc'"
                         [style]="getWrapperStyle('item-ata-' + item.symbol + '-desc')">
-                        {{ item.description }}
+                        {{ item.symbol }}
                         <div class="resize-actions">
                           <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                           <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -687,7 +687,7 @@
                     <td class="ps-3 fw-semibold base-text item-description resizable-wrapper"
                         [attr.data-key]="'item-kredi-' + item.symbol + '-desc'"
                         [style]="getWrapperStyle('item-kredi-' + item.symbol + '-desc')">
-                        {{ item.description }}
+                        {{ item.symbol }}
                         <div class="resize-actions">
                           <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                           <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>

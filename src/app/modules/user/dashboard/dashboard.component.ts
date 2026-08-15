@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, Inject, CUSTOM_ELEMENTS_SCHEMA, HostListener, ChangeDetectorRef, NgZone, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Inject, CUSTOM_ELEMENTS_SCHEMA, HostListener, ChangeDetectorRef, NgZone, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DecimalPipe, DatePipe, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,15 +15,14 @@ import { PriceData } from '@/app/core/models/price-data.model';
 import { environment } from '@environment/environment';
 
 import { CategoryService } from '@/app/modules/user/categories/services/category.service';
-import { SettingsService } from '../multiplier-settings/services/multiplier-settings.service';
 
 // 🔥 EKLENEN API SERVİSİ (Yolunu projene göre düzenle)
 import { ThemeSettingsService } from './services/theme-settings.service';
 
+// categoryIndex artık PriceData'nın zorunlu bir alanı (sunucu her zaman gönderiyor),
+// bu yüzden burada tekrar tanımlanmıyor. Buradakiler yalnızca ekrana ait alanlar.
 interface DashboardPriceItem extends PriceData {
-  categoryIndex?: number;
   flashCss?: string;
-  flashTimeout?: any;
 }
 
 // UI Ayarlarını tutacak arayüz
@@ -47,14 +46,22 @@ type ThemeType = 'custom' | 'light' | 'dark' | 'financial' | 'flat-light' | 'fla
   imports: [CommonModule, FormsModule, DecimalPipe, DatePipe, NgbDropdownModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+
+  // Bu ekran TV modunda saatlerce açık kalıyor ve saniyede bir fiyat paketi alıyor.
+  // Varsayılan stratejide her paket, 700+ satırlık template'in tamamını yeniden
+  // değerlendiriyordu — üstelik ürün başına ayrı ayrı (bulgu W1). OnPush ile change
+  // detection yalnızca aşağıdaki markForCheck çağrılarında tetikleniyor.
+  //
+  // ⚠️ OnPush kuralı: template dışından (subscribe, setTimeout, setInterval) yapılan
+  // her state değişikliğinden sonra markForCheck/detectChanges çağrılmalıdır.
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private goldHub = inject(GoldHubService);
   private authService = inject(AuthenticationService);
   private categoryService = inject(CategoryService);
-  private settingsService = inject(SettingsService);
   private themeSettingsApi = inject(ThemeSettingsService); // 🔥 API Inject Edildi
   private store = inject(Store);
   private router = inject(Router);
@@ -176,17 +183,20 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   user$!: Observable<any>;
   public apiRoot = environment.apiUrl.replace('/api', '');
 
+  // Ürünlerin TEK kaynağı. Aşağıdaki listeler bu nesnelerin referanslarını tutar,
+  // yani kopya veri yoktur (bulgu W2) ve arama O(1)'dir (bulgu W3).
+  private itemsById = new Map<string, DashboardPriceItem>();
+
   allData: DashboardPriceItem[] = [];
-  madenList: DashboardPriceItem[] = [];    
-  dovizList: DashboardPriceItem[] = [];    
-  bilezikList: DashboardPriceItem[] = [];  
-  ataResatList: DashboardPriceItem[] = []; 
-  krediList: DashboardPriceItem[] = [];    
+  madenList: DashboardPriceItem[] = [];
+  dovizList: DashboardPriceItem[] = [];
+  bilezikList: DashboardPriceItem[] = [];
+  ataResatList: DashboardPriceItem[] = [];
+  krediList: DashboardPriceItem[] = [];
 
-  categoryNameMap: { [key: number]: string } = {}; 
+  categoryNameMap: { [key: number]: string } = {};
 
-  productVisibilityMap: Map<string, boolean> = new Map();
-  isConfigLoaded = false;
+  private flashClearTimer: any;
 
   currentTime = new Date();
   isTvMode = false;
@@ -203,7 +213,6 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
     this.user$ = this.store.select(getUser);
 
     this.loadCategories();
-    this.loadProductConfigurations();
 
     this.goldHub.startConnection();
 
@@ -450,58 +459,13 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
     }
   }
 
-  private generateUniqueKey(category: string, name: string): string {
-      const cat = category ? category.trim().toLocaleUpperCase('tr-TR') : '';
-      const prod = name ? name.trim().toLocaleUpperCase('tr-TR') : '';
-      return `${cat}_${prod}`; 
-  }
-
-  loadProductConfigurations() {
-    this.settingsService.getProducts().subscribe({
-        next: (products) => {
-            this.productVisibilityMap.clear();
-            products.forEach(p => {
-                if (p.name && p.categoryName) {
-                    const uniqueKey = this.generateUniqueKey(p.categoryName, p.name);
-                    this.productVisibilityMap.set(uniqueKey, p.showOnWeb);
-                }
-            });
-            this.isConfigLoaded = true;
-            this.refreshCurrentLists();
-        },
-        error: (err) => console.error("Ürün ayarları yüklenemedi", err)
-    });
-  }
-
-  refreshCurrentLists() {
-      const cleanList = (list: DashboardPriceItem[]) => {
-          for (let i = list.length - 1; i >= 0; i--) {
-              const key = this.generateUniqueKey(list[i].category, list[i].symbol);
-              const isVisible = this.productVisibilityMap.has(key) 
-                                              ? this.productVisibilityMap.get(key) 
-                                              : true; 
-
-              if (isVisible === false) {
-                  list.splice(i, 1);
-              }
-          }
-      };
-
-      cleanList(this.madenList);
-      cleanList(this.dovizList);
-      cleanList(this.bilezikList);
-      cleanList(this.ataResatList);
-      cleanList(this.krediList);
-      cleanList(this.allData);
-      
-      this.cdr.detectChanges();
-  }
-
   loadCategories() {
     this.categoryService.getCategories().subscribe(res => {
       res.forEach(cat => {
         this.categoryNameMap[cat.orderIndex] = cat.name.toLocaleUpperCase('tr-TR');
       });
+      // OnPush: template dışından gelen değişiklik, işaretlenmezse ekrana yansımaz.
+      this.cdr.markForCheck();
     });
   }
 
@@ -510,85 +474,128 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   processData(data: DashboardPriceItem[]) {
-    for (const item of data) {
-      const uniqueKey = this.generateUniqueKey(item.category, item.symbol);
+    // Görünürlük filtresi (ShowOnWeb) artık SUNUCUDA uygulanıyor: bu listede zaten
+    // yalnızca web'de görünmesi gereken ürünler var. Eskiden gizli ürünlerin fiyatları
+    // da tel üzerinden gelip burada eleniyordu (bulgu W5) — hem gereksiz trafik hem de
+    // gizlilik sızıntısıydı.
+    //
+    // Eskiden bu döngü ürün BAŞINA cdr.detectChanges() çağırıyordu (bulgu W1); ~30 ürün
+    // × saniyede bir paket = saniyede 30 tam CD döngüsü. Artık tüm paket işlenip
+    // sonunda TEK bir markForCheck yapılıyor.
+    let membershipChanged = false;
+    let anyFlash = false;
 
-      if (this.isConfigLoaded) {
-         const showOnWeb = this.productVisibilityMap.has(uniqueKey) 
-                           ? this.productVisibilityMap.get(uniqueKey) 
-                           : true;
-         if (showOnWeb === false) continue; 
+    for (const incoming of data) {
+      const existing = this.itemsById.get(incoming.id);
+
+      if (!existing) {
+        // Yeni ürün: kendi kopyamızı oluşturuyoruz. Servisten gelen nesneyi doğrudan
+        // tutmuyoruz, çünkü flash/direction gibi alanlar yalnızca ekrana ait.
+        this.itemsById.set(incoming.id, {
+          ...incoming,
+          direction: 'stable',
+          flashCss: ''
+        });
+        membershipChanged = true;
+        continue;
       }
 
-      this.updateList(this.allData, item);
+      const oldAsk = existing.ask || 0;
+      const oldBid = existing.bid || 0;
+      const newAsk = incoming.ask || 0;
+      const newBid = incoming.bid || 0;
 
-      let targetList: DashboardPriceItem[] | null = null;
-
-      switch (item.categoryIndex) {
-        case 1: targetList = this.madenList; break;
-        case 2: targetList = this.dovizList; break;
-        case 3: targetList = this.bilezikList; break;
-        case 4: targetList = this.ataResatList; break;
-        case 5: targetList = this.krediList; break;
-        default: 
-           if (item.category === 'Maden') targetList = this.madenList;
-           else if (item.category === 'Döviz') targetList = this.dovizList;
-           else targetList = this.madenList; 
-           break;
+      // Ad/kategori/sıra değiştiyse listelerin yeniden kurulması gerekir; sunucu bu
+      // durumda zaten delta yerine tam liste gönderiyor.
+      if (existing.symbol !== incoming.symbol ||
+          existing.categoryIndex !== incoming.categoryIndex ||
+          existing.orderIndex !== incoming.orderIndex) {
+        membershipChanged = true;
       }
 
-      if (targetList) {
-        this.updateList(targetList, item);
-      }
-    }
-  }
-
-  updateList(list: DashboardPriceItem[], newItem: DashboardPriceItem) {
-    const existingItem = list.find(x => 
-        x.symbol === newItem.symbol && x.category === newItem.category
-    );
-
-    if (existingItem) {
-      const oldAsk = existingItem.ask || 0;
-      const oldBid = existingItem.bid || 0;
-      const newAsk = newItem.ask || 0;
-      const newBid = newItem.bid || 0;
-
-      existingItem.bid = newBid;
-      existingItem.ask = newAsk;
-      existingItem.timestamp = newItem.timestamp;
-      existingItem.description = newItem.description;
+      existing.symbol = incoming.symbol;
+      existing.category = incoming.category;
+      existing.categoryIndex = incoming.categoryIndex;
+      existing.orderIndex = incoming.orderIndex;
+      existing.bid = newBid;
+      existing.ask = newAsk;
 
       if (newAsk !== oldAsk || newBid !== oldBid) {
-        if (existingItem.flashTimeout) clearTimeout(existingItem.flashTimeout);
-
-        if (newAsk > oldAsk) {
-          existingItem.direction = 'up';
-          existingItem.flashCss = 'text-flash-up';
-        } else if (newAsk < oldAsk) {
-          existingItem.direction = 'down';
-          existingItem.flashCss = 'text-flash-down';
-        }
-
-        this.cdr.detectChanges();
-
-        existingItem.flashTimeout = setTimeout(() => {
-          existingItem.flashCss = '';
-          this.cdr.detectChanges();
-        }, 400);
-      } else {
-          this.cdr.detectChanges();
+        existing.direction = newAsk > oldAsk ? 'up' : 'down';
+        existing.flashCss = newAsk > oldAsk ? 'text-flash-up' : 'text-flash-down';
+        anyFlash = true;
       }
-    } else {
-      newItem.direction = 'stable';
-      newItem.flashCss = '';
-      list.push(newItem);
-      this.cdr.detectChanges();
+    }
+
+    // Sunucudan artık gelmeyen ürünleri düşür (ürün silinmiş/gizlenmiş olabilir).
+    if (data.length !== this.itemsById.size) {
+      const liveIds = new Set(data.map(x => x.id));
+      for (const id of Array.from(this.itemsById.keys())) {
+        if (!liveIds.has(id)) this.itemsById.delete(id);
+      }
+      membershipChanged = true;
+    }
+
+    if (membershipChanged) this.rebuildLists();
+    if (anyFlash) this.scheduleFlashClear();
+
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Kategori listelerini yeniden kurar. Listeler aynı nesnelerin REFERANSINI tutar,
+   * bu yüzden fiyat güncellemeleri için yeniden kurmaya gerek yoktur — yalnızca ürün
+   * kümesi ya da sırası değiştiğinde çağrılır.
+   */
+  private rebuildLists() {
+    this.allData = Array.from(this.itemsById.values())
+      .sort((a, b) => (a.orderIndex ?? 9999) - (b.orderIndex ?? 9999));
+
+    this.madenList = [];
+    this.dovizList = [];
+    this.bilezikList = [];
+    this.ataResatList = [];
+    this.krediList = [];
+
+    for (const item of this.allData) {
+      switch (item.categoryIndex) {
+        case 1: this.madenList.push(item); break;
+        case 2: this.dovizList.push(item); break;
+        case 3: this.bilezikList.push(item); break;
+        case 4: this.ataResatList.push(item); break;
+        case 5: this.krediList.push(item); break;
+        default:
+          // Kategori indeksi bilinmiyorsa ada göre tahmin et; hiçbiri tutmazsa
+          // ürünün kaybolmaması için Maden listesine düşür.
+          if (item.category === 'Döviz') this.dovizList.push(item);
+          else this.madenList.push(item);
+          break;
+      }
     }
   }
 
+  /**
+   * Flash efektini TEK bir zamanlayıcıyla temizler.
+   *
+   * Eskiden her fiyat değişiminde ürün başına ayrı bir setTimeout kuruluyor ve her biri
+   * ayrı bir detectChanges tetikliyordu (bulgu W4); yoğun akışta onlarca bekleyen timer
+   * oluşuyordu. Artık aynı anda en fazla bir zamanlayıcı yaşar.
+   */
+  private scheduleFlashClear() {
+    if (this.flashClearTimer) clearTimeout(this.flashClearTimer);
+
+    this.flashClearTimer = setTimeout(() => {
+      for (const item of this.itemsById.values()) {
+        item.flashCss = '';
+      }
+      this.cdr.markForCheck();
+    }, 400);
+  }
+
+
   trackBySymbol(index: number, item: DashboardPriceItem): string {
-    return item.category + '_' + item.symbol;
+    // Ürünün kalıcı kimliği. Ad değişse bile Angular satırı yeniden yaratmaz.
+    return item.id;
   }
 
   initAutoLogout() {
@@ -628,7 +635,12 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   startClock() {
-    this.timeInterval = setInterval(() => { this.currentTime = new Date(); }, 1000);
+    // Saat saniyede bir güncelleniyor. OnPush sayesinde bu artık tüm component ağacını
+    // değil yalnızca bu component'i işaretliyor; fiyat akışıyla da çakışmıyor (bulgu W8).
+    this.timeInterval = setInterval(() => {
+      this.currentTime = new Date();
+      this.cdr.markForCheck();
+    }, 1000);
   }
 
   toggleTvMode() {
@@ -652,6 +664,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
     this.subs.forEach(s => s.unsubscribe());
     if (this.timeInterval) clearInterval(this.timeInterval);
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
+    if (this.flashClearTimer) clearTimeout(this.flashClearTimer);
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
     this.goldHub.stopConnection();
   }
 }
