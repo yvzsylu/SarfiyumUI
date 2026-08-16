@@ -174,10 +174,10 @@
       <ng-container *ngFor="let i of [1,2]">
         <div class="ticker-item" *ngFor="let item of allData" >
           <span class="ticker-symbol" >{{ item.symbol }}</span>
-          <span class="base-text font-financial ms-1" [ngClass]="item.flashCss">
+          <span class="base-text font-financial ms-1" [ngClass]="item.askFlashCss">
             {{ item.ask | number:'1.2-2' }}
-            <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-            <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+            <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+            <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
           </span>
         </div>
       </ng-container>
@@ -277,10 +277,10 @@
                   <td class="text-end font-financial base-text resizable-wrapper" style="padding-left: 0rem !important;"
                     [attr.data-key]="'item-maden-' + item.symbol + '-bid'"
                     [style]="getWrapperStyle('item-maden-' + item.symbol + '-bid')"
-                    [ngClass]="item.flashCss">
+                    [ngClass]="item.bidFlashCss">
                     {{ item.bid | number:'1.2-2' }}
-                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <i *ngIf="item.bidDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.bidDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -291,10 +291,10 @@
                   <td class="text-end font-financial base-text pe-4 resizable-wrapper" style="padding-left: 0rem !important;"
                     [attr.data-key]="'item-maden-' + item.symbol + '-ask'"
                     [style]="getWrapperStyle('item-maden-' + item.symbol + '-ask')"
-                    [ngClass]="item.flashCss">
+                    [ngClass]="item.askFlashCss">
                     {{ item.ask | number:'1.2-2' }}
-                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -356,11 +356,11 @@
                   <span class="display-6 font-financial base-text lh-1 mb-0 resizable-wrapper" 
                         [attr.data-key]="'doviz-' + item.symbol + '-bid'"
                         [style]="getWrapperStyle('doviz-' + item.symbol + '-bid')"
-                        [ngClass]="item.flashCss"
+                        [ngClass]="item.bidFlashCss"
                         style="font-size: 3rem;">
                     {{ item.bid | number:'1.3-3' }}
-                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <i *ngIf="item.bidDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.bidDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -375,11 +375,11 @@
                   <span class="display-6 font-financial base-text lh-1 mb-0 resizable-wrapper" 
                         [attr.data-key]="'doviz-' + item.symbol + '-ask'"
                         [style]="getWrapperStyle('doviz-' + item.symbol + '-ask')"
-                        [ngClass]="item.flashCss"
+                        [ngClass]="item.askFlashCss"
                         style="font-size: 3rem;">
                     {{ item.ask | number:'1.3-3' }}
-                    <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                    <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                    <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                    <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                     <div class="resize-actions">
                       <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                       <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -475,12 +475,12 @@
                           <button (click)="adjustFontSize($event, -1)">-</button>
                         </div>
                     </td>
-                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.bidFlashCss"
                         [attr.data-key]="'item-bilezik-' + item.symbol + '-bid'"
                         [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-bid')">
                       {{ item.bid | number:'1.2-2' }}
-                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.bidDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.bidDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                       <div class="resize-actions">
                         <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                         <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -488,12 +488,12 @@
                         <button (click)="adjustFontSize($event, -1)">-</button>
                       </div>
                     </td>
-                    <td class="text-end pe-3 font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                    <td class="text-end pe-3 font-financial base-text resizable-wrapper" [ngClass]="item.askFlashCss"
                         [attr.data-key]="'item-bilezik-' + item.symbol + '-ask'"
                         [style]="getWrapperStyle('item-bilezik-' + item.symbol + '-ask')">
                       {{ item.ask | number:'1.2-2' }}
-                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                       <div class="resize-actions">
                         <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                         <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -591,12 +591,12 @@
                         </div>
                     </td>
 
-                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.flashCss"
+                    <td class="text-end font-financial base-text resizable-wrapper" [ngClass]="item.bidFlashCss"
                         [attr.data-key]="'item-ata-' + item.symbol + '-bid'"
                         [style]="getWrapperStyle('item-ata-' + item.symbol + '-bid')">
                       {{ item.bid | number:'1.2-2' }}
-                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.bidDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.bidDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                       <div class="resize-actions">
                         <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                         <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -605,12 +605,12 @@
                       </div>
                     </td>
                     <td class="text-end pe-3 font-financial base-text resizable-wrapper" style=" padding-left: 0rem !important;"
-                      [ngClass]="item.flashCss"
+                      [ngClass]="item.askFlashCss"
                       [attr.data-key]="'item-ata-' + item.symbol + '-ask'"
                       [style]="getWrapperStyle('item-ata-' + item.symbol + '-ask')">
                       {{ item.ask | number:'1.2-2' }}
-                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                       <div class="resize-actions">
                         <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                         <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>
@@ -698,10 +698,10 @@
                     <td class="text-end pe-3 font-financial base-text resizable-wrapper" style="padding-left: 0rem !important; "
                       [attr.data-key]="'item-kredi-' + item.symbol + '-ask'"
                       [style]="getWrapperStyle('item-kredi-' + item.symbol + '-ask')"
-                      [ngClass]="item.flashCss">
+                      [ngClass]="item.askFlashCss">
                       {{ item.ask | number:'1.2-2' }}
-                      <i *ngIf="item.direction === 'up'" class="bx bx-up-arrow-alt text-success"></i>
-                      <i *ngIf="item.direction === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
+                      <i *ngIf="item.askDirection === 'up'" class="bx bx-up-arrow-alt text-success"></i>
+                      <i *ngIf="item.askDirection === 'down'" class="bx bx-down-arrow-alt text-danger"></i>
                       <div class="resize-actions">
                         <button (click)="adjustFontWeight($event, 100)" class="btn-bold">B+</button>
                         <button (click)="adjustFontWeight($event, -100)" class="btn-bold">B-</button>

@@ -22,8 +22,19 @@ import { ThemeSettingsService } from './services/theme-settings.service';
 
 // categoryIndex artık PriceData'nın zorunlu bir alanı (sunucu her zaman gönderiyor),
 // bu yüzden burada tekrar tanımlanmıyor. Buradakiler yalnızca ekrana ait alanlar.
+//
+// Alış ve satış AYRI takip edilir. Tek bir `direction`/`flashCss` alanı vardı ve yönü
+// yalnızca satış fiyatına bakarak belirliyordu; alış tarafındaki hareket görünmüyordu
+// (bulgu W14). Alış çarpanını büyütüp fiyatı iki katına çıkarmak bile, satış o an
+// oynamadığı sürece ekranda AŞAĞI ok gösteriyordu.
 interface DashboardPriceItem extends PriceData {
-  flashCss?: string;
+  /** Alış hücresinin yönü ve flash sınıfı. */
+  bidDirection?: 'up' | 'down' | 'stable';
+  bidFlashCss?: string;
+
+  /** Satış hücresinin yönü ve flash sınıfı. */
+  askDirection?: 'up' | 'down' | 'stable';
+  askFlashCss?: string;
 }
 
 // UI Ayarlarını tutacak arayüz
@@ -507,7 +518,10 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
         this.itemsById.set(incoming.id, {
           ...incoming,
           direction: 'stable',
-          flashCss: ''
+          bidDirection: 'stable',
+          askDirection: 'stable',
+          bidFlashCss: '',
+          askFlashCss: ''
         });
         membershipChanged = true;
         continue;
@@ -533,10 +547,33 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
       existing.bid = newBid;
       existing.ask = newAsk;
 
-      if (newAsk !== oldAsk || newBid !== oldBid) {
-        existing.direction = newAsk > oldAsk ? 'up' : 'down';
-        existing.flashCss = newAsk > oldAsk ? 'text-flash-up' : 'text-flash-down';
+      // Alış ve satış BİRBİRİNDEN BAĞIMSIZ değerlendirilir.
+      //
+      // Eskiden tek bir karar vardı ve yalnızca satışa bakıyordu:
+      // `newAsk > oldAsk ? 'up' : 'down'`. İki ayrı hata üretiyordu — alıştaki hareket
+      // hiç görünmüyordu, ayrıca satış HİÇ değişmediğinde ternary 'down' tarafına
+      // düştüğü için yükselen bir alış fiyatı aşağı okla gösteriliyordu. Kuyumcu alış
+      // çarpanını büyüttüğünde tam olarak bu yaşanıyordu (bulgu W14).
+      if (newBid !== oldBid) {
+        const yukseldi = newBid > oldBid;
+        existing.bidDirection = yukseldi ? 'up' : 'down';
+        existing.bidFlashCss = yukseldi ? 'text-flash-up' : 'text-flash-down';
         anyFlash = true;
+      }
+
+      if (newAsk !== oldAsk) {
+        const yukseldi = newAsk > oldAsk;
+        existing.askDirection = yukseldi ? 'up' : 'down';
+        existing.askFlashCss = yukseldi ? 'text-flash-up' : 'text-flash-down';
+        anyFlash = true;
+      }
+
+      // Döviz kartının kenarlığı satır geneline ait tek bir yön istiyor. Satış piyasa
+      // tarafını temsil ettiği için önceliklidir; satış oynamadıysa alışa düşer.
+      if (newAsk !== oldAsk) {
+        existing.direction = newAsk > oldAsk ? 'up' : 'down';
+      } else if (newBid !== oldBid) {
+        existing.direction = newBid > oldBid ? 'up' : 'down';
       }
     }
 
@@ -599,7 +636,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.flashClearTimer = setTimeout(() => {
       for (const item of this.itemsById.values()) {
-        item.flashCss = '';
+        item.bidFlashCss = '';
+        item.askFlashCss = '';
       }
       this.cdr.markForCheck();
     }, 400);
